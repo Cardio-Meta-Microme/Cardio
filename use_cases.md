@@ -1,4 +1,4 @@
-###Use Cases
+### Use Cases
 1. Run a ML model
 a. Inputs: metabolome concentrations and microbiome relative abundance
 b. Output: prediction of heart disease classification
