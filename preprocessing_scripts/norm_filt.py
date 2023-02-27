@@ -1,0 +1,64 @@
+import pandas as pd
+import numpy as np
+import scipy.stats
+from skbio.stats.composition import clr
+
+"""
+This script reads csv files, calculates microbe relative abundance, and
+filters out rare features (present in > some % samples).
+"""
+
+
+def count_to_abundance(df):
+    """
+    Transform microbiome sequencing count data to relative abundance with 
+    Center-log ratio (CLR) transformation.
+    """
+    df.replace(0, np.nan, inplace=True)
+    df.sort_values(by='ID')        # we need to maintain this order so we can rejoin later
+
+    counts = df.drop(columns=['Status', 'MGS count', 'Gene count', 'Microbial load'])
+    counts.set_index('ID', inplace=True)
+    counts['gmean'] = counts.apply(scipy.stats.mstats.gmean, axis=1, nan_policy='omit')
+
+    abund = np.log(counts.divide(counts['gmean'], axis=0))
+    abund.drop(columns='gmean', inplace=True)
+    abund.reset_index(inplace=True)
+    return abund
+
+
+def filter_sparse(df, feature_cols, percent):
+    '''
+    filters sparse features (microbes or metabolites) so that we only consider
+    those present in at least (percent) % of samples
+    '''
+    sparse = df[feature_cols].isnull().sum() / df.shape[0] > (1.0 - percent)
+    feature_cols = sparse[~sparse].index
+    df = df.drop(columns=sparse[sparse].index)
+    assert (df[feature_cols].mean().abs() < 1e-6).all()
+    return df
+
+
+def combine_metamicro(metadata, metabs, micros):
+    ids = metadata[['ID', 'Status', 'Age (years)', 'BMI (kg/m²)', 'Gender']]
+    ids_metab = ids.merge(metabs, how='inner', on=['ID', 'Status'])
+    ids_metab.sort_values(by='ID')
+    ids_metab_micro = ids_metab.join(micros) 
+    return ids_metab_micro
+
+
+# import csv files from current directory - we can change this
+metadata = pd.read_csv('metacard_metadata.csv')
+microbiome = pd.read_csv('metacard_microbiome.csv')
+metabolome = pd.read_csv('metacard_serum.csv')
+
+# transform and filter microbiome dataframe
+abundance = count_to_abundance(microbiome)
+
+# merge into one large dataframe by patient ID, filter sparse features
+metamicro = combine_metamicro(metadata, metabolome, abundance)
+metamicro_filt = filter_sparse(abundance, abundance.columns[0:], percent=0.15)      # this is where we could remove X-metabolites
+
+# send final df to pickle
+metamicro_filt.to_pickle('./metamicro_processed.pkl')
+
