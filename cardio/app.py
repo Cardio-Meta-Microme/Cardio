@@ -6,7 +6,10 @@ Here's our first attempt at using data to create a table:
 import streamlit as st
 import pandas as pd
 import numpy as np
+from preprocessing_scripts import get_dataframes
 
+# The write function is a handy magic that will interpret input and display it
+# The object is displayed in whatever streamlit thinks is a reasonable way.
 st.write(" # Displaying a Dataframe")
 
 df = pd.DataFrame({
@@ -48,4 +51,12 @@ with col2:
         st.session_state.cols += 1
 
 st.session_state.df
+
+if st.button(label = "Fetch Raw Data"):
+    st.write("Fetching data!")
+    st.session_state["raw_data"] = get_dataframes.get_df()
+    st.write("Data fetched!")
+    st.session_state.raw_data[0].head()
+
+
 
