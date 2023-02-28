@@ -56,7 +56,7 @@ if st.button(label = "Fetch Raw Data"):
     st.write("Fetching data!")
     st.session_state["raw_data"] = get_dataframes.get_df()
     st.write("Data fetched!")
-    st.session_state.raw_data[0].head()
+    st.write(st.session_state.raw_data[0].head())
 
 
 
