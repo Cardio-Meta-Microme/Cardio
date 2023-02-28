@@ -15,7 +15,6 @@ def count_to_abundance(df):
     Center-log ratio (CLR) transformation.
     """
     df.replace(0, np.nan, inplace=True)
-    df.sort_values(by='ID')        # we need to maintain this order so we can rejoin later
 
     counts = df.drop(columns=['Status', 'MGS count', 'Gene count', 'Microbial load'])
     counts.set_index('ID', inplace=True)
@@ -34,16 +33,18 @@ def filter_sparse(df, feature_cols, percent):
     '''
     sparse = df[feature_cols].isnull().sum() / df.shape[0] > (1.0 - percent)
     feature_cols = sparse[~sparse].index
-    df = df.drop(columns=sparse[sparse].index)
-    assert (df[feature_cols].mean().abs() < 1e-6).all()
+    df.drop(columns=sparse[sparse].index, inplace=True)
     return df
 
 
 def combine_metamicro(metadata, metabs, micros):
     ids = metadata[['ID', 'Status', 'Age (years)', 'BMI (kg/m²)', 'Gender']]
     ids_metab = ids.merge(metabs, how='inner', on=['ID', 'Status'])
-    ids_metab.sort_values(by='ID')
-    ids_metab_micro = ids_metab.join(micros) 
+    ids_metab_micro = micros.merge(ids_metab, how='inner', on=['ID', 'Status'])
+    ids_metab_micro.set_index(['ID', 'Status'], inplace=True)
+    ids_metab_micro.drop_duplicates(keep='first', inplace=True)
+    ids_metab_micro.dropna(axis=0, how='all', inplace=True)
+    ids_metab_micro.reset_index(inplace=True)
     return ids_metab_micro
 
 
@@ -57,8 +58,7 @@ abundance = count_to_abundance(microbiome)
 
 # merge into one large dataframe by patient ID, filter sparse features
 metamicro = combine_metamicro(metadata, metabolome, abundance)
-metamicro_filt = filter_sparse(abundance, abundance.columns[0:], percent=0.15)      # this is where we could remove X-metabolites
+metamicro_filt = filter_sparse(metamicro, metamicro.columns[2:], percent=0.25) # this is where we could remove X-metabolites
 
 # send final df to pickle
 metamicro_filt.to_pickle('./metamicro_processed.pkl')
-
