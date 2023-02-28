@@ -20,4 +20,4 @@ jobs:
         $CONDA/bin/conda env update --file environment.yml --name base        
     - name: Analysing the code with pylint
       run: |
-        pylint $(git ls-files '*.py')
+        $CONDA/bin/pylint $(git ls-files '*.py')
