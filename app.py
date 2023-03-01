@@ -10,11 +10,13 @@ import numpy as np
 # Read in data from the Google Sheet.
 # Getting data from a google sheet: https://docs.streamlit.io/knowledge-base/tutorials/databases/public-gsheet
 # Uses st.cache_data to only rerun when the query changes or after 10 min.
-@st.cache_data(ttl=600)
+@st.cache_data()
 def load_data(sheets_url):
     csv_url = sheets_url.replace("/edit#gid=", "/export?format=csv&gid=")
+    st.write(f"attempting to access {csv_url}")
     return pd.read_csv(csv_url)
 
+# Loading data in from the google sheet URLs
 metacard_drug = load_data(st.secrets["metacard_drug_public_gsheets_url"])
 metacard_kegg = load_data(st.secrets["metacard_kegg_public_gsheets_url"])
 metacard_metadata = load_data(st.secrets["metacard_metadata_public_gsheets_url"])
@@ -23,8 +25,19 @@ metacard_serum = load_data(st.secrets["metacard_serum_public_gsheets_url"])
 metacard_taxonomy = load_data(st.secrets["metacard_taxonomy_public_gsheets_url"])
 metacard_urine = load_data(st.secrets["metacard_urine_public_gsheets_url"])
 
-if st.button(label = "Fetch Raw Data"):
-    st.write(metacard_kegg.head(50))
+# Displaying a view of the data.
+datasets = {"metacard_drug": metacard_drug, 
+            "metacard_kegg":metacard_kegg, 
+            "metacard_metadata": metacard_metadata,
+            "metacard_microbiome": metacard_microbiome,
+            "metacard_serum": metacard_serum,
+            "metacard_taxonomy": metacard_taxonomy, 
+            "metacard_urine": metacard_urine}
+
+
+for name, dataset in datasets.items():
+    if st.button(label = f"Fetch {name} Data"):
+        st.write(dataset.head(50))
 
 # The write function is a handy magic that will interpret input and display it
 # The object is displayed in whatever streamlit thinks is a reasonable way.
