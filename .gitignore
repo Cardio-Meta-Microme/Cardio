@@ -134,3 +134,7 @@ dmypy.json
 *.pkl
 *.csv
 *.Identifier
+
+#Streamlit secrets
+# Once everyone has this we only need it once
+#secrets.toml
