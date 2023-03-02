@@ -39,6 +39,9 @@ for name, dataset in datasets.items():
     if st.button(label = f"Fetch {name} Data"):
         st.write(dataset.head(50))
 
+#if st.button(label = "Fetch Data"):
+#    st.write(metacard_kegg.head(50))
+
 # The write function is a handy magic that will interpret input and display it
 # The object is displayed in whatever streamlit thinks is a reasonable way.
 st.write(" # Displaying a Dataframe")
