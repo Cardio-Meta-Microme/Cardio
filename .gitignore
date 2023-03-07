@@ -128,3 +128,13 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Data files
+*.xlsx
+*.pkl
+*.csv
+*.Identifier
+
+#Streamlit secrets
+
+#secrets.toml #UNCOMMENT THIS LINE ONLY

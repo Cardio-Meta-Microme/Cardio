@@ -1,0 +1,13 @@
+name: cardio
+
+dependencies:
+  - python=3.9
+  - numpy
+  - scipy
+  - pandas
+  - matplotlib
+  - openpyxl
+  - altair
+  - streamlit
+  - plotly
+  - skbio
