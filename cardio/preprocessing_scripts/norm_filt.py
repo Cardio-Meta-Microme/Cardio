@@ -16,8 +16,8 @@ def count_to_abundance(df):
     """
     df.replace(0, np.nan, inplace=True)
 
-    counts = df.drop(columns=['Status', 'MGS count', 'Gene count', 'Microbial load'])
-    counts.set_index('ID', inplace=True)
+    counts = df.drop(columns=['MGS count', 'Gene count', 'Microbial load'])
+    counts.set_index(['ID', 'Status'], inplace=True)
     counts['gmean'] = counts.apply(scipy.stats.mstats.gmean, axis=1, nan_policy='omit')
 
     abund = np.log(counts.divide(counts['gmean'], axis=0))
