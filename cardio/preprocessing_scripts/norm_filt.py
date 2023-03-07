@@ -50,18 +50,18 @@ def combine_metamicro(metadata, metabs, micros):
     ids_metab_micro.reset_index(inplace=True)
     return ids_metab_micro
 
+def run_example():
+    # import csv files from current directory - we can change this
+    metadata = pd.read_csv('metacard_metadata.csv')
+    microbiome = pd.read_csv('metacard_microbiome.csv')
+    metabolome = pd.read_csv('metacard_serum.csv')
 
-# import csv files from current directory - we can change this
-metadata = pd.read_csv('metacard_metadata.csv')
-microbiome = pd.read_csv('metacard_microbiome.csv')
-metabolome = pd.read_csv('metacard_serum.csv')
+    # transform and filter microbiome dataframe
+    abundance = count_to_abundance(microbiome)
 
-# transform and filter microbiome dataframe
-abundance = count_to_abundance(microbiome)
+    # merge into one large dataframe by patient ID, filter sparse features
+    metamicro = combine_metamicro(metadata, metabolome, abundance)
+    metamicro_filt = filter_sparse(metamicro, metamicro.columns[2:], percent=0.25) # this is where we could remove X-metabolites
 
-# merge into one large dataframe by patient ID, filter sparse features
-metamicro = combine_metamicro(metadata, metabolome, abundance)
-metamicro_filt = filter_sparse(metamicro, metamicro.columns[2:], percent=0.25) # this is where we could remove X-metabolites
-
-# send final df to pickle
-metamicro_filt.to_pickle('./metamicro_processed.pkl')
+    # send final df to pickle
+    metamicro_filt.to_pickle('./metamicro_processed.pkl')
