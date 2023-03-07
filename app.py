@@ -6,6 +6,7 @@ Here's our first attempt at using data to create a table:
 import streamlit as st
 import pandas as pd
 import numpy as np
+from cardio.preprocessing_scripts import norm_filt
 
 # Read in data from the Google Sheet.
 # Getting data from a google sheet: https://docs.streamlit.io/knowledge-base/tutorials/databases/public-gsheet
@@ -34,10 +35,20 @@ datasets = {"metacard_drug": metacard_drug,
             "metacard_taxonomy": metacard_taxonomy, 
             "metacard_urine": metacard_urine}
 
+abundance = norm_filt.count_to_abundance(metacard_microbiome)
 
-for name, dataset in datasets.items():
-    if st.button(label = f"Fetch {name} Data"):
-        st.write(dataset.head(50))
+processed_datasets = {"abundance" : abundance}
+
+if st.button(label = "Count to Abundance"):
+    st.write("## Raw Microbiome")
+    st.write(metacard_microbiome.head(50))
+    st.write("## Processed Microbiome")
+    st.write(abundance)
+
+metamicro = norm_filt.combine_metamicro(metacard_metadata, metacard_serum, abundance)
+
+if st.button(label="Combine Datasets"):
+    st.write(metamicro)
 
 #if st.button(label = "Fetch Data"):
 #    st.write(metacard_kegg.head(50))
