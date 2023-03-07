@@ -38,6 +38,9 @@ def filter_sparse(df, feature_cols, percent):
 
 
 def combine_metamicro(metadata, metabs, micros):
+    """
+    
+    """
     ids = metadata[['ID', 'Status', 'Age (years)', 'BMI (kg/m²)', 'Gender']]
     ids_metab = ids.merge(metabs, how='inner', on=['ID', 'Status'])
     ids_metab_micro = micros.merge(ids_metab, how='inner', on=['ID', 'Status'])
