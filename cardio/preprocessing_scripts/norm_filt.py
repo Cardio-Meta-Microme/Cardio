@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import scipy.stats
-from skbio.stats.composition import clr
+# from skbio.stats.composition import clr
 
 """
 This script reads csv files, calculates microbe relative abundance, and
