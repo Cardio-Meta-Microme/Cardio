@@ -17,8 +17,18 @@ import matplotlib.pyplot as plt
 def load_data(sheets_url):
     """
     Takes a secret url, for a public google spreadsheet and formats it to download.
+
+    Parameter
+    ---------
+    sheets_url: String that specifies 
+
+    Returns
+    -------
+    A pandas DataFrame
     """
+    # Test that the URLs are correct
     assert "/edit#gid=" in sheets_url, "URL specified is not a public google sheet. Please check permissions."
+
     csv_url = sheets_url.replace("/edit#gid=", "/export?format=csv&gid=")
     st.write(f"attempting to access {csv_url}")
     return pd.read_csv(csv_url)
@@ -45,24 +55,34 @@ abundance = norm_filt.count_to_abundance(metacard_microbiome)
 
 processed_datasets = {"abundance" : abundance}
 
-if st.button(label = "Count to Abundance"):
+with st.expander(label = "Count to Abundance", expanded=False):
     st.write("## Raw Microbiome")
-    st.write(metacard_microbiome.head(50))
+    st.dataframe(metacard_microbiome.head(50))
     st.write("## Processed Microbiome")
-    st.write(abundance)
+    st.dataframe(abundance)
 
 metamicro = norm_filt.combine_metamicro(metacard_metadata, metacard_serum, abundance)
 
 # Filter sparse for metabolites and species seperately then merge
 # Add a slider widget that can change how much to filter. Report on number species removed.
 
-metamicro_filt = norm_filt.filter_sparse(metamicro, metamicro.columns[2:], percent=0.25) # this is where we could remove X-metabolites
+ # this is where we could remove X-metabolites
+metamicro_filt = norm_filt.filter_sparse(metamicro, metamicro.columns[2:], percent=0.1)
 
-if st.button(label="Combine Datasets"):
-    st.write(metamicro)
 
+with st.expander(label="Combine Datasets", expanded=False):
+    st.dataframe(metamicro)
+
+""" 
 if st.button(label="Filter Sparse"):
-    st.write(metamicro_filt)
+    percent = st.slider('What prevalence threshold do you want', 0.0, 1.0, 0.25, 0.05)
+    metamicro_filt = norm_filt.filter_sparse(metamicro, metamicro.columns[2:], percent=percent)
+    st.write(metamicro_filt) 
+"""
+    
+percent = st.slider('What prevalence threshold do you want', 0.0, 1.0, 0.25, 0.05)
+metamicro_filt = norm_filt.filter_sparse(metamicro, metamicro.columns[2:], percent=percent)
+st.write(metamicro_filt)
 
 labels = metamicro_filt.columns.values
 fig = plt.figure(figsize=(10, 4))
