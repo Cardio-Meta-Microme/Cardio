@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import scipy.stats
-from skbio.stats.composition import clr
 
 """
 This script reads csv files, calculates microbe relative abundance, and
@@ -14,10 +13,11 @@ def count_to_abundance(df):
     Transform microbiome sequencing count data to relative abundance with 
     Center-log ratio (CLR) transformation.
     """
-    df.replace(0, np.nan, inplace=True)
 
     counts = df.drop(columns=['MGS count', 'Gene count', 'Microbial load'])
     counts.set_index(['ID', 'Status'], inplace=True)
+
+    counts += 1.0
     counts['gmean'] = counts.apply(scipy.stats.mstats.gmean, axis=1, nan_policy='omit')
 
     abund = np.log(counts.divide(counts['gmean'], axis=0))
@@ -61,7 +61,8 @@ def run_example():
 
     # merge into one large dataframe by patient ID, filter sparse features
     metamicro = combine_metamicro(metadata, metabolome, abundance)
-    metamicro_filt = filter_sparse(metamicro, metamicro.columns[2:], percent=0.25) # this is where we could remove X-metabolites
+    metamicro_filt = filter_sparse(metamicro, metamicro.columns[2:], percent=0.25)
+    # this is where we could remove X-metabolites
 
     # send final df to pickle
     metamicro_filt.to_pickle('./metamicro_processed.pkl')
