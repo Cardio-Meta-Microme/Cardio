@@ -7,12 +7,18 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from cardio.preprocessing_scripts import norm_filt
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 # Read in data from the Google Sheet.
 # Getting data from a google sheet: https://docs.streamlit.io/knowledge-base/tutorials/databases/public-gsheet
 # Uses st.cache_data to only rerun when the query changes or after 10 min.
 @st.cache_data()
 def load_data(sheets_url):
+    """
+    Takes a secret url, for a public google spreadsheet and formats it to download.
+    """
+    assert "/edit#gid=" in sheets_url, "URL specified is not a public google sheet. Please check permissions."
     csv_url = sheets_url.replace("/edit#gid=", "/export?format=csv&gid=")
     st.write(f"attempting to access {csv_url}")
     return pd.read_csv(csv_url)
@@ -47,57 +53,22 @@ if st.button(label = "Count to Abundance"):
 
 metamicro = norm_filt.combine_metamicro(metacard_metadata, metacard_serum, abundance)
 
+# Filter sparse for metabolites and species seperately then merge
+# Add a slider widget that can change how much to filter. Report on number species removed.
+
+metamicro_filt = norm_filt.filter_sparse(metamicro, metamicro.columns[2:], percent=0.25) # this is where we could remove X-metabolites
+
 if st.button(label="Combine Datasets"):
     st.write(metamicro)
 
-#if st.button(label = "Fetch Data"):
-#    st.write(metacard_kegg.head(50))
+if st.button(label="Filter Sparse"):
+    st.write(metamicro_filt)
 
-# The write function is a handy magic that will interpret input and display it
-# The object is displayed in whatever streamlit thinks is a reasonable way.
-st.write(" # Displaying a Dataframe")
+labels = metamicro_filt.columns.values
+fig = plt.figure(figsize=(10, 4))
+sns.histplot(data=metamicro_filt, x=labels[4])
 
-df = pd.DataFrame({
-  'first column': [1, 2, 3, 4],
-  'second column': [10, 20, 30, 40]
-})
-
-df
-
-st.write(" # Adding some interactivity")
-
-def generate_table():
-    st.session_state['df'] = pd.DataFrame({
-        'first column': np.random.rand(5),
-        'second column': np.random.rand(5)
-        })
-    st.session_state['cols'] = 3
-
-
-col1, col2 = st.columns(2)
-
-if 'cols' not in st.session_state:
-    st.session_state['cols'] = 3
-
-if 'df' not in st.session_state:
-    st.session_state['df'] = pd.DataFrame({
-        'first column': np.random.rand(5),
-        'second column': np.random.rand(5)
-        })
-
-with col1:
-    if st.button(label="Clear DF"):
-        generate_table()
-
-with col2:
-    if st.button(label="Add Column"):
-        name = "column" + str(st.session_state.cols)
-        st.session_state.df[name] = np.random.rand(5)
-        st.session_state.cols += 1
-
-st.session_state.df
-
-
+st.pyplot(fig)
 
 
 
