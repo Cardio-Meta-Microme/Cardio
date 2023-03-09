@@ -6,12 +6,29 @@ Here's our first attempt at using data to create a table:
 import streamlit as st
 import pandas as pd
 import numpy as np
+from cardio.preprocessing_scripts import norm_filt
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 # Read in data from the Google Sheet.
 # Getting data from a google sheet: https://docs.streamlit.io/knowledge-base/tutorials/databases/public-gsheet
 # Uses st.cache_data to only rerun when the query changes or after 10 min.
 @st.cache_data()
 def load_data(sheets_url):
+    """
+    Takes a secret url, for a public google spreadsheet and formats it to download.
+
+    Parameter
+    ---------
+    sheets_url: String that specifies 
+
+    Returns
+    -------
+    A pandas DataFrame
+    """
+    # Test that the URLs are correct
+    assert "/edit#gid=" in sheets_url, "URL specified is not a public google sheet. Please check permissions."
+
     csv_url = sheets_url.replace("/edit#gid=", "/export?format=csv&gid=")
     st.write(f"attempting to access {csv_url}")
     return pd.read_csv(csv_url)
@@ -34,59 +51,44 @@ datasets = {"metacard_drug": metacard_drug,
             "metacard_taxonomy": metacard_taxonomy, 
             "metacard_urine": metacard_urine}
 
+abundance = norm_filt.count_to_abundance(metacard_microbiome)
 
-for name, dataset in datasets.items():
-    if st.button(label = f"Fetch {name} Data"):
-        st.write(dataset.head(50))
+processed_datasets = {"abundance" : abundance}
 
-#if st.button(label = "Fetch Data"):
-#    st.write(metacard_kegg.head(50))
+with st.expander(label = "Count to Abundance", expanded=False):
+    st.write("## Raw Microbiome")
+    st.dataframe(metacard_microbiome.head(50))
+    st.write("## Processed Microbiome")
+    st.dataframe(abundance)
 
-# The write function is a handy magic that will interpret input and display it
-# The object is displayed in whatever streamlit thinks is a reasonable way.
-st.write(" # Displaying a Dataframe")
+metamicro = norm_filt.combine_metamicro(metacard_metadata, metacard_serum, abundance)
 
-df = pd.DataFrame({
-  'first column': [1, 2, 3, 4],
-  'second column': [10, 20, 30, 40]
-})
+# Filter sparse for metabolites and species seperately then merge
+# Add a slider widget that can change how much to filter. Report on number species removed.
 
-df
-
-st.write(" # Adding some interactivity")
-
-def generate_table():
-    st.session_state['df'] = pd.DataFrame({
-        'first column': np.random.rand(5),
-        'second column': np.random.rand(5)
-        })
-    st.session_state['cols'] = 3
+ # this is where we could remove X-metabolites
+metamicro_filt = norm_filt.filter_sparse(metamicro, metamicro.columns[2:], percent=0.1)
 
 
-col1, col2 = st.columns(2)
+with st.expander(label="Combine Datasets", expanded=False):
+    st.dataframe(metamicro)
 
-if 'cols' not in st.session_state:
-    st.session_state['cols'] = 3
+""" 
+if st.button(label="Filter Sparse"):
+    percent = st.slider('What prevalence threshold do you want', 0.0, 1.0, 0.25, 0.05)
+    metamicro_filt = norm_filt.filter_sparse(metamicro, metamicro.columns[2:], percent=percent)
+    st.write(metamicro_filt) 
+"""
+    
+percent = st.slider('What prevalence threshold do you want', 0.0, 1.0, 0.25, 0.05)
+metamicro_filt = norm_filt.filter_sparse(metamicro, metamicro.columns[2:], percent=percent)
+st.write(metamicro_filt)
 
-if 'df' not in st.session_state:
-    st.session_state['df'] = pd.DataFrame({
-        'first column': np.random.rand(5),
-        'second column': np.random.rand(5)
-        })
+labels = metamicro_filt.columns.values
+fig = plt.figure(figsize=(10, 4))
+sns.histplot(data=metamicro_filt, x=labels[4])
 
-with col1:
-    if st.button(label="Clear DF"):
-        generate_table()
-
-with col2:
-    if st.button(label="Add Column"):
-        name = "column" + str(st.session_state.cols)
-        st.session_state.df[name] = np.random.rand(5)
-        st.session_state.cols += 1
-
-st.session_state.df
-
-
+st.pyplot(fig)
 
 
 
