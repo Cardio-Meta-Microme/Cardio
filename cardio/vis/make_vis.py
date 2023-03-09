@@ -245,3 +245,80 @@ def plot_micro_abundance(df, microtype):
     chart = mk_chart(hcdf, ihddf, mmcdf, umccdf, microtype)
     
     return chart
+
+def high_var(df):
+    """
+    Returns 500 most variable features in dataframe
+    
+        Parameters:
+            df(Pandas dataframe): entire dataframe
+        Returns:
+            hv_data(Pandas dataframe): only includes the 500 most variable features
+    """
+    high_var = df.var(axis=0).sort_values(ascending=False)[:500].index
+    hv_data = df[high_var]
+    
+    return hv_data
+
+def plot_UMAP(df, columns, hivar):
+    """
+    Creates a UMAP
+    
+        Parameters:
+            df(Pandas dataframe): entire dataframe
+            columns(str): either "all" or "default", specifies if you want to include age and BMI or not
+            hivar(bool): True or False, specifies if you want to only include the high variable 
+        Returns:
+            chart(Altair chart): clusters patients
+    """
+    bacteria = [column for column in df.columns if 'CAG' in column and 'unclassified' not in column]
+    metabolites = list(df.columns[339:1551])
+    default_modeling_columns = bacteria + metabolites
+    all_modeling_columns = bacteria + metabolites + ['Age (years)', 'BMI (kg/m²)']
+    
+    # specify the dataframe at either all_modeling_columns or default_modeling_columns, depending on inclusion of age and BMI
+    if columns == "all":
+        X = df[all_modeling_columns]
+    elif columns == "default":
+        X = df[default_modeling_columns]
+    
+    if hivar:
+        X = high_var(X)
+    else:
+        pass
+    
+    # replace NaN values with zero (do we want to impute with mean???)
+    for col in X.columns:
+        X[col] = np.where(X[col].isna(), 0, X[col])
+     
+    reducer = UMAP()
+    X = reducer.fit_transform(X)
+    
+    principal_df = pd.DataFrame(data=X, columns=['component_one', 'component_two'])
+    final_df = pd.concat([principal_df, df[['Status']]], axis=1)
+    
+    chart = alt.Chart(final_dfy).mark_circle(size=10).encode(
+                alt.X('component_one'),
+                alt.Y('component_two'),
+                color='Status',
+                tooltip=['Status']
+            ).interactive()
+    
+    return chart
+
+def cluster_age_bmi(df):
+    """
+    Creates a scatter plot of age and BMI
+    
+        Parameters:
+            df(Pandas dataframe): entire dataframe
+        Returns:
+            chart(Altair chart): clusters patients based off their age and BMI
+    """
+    chart = alt.Chart(df_age_bmi).mark_circle(size=15).encode(
+                alt.X('Age (years)'),
+                alt.Y('BMI (kg/m²)'),
+                color='Status',
+                tooltip=['Status']
+            ).interactive()
+    return chart
