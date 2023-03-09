@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import scipy.stats
 from skbio.stats.composition import clr
+from os.path import dirname, abspath, join
 
 """
 This script reads csv files, calculates microbe relative abundance, and
@@ -48,10 +49,21 @@ def combine_metamicro(metadata, metabs, micros):
     return ids_metab_micro
 
 
+def load_data(sheets_url):
+    csv_url = sheets_url.replace("/edit#gid=", "/export?format=csv&gid=")
+    return pd.read_csv(csv_url)
+
+metacard_metadata_public_gsheets_url = "https://docs.google.com/spreadsheets/d/1t6mfVOJsSmbwtgvYzyYqT6ofSFoJb6HZBl2ZddZis4g/edit#gid=1481496480"
+metacard_microbiome_public_gsheets_url = "https://docs.google.com/spreadsheets/d/13o6uYJ-vX1VIMPO1nkH4WYaNUJe3vdVrw6pv8O76S6g/edit#gid=1074439309"
+metacard_serum_public_gsheets_url = "https://docs.google.com/spreadsheets/d/1_Z_U_gJ0li1Iy7wwrQGWoZOcQ6fFc1As21omMuuObXc/edit#gid=1093748047"
+
 # import csv files from current directory - we can change this
-metadata = pd.read_csv('metacard_metadata.csv')
-microbiome = pd.read_csv('metacard_microbiome.csv')
-metabolome = pd.read_csv('metacard_serum.csv')
+# metadata = pd.read_csv('metacard_metadata.csv')
+# microbiome = pd.read_csv('metacard_microbiome.csv')
+# metabolome = pd.read_csv('metacard_serum.csv')
+metadata = load_data(metacard_metadata_public_gsheets_url)
+microbiome = load_data(metacard_microbiome_public_gsheets_url)
+metabolome = load_data(metacard_serum_public_gsheets_url)
 
 # transform and filter microbiome dataframe
 abundance = count_to_abundance(microbiome)
@@ -61,4 +73,6 @@ metamicro = combine_metamicro(metadata, metabolome, abundance)
 metamicro_filt = filter_sparse(metamicro, metamicro.columns[2:], percent=0.25) # this is where we could remove X-metabolites
 
 # send final df to pickle
-metamicro_filt.to_pickle('./metamicro_processed.pkl')
+current_dir = abspath(__file__)
+root_dir = dirname(dirname(dirname(current_dir)))
+metamicro_filt.to_pickle(join(root_dir, 'data/metamicro_processed.pkl'))
