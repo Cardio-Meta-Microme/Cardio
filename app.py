@@ -7,6 +7,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from cardio.preprocessing_scripts import norm_filt
+from cardio.vis import make_vis
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -30,17 +31,19 @@ def load_data(sheets_url):
     assert "/edit#gid=" in sheets_url, "URL specified is not a public google sheet. Please check permissions."
 
     csv_url = sheets_url.replace("/edit#gid=", "/export?format=csv&gid=")
-    st.write(f"attempting to access {csv_url}")
+    # st.write(f"attempting to access {csv_url}")
     return pd.read_csv(csv_url)
 
 # Loading data in from the google sheet URLs
-metacard_drug = load_data(st.secrets["metacard_drug_public_gsheets_url"])
-metacard_kegg = load_data(st.secrets["metacard_kegg_public_gsheets_url"])
-metacard_metadata = load_data(st.secrets["metacard_metadata_public_gsheets_url"])
-metacard_microbiome = load_data(st.secrets["metacard_microbiome_public_gsheets_url"])
-metacard_serum = load_data(st.secrets["metacard_serum_public_gsheets_url"])
-metacard_taxonomy = load_data(st.secrets["metacard_taxonomy_public_gsheets_url"])
-metacard_urine = load_data(st.secrets["metacard_urine_public_gsheets_url"])
+with st.spinner('Wait for it...'):
+    metacard_drug = load_data(st.secrets["metacard_drug_public_gsheets_url"])
+    metacard_kegg = load_data(st.secrets["metacard_kegg_public_gsheets_url"])
+    metacard_metadata = load_data(st.secrets["metacard_metadata_public_gsheets_url"])
+    metacard_microbiome = load_data(st.secrets["metacard_microbiome_public_gsheets_url"])
+    metacard_serum = load_data(st.secrets["metacard_serum_public_gsheets_url"])
+    metacard_taxonomy = load_data(st.secrets["metacard_taxonomy_public_gsheets_url"])
+    metacard_urine = load_data(st.secrets["metacard_urine_public_gsheets_url"])
+    st.write("Success!")
 
 # Displaying a view of the data.
 datasets = {"metacard_drug": metacard_drug, 
@@ -85,8 +88,7 @@ metamicro_filt = norm_filt.filter_sparse(metamicro, metamicro.columns[2:], perce
 st.write(metamicro_filt)
 
 labels = metamicro_filt.columns.values
-fig = plt.figure(figsize=(10, 4))
-sns.histplot(data=metamicro_filt, x=labels[4])
+fig = make_vis.plot_general_dist(metamicro_filt)
 
 st.pyplot(fig)
 
