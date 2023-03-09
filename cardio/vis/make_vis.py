@@ -22,6 +22,11 @@ SMALL_SIZE = 10
 MEDIUM_SIZE = 16
 BIGGER_SIZE = 18
 
+BACTERIA = [column for column in df.columns if 'CAG' in column and 'unclassified' not in column]
+METABOLITES = list(df.columns[339:1551])
+DEFAULT_MODELING_COLUMNS = BACTERIA + METABOLITES
+ALL_MODELING_COLUMNS = BACTERIA + METABOLITES + ['Age (years)', 'BMI (kg/m²)']
+
 plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
 plt.rc('axes', titlesize=BIGGER_SIZE)     # fontsize of the axes title
 plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
@@ -217,9 +222,9 @@ def plot_micro_abundance(df, microtype):
             chart(Altair chart): chart of mean normalized read counts for either bacterial species or metabolites sorted based off the healthy control subtype for all four subgroups
     """
     if microtype == "Bacteria":
-        mtype = bacteria
+        mtype = BACTERIA
     elif microtype == "Metabolite":
-        mtype = metabolites
+        mtype = METABOLITES
     
     df_HC275 = df[df["Status"] == "HC275"]
     df_MMC269 = df[df["Status"] == "MMC269"]
