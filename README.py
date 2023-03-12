@@ -28,5 +28,16 @@ Tool for Analysis of meta microbiomes and metabolomes.
 - scipy
 - pandas
 - matplotlib
-- openpyxl""")
+- openpyxl
+
+## TODO
+
+- Revamp README page
+- Make all of the data loading and processing occur silently in the README
+- Add extra descriptions to the Data Preprocessing
+    - mathematical description of processing steps
+    - extra transformations (e.g. how the distributions of features change)
+- Make the model training and model prediction pages
+
+""")
 
