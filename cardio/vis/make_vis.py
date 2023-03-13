@@ -344,7 +344,7 @@ def cluster_age_bmi(df):
         Returns:
             chart(Altair chart): clusters patients based off their age and BMI
     """
-    chart = alt.Chart(df_age_bmi).mark_circle(size=15).encode(
+    chart = alt.Chart(df).mark_circle(size=15).encode(
                 alt.X('Age (years)'),
                 alt.Y('BMI (kg/m²)'),
                 color='Status',
