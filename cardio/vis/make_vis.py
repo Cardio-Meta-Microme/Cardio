@@ -13,6 +13,7 @@ import sklearn.inspection
 import sklearn.impute
 import sklearn.manifold
 
+# Packages for visualisation
 from sklearn.manifold import TSNE
 from sklearn.impute import SimpleImputer
 from vega_datasets import data
