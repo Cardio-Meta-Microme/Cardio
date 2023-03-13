@@ -14,6 +14,9 @@ Tool for Analysis of meta microbiomes and metabolomes.
 
 =======
 
+## Components
+
+
 ## Patient status abbreviations:
 - IHD: ischemic heart disease patients
 - HC: healthy controls

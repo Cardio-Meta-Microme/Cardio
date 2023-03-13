@@ -15,7 +15,7 @@ st.session_state['metamicro_filt'] = norm_filt.filter_sparse(st.session_state['m
 st.write(st.session_state['metamicro_filt'])
 
 labels = st.session_state['metamicro_filt'].columns.values
-fig = make_vis.plot_general_dist(st.session_state['metamicro_filt'])
+fig = make_vis.plot_general_dist_altair(st.session_state['metamicro_filt'])
 st.write("## Old Figure (Lame)")
 st.pyplot(fig)
 

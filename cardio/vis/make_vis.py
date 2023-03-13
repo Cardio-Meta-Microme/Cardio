@@ -30,7 +30,7 @@ def process_for_visualization(df):
     """
     #check that the columns we need are present
     for col in ['sample_group', 'BMI (kg/m²)', 'Age (years)', 'Gender']:
-        assert col in df.columns
+        assert col in df.columns, f"Column {col} is not in the dataframe"
 
     #mapping sample names
     sample_name_w_breaks = {'HC275': 'Healthy\n n=275',
