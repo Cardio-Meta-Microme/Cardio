@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import math
 import altair as alt
+import statsmodels
 
 import sklearn.model_selection
 import sklearn.preprocessing
@@ -19,7 +20,8 @@ from sklearn.manifold import TSNE
 from sklearn.impute import SimpleImputer
 from vega_datasets import data
 from umap import UMAP
-
+from statsmodels.stats.weightstats import ztest
+from statsmodels.stats.multitest import multipletests
 
 #Global variable for matplotlib fonts
 SMALL_SIZE = 10
@@ -126,6 +128,40 @@ def plot_general_dist_altair(df):
 
     return fig
 
+def ttest(hc, subgroup, microtype):
+    """
+    Evaluates a t test for each feature of the dataframe
+    
+        Parameters:
+            hc(Pandas dataframe): subgroup of whole dataset for only the healthy control group
+            subgroup(Pandas dataframe): subgroup of whole dataset for only one disease condition
+            microtype(list): names of bacterial or metabolite species, matches the column names in the df
+        Returns:
+            pvals(list): p values of each t test
+    """
+    pvals = []
+    for species in microtype:
+        t, pval = statsmodels.stats.weightstats.ztest(hc[species].dropna(), subgroup[species].dropna())
+        pvals.append(pval)
+    return pvals
+
+def multtest(hc, subgroup, microtype):
+    """
+    Evaluates a Benjamini/Hochberg test for each p value of the t test of each feature of the dataframe
+    
+        Parameters:
+            hc(Pandas dataframe): subgroup of whole dataset for only the healthy control group
+            subgroup(Pandas dataframe): subgroup of whole dataset for only one disease condition
+            microtype(list): names of bacterial or metabolite species, matches the column names in the df
+        Returns:
+            siglist(list): boolean values for each feature if it has significantly deviated from the healthy control group
+    """
+    tlist = ttest(hc, subgroup, microtype)
+    sigbool = statsmodels.stats.multitest.multipletests(tlist, method="fdr_bh")[0]
+    siglist = dict(map(lambda i,j : (i,j) , microtype, sigbool))
+    
+    return siglist
+
 def mk_dict(colnames, df):
     """
     Makes a dictionary of mean normalized read counts for either bacterial species or metabolites for a dataframe
@@ -165,7 +201,7 @@ def mk_control_df(micro_dict, valtype):
 
     return micro_dict
 
-def mk_df(micro_dict, control_dict, valtype):
+def mk_df(micro_dict, control_dict, valtype, siglist):
     """
     Makes a dataframe of mean normalized read counts for either bacterial species or metabolites sorted based off the healthy control subtype
 
@@ -173,7 +209,8 @@ def mk_df(micro_dict, control_dict, valtype):
             micro_dict(dict): mean normalized read counts (values) for bacterial species or metabolites (key)
             control_dict(dict): mean normalized read counts (values) for bacterial species or metabolites (key) for healthy control subtype
             valtype(string): either "Bacteria" or "Metabolites"
-        Returns:
+	    siglist(list): boolean values for each feature if significantly deviated from healthy
+	Returns:
             micro_df(Pandas dataframe): sorted dataframe of normalized read counts for either bacterial species or metabolites
     """
     micro_dict = dict(sorted(micro_dict.items(), key=lambda kv: control_dict[kv[0]]))
@@ -181,10 +218,10 @@ def mk_df(micro_dict, control_dict, valtype):
     type_counts = list(micro_dict.values())
 
     for species in micro_dict.keys():
-        if np.sign(micro_dict[species]) == np.sign(control_dict[species]):
-            micro_dict[species].append("No Significant Change")
-        else:
+        if siglist[species]:
             micro_dict[species].append("Significant Change")
+        else:
+            micro_dict[species].append("No Significant Change")
 
     micro_df = pd.DataFrame(micro_dict).T.reset_index()
     micro_df.rename(columns={'index': valtype, 0: 'Normalized Read Count', 1: 'Change from Healthy Control'}, inplace=True)
@@ -278,14 +315,17 @@ def plot_micro_abundance(df, microtype):
     hcdict = mk_dict(mtype, df_HC275)
     hcdf = mk_control_df(hcdict, microtype)
 
+    mmcsiglist = multtest(df_HC275, df_MMC269, mtype)
     mmcdict = mk_dict(mtype, df_MMC269)
-    mmcdf = mk_df(mmcdict, hcdict, microtype)
+    mmcdf = mk_df(mmcdict, hcdict, microtype, mmcsiglist)
 
+    ihdsiglist = multtest(df_HC275, df_IHD372, mtype)
     ihddict = mk_dict(mtype, df_IHD372)
-    ihddf = mk_df(ihddict, hcdict, microtype)
+    ihddf = mk_df(ihddict, hcdict, microtype, ihdsiglist)
 
+    umccsiglist = multtest(df_HC275, df_UMCC222, mtype)
     umccdict = mk_dict(mtype, df_UMCC222)
-    umccdf = mk_df(umccdict, hcdict, microtype)
+    umccdf = mk_df(umccdict, hcdict, microtype, umccsiglist)
 
     chart = mk_chart(hcdf, ihddf, mmcdf, umccdf, microtype)
 
