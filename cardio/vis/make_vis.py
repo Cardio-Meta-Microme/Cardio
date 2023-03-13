@@ -69,7 +69,7 @@ def plot_general_dist_altair(df):
     df = process_for_visualization(df)
 
     #check that the columns we need are present
-    for col in ['sample_group', 'BMI (kg/m²)', 'Age (years)', 'Gender']:
+    for col in ['Status', 'BMI (kg/m²)', 'Age (years)', 'Gender']:
         assert col in df.columns
 
     #creating first boxplot of bmi using altair
