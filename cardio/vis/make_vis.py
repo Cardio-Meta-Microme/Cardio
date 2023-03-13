@@ -319,13 +319,14 @@ def plot_UMAP(df, columns, hivar):
     for col in X.columns:
         X[col] = np.where(X[col].isna(), 0, X[col])
 
+    # Dimensionality
     reducer = UMAP()
     X = reducer.fit_transform(X)
 
     principal_df = pd.DataFrame(data=X, columns=['component_one', 'component_two'])
     final_df = pd.concat([principal_df, df[['Status']]], axis=1)
 
-    chart = alt.Chart(final_dfy).mark_circle(size=10).encode(
+    chart = alt.Chart(final_df).mark_circle(size=10).encode(
                 alt.X('component_one'),
                 alt.Y('component_two'),
                 color='Status',
