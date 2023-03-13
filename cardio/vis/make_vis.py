@@ -29,7 +29,7 @@ def process_for_visualization(df):
     general_data, pandas df with columns mentioned above and new cols sample_group, and sample_group_breaks
     """
     #check that the columns we need are present
-    for col in ['sample_group', 'BMI (kg/m²)', 'Age (years)', 'Gender']:
+    for col in ['Status', 'BMI (kg/m²)', 'Age (years)', 'Gender']:
         assert col in df.columns, f"Column {col} is not in the dataframe"
 
     #mapping sample names
@@ -45,8 +45,8 @@ def process_for_visualization(df):
 
 
     #mapping ID to these sample names
-    data['sample_group_breaks'] = df['Status'].apply(lambda x: sample_name_w_breaks[x])
-    data['sample_group'] = df['Status'].apply(lambda x: sample_name[x])
+    df['sample_group_breaks'] = df['Status'].apply(lambda x: sample_name_w_breaks[x])
+    df['sample_group'] = df['Status'].apply(lambda x: sample_name[x])
 
     general_data = df[['ID', 'Status', 'Age (years)', 'BMI (kg/m²)', 'Gender', 'sample_group', 'sample_group_breaks']]
 

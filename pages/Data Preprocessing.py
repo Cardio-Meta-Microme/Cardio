@@ -10,12 +10,13 @@ from cardio.preprocessing_scripts import norm_filt
 from cardio.vis import make_vis
 import seaborn as sns
 import matplotlib.pyplot as plt
+import os
 
 # Read in data from the Google Sheet.
 # Getting data from a google sheet: https://docs.streamlit.io/knowledge-base/tutorials/databases/public-gsheet
 # Uses st.cache_data to only rerun when the query changes or after 10 min.
 @st.cache_data()
-def load_data(sheets_url):
+def load_data(sheets_url, sheets = False):
     """
     Takes a secret url, for a public google spreadsheet and formats it to download.
 
@@ -27,23 +28,42 @@ def load_data(sheets_url):
     -------
     A pandas DataFrame
     """
-    # Test that the URLs are correct
-    assert "/edit#gid=" in sheets_url, "URL specified is not a public google sheet. Please check permissions."
+    # Check whether you download locally or doesnload from a google sheet
+    wdir = os.getcwd()
+    if sheets:
+        # Test that the URLs are correct
+        assert "/edit#gid=" in sheets_url, "URL specified is not a public google sheet. Please check permissions."
 
-    csv_url = sheets_url.replace("/edit#gid=", "/export?format=csv&gid=")
-    # st.write(f"attempting to access {csv_url}")
-    return pd.read_csv(csv_url)
+        csv_url = sheets_url.replace("/edit#gid=", "/export?format=csv&gid=")
+        # st.write(f"attempting to access {csv_url}")
+        data = pd.read_csv(csv_url)
+    else:
+        st.write(wdir + "/data" + sheets_url)
+        data = pd.read_excel(wdir + "/data" + sheets_url)
+    return data
+
+metacard_drug = load_data("/metacard_drug.xlsx")
+metacard_kegg = load_data("/metacard_kegg.xlsx")
+metacard_metadata = load_data("/metacard_metadata.xlsx")
+metacard_microbiome = load_data("/metacard_microbiome.xlsx")
+metacard_serum = load_data("/metacard_serum.xlsx")
+metacard_taxonomy = load_data("/metacard_taxonomy.xlsx")
+metacard_urine = load_data("/metacard_urine.xlsx")
+
 
 # Loading data in from the google sheet URLs
-with st.spinner('Wait for it...'):
-    metacard_drug = load_data(st.secrets["metacard_drug_public_gsheets_url"])
-    metacard_kegg = load_data(st.secrets["metacard_kegg_public_gsheets_url"])
-    metacard_metadata = load_data(st.secrets["metacard_metadata_public_gsheets_url"])
-    metacard_microbiome = load_data(st.secrets["metacard_microbiome_public_gsheets_url"])
-    metacard_serum = load_data(st.secrets["metacard_serum_public_gsheets_url"])
-    metacard_taxonomy = load_data(st.secrets["metacard_taxonomy_public_gsheets_url"])
-    metacard_urine = load_data(st.secrets["metacard_urine_public_gsheets_url"])
-    st.write("Success!")
+if st.button(label="Fetch Data"):
+    with st.spinner('Wait for it...'):
+        metacard_drug = load_data(sheets_url = st.secrets["metacard_drug_public_gsheets_url"], sheets=True)
+        metacard_kegg = load_data(sheets_url = st.secrets["metacard_kegg_public_gsheets_url"], sheets=True)
+        metacard_metadata = load_data(sheets_url = st.secrets["metacard_metadata_public_gsheets_url"], sheets=True)
+        metacard_microbiome = load_data(sheets_url = st.secrets["metacard_microbiome_public_gsheets_url"], sheets=True)
+        metacard_serum = load_data(sheets_url = st.secrets["metacard_serum_public_gsheets_url"], sheets=True)
+        metacard_taxonomy = load_data(sheets_url = st.secrets["metacard_taxonomy_public_gsheets_url"], sheets=True)
+        metacard_urine = load_data(sheets_url = st.secrets["metacard_urine_public_gsheets_url"], sheets=True)
+        st.write("Success!")
+
+
 
 # Displaying a view of the data.
 datasets = {"metacard_drug": metacard_drug, 
