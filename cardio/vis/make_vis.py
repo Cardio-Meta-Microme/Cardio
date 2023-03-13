@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import math
 import altair as alt
 
 import sklearn.model_selection
@@ -18,6 +19,22 @@ from sklearn.manifold import TSNE
 from sklearn.impute import SimpleImputer
 from vega_datasets import data
 from umap import UMAP
+
+
+#Global variable for matplotlib fonts
+SMALL_SIZE = 10
+MEDIUM_SIZE = 16
+BIGGER_SIZE = 18
+
+plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+plt.rc('axes', titlesize=BIGGER_SIZE)     # fontsize of the axes title
+plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+plt.rc("figure", labelsize=BIGGER_SIZE)
+plt.style.use("dark_background")
 
 def process_for_visualization(df):
     """
@@ -351,3 +368,60 @@ def cluster_age_bmi(df):
                 tooltip=['Status']
             ).interactive()
     return chart
+
+def feature_histograms(df, patient_data, features):
+    """
+    Takes in training data and patient data and plots patient values against the training data with IHD for
+    certain list of predictive features
+    Parameters
+    ----------
+    df, pandas df with the training data with columns 'Status'
+    patient data, pandas series where each row is a feature to plot against training data
+    features, list of features, should be columns in both patient data and df
+    Returns
+    ------
+    fig, altair plot
+    """
+
+    #filtering data for IHD only
+    df = df[df['Status'] == 'IHD372']
+    #subsetting to features we're interested in
+    df = df[features]
+    patient_data = patient_data[features]
+
+    #determining how big a plotting grid to make
+    if len(features) % 5 == 0:
+        rows = len(features) / 5
+    else:
+        rows = math.ceil(len(features) / 5)
+
+    #creating said grid
+    fig, axs = plt.subplots(int(rows), 5)
+    fig.set_size_inches(20, 10)
+
+    #so only the axis with plots show
+    for ax in axs:
+        for col in ax:
+            col.set_axis_off()
+
+    counter = 0
+    #for loop creating plot for each feature
+    for i, feature in enumerate(features):
+        #resetting counter after each row is full
+        if counter % 5 == 0:
+            counter = 0
+        else:
+            pass
+        #making kdeplot
+        sns.kdeplot(df[feature], legend=False, fill=True, color='lightgray', ax=axs[i//5,counter])
+        #adding vertical line for patient data
+        axs[i//5,counter].axvline(patient_data.loc[feature], color='r')
+        axs[i//5,counter].set_axis_on()
+        axs[i//5,counter].set_ylabel('')
+        counter += 1
+
+    plt.suptitle('Predictive Features')
+    fig.supylabel('Density', x=0)
+
+    plt.tight_layout()
+    return fig
