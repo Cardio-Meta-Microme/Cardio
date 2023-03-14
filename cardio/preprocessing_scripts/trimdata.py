@@ -1,7 +1,6 @@
 """
 This script reads csv files, calculates microbe relative abundance and alpha
-diversity, 
-filters out rare features (present in > some % samples).
+diversity, filters out rare features (present in > some % samples).
 """
 
 import pandas as pd
@@ -9,7 +8,7 @@ import numpy as np
 import scipy.stats
 import skbio.diversity
 import os
-
+import json
 
 def read_csvs():
     """
@@ -148,7 +147,13 @@ def preprocess():
     df_metamicro.reset_index(inplace=True)
 
     # update microbiome and metabolome columns
-    micro_cols = df_metamicro.columns[df_metamicro.columns.isin(microbiome_cols[2:])]
-    metabo_cols = df_metamicro.columns[df_metamicro.columns.isin(metabolome_cols[2:])]
+    micro_cols = list(df_metamicro.columns[df_metamicro.columns.isin(microbiome_cols[2:])])
+    metabo_cols = list(df_metamicro.columns[df_metamicro.columns.isin(metabolome_cols[2:])])
 
-    return df_metamicro, micro_cols, metabo_cols
+    # output micro/metabo columns to json
+    json.dump(micro_cols, open('./data/microbiome_columns.json', 'w'))
+    json.dump(metabo_cols, open('./data/metabolite_columns.json', 'w'))
+    return df_metamicro
+
+if __name__ == "__main__":
+    preprocess()
