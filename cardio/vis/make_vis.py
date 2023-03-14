@@ -43,14 +43,15 @@ def process_for_visualization(df):
     Processed data for visualization by changing chort names to more memorable titles
     Parameters
     ---------
-    data, pandas df with columsn ID, Status, Age (years), BMI (kg/m²), Gender
+    data, pandas df with columsn ID, Status, Age, BMI, Gender
     Returns
     -------
     general_data, pandas df with columns mentioned above and new cols sample_group, and sample_group_breaks
     """
     #check that the columns we need are present
+    #['Status', 'BMI (kg/m²)', 'Age (years)', 'Gender']
     for col in ['Status', 'BMI', 'Age', 'Gender']:
-        assert col in df.columns, f"Column {col} is not in the dataframe"
+        assert col in df.columns
 
     #mapping sample names
     sample_name_w_breaks = {'HC275': 'Healthy\n n=275',
@@ -73,7 +74,7 @@ def process_for_visualization(df):
     return general_data
 
 
-def plot_general_dist_altair(df):
+ddef plot_general_dist_altair(df):
     """
     Make boxplots showing general characteristics of each cohort we are trying to classify
     Parameters
@@ -89,7 +90,7 @@ def plot_general_dist_altair(df):
     df = process_for_visualization(df)
 
     #check that the columns we need are present
-    for col in ['Status', 'BMI', 'Age', 'Gender']:
+    for col in ['sample_group', 'BMI', 'Age', 'Gender']:
         assert col in df.columns
 
     #creating first boxplot of bmi using altair
@@ -102,7 +103,7 @@ def plot_general_dist_altair(df):
     #creating second boxplot of Age using altair
     chart2 = alt.Chart(df).mark_boxplot().encode(
         alt.X('sample_group', title='', axis=alt.Axis(labels=False)),
-        alt.Y('Age (years)'),
+        alt.Y('Age'),
         alt.Color('sample_group', legend=alt.Legend(title='Patient Group'))
     )
     #concatenating the charts using altair
@@ -131,7 +132,7 @@ def plot_general_dist_altair(df):
 def ttest(hc, subgroup, microtype):
     """
     Evaluates a t test for each feature of the dataframe
-    
+
         Parameters:
             hc(Pandas dataframe): subgroup of whole dataset for only the healthy control group
             subgroup(Pandas dataframe): subgroup of whole dataset for only one disease condition
@@ -148,7 +149,7 @@ def ttest(hc, subgroup, microtype):
 def multtest(hc, subgroup, microtype):
     """
     Evaluates a Benjamini/Hochberg test for each p value of the t test of each feature of the dataframe
-    
+
         Parameters:
             hc(Pandas dataframe): subgroup of whole dataset for only the healthy control group
             subgroup(Pandas dataframe): subgroup of whole dataset for only one disease condition
@@ -159,7 +160,7 @@ def multtest(hc, subgroup, microtype):
     tlist = ttest(hc, subgroup, microtype)
     sigbool = statsmodels.stats.multitest.multipletests(tlist, method="fdr_bh")[0]
     siglist = dict(map(lambda i,j : (i,j) , microtype, sigbool))
-    
+
     return siglist
 
 def mk_dict(colnames, df):
