@@ -49,7 +49,7 @@ def process_for_visualization(df):
     general_data, pandas df with columns mentioned above and new cols sample_group, and sample_group_breaks
     """
     #check that the columns we need are present
-    for col in ['Status', 'BMI (kg/m²)', 'Age (years)', 'Gender']:
+    for col in ['Status', 'BMI', 'Age', 'Gender']:
         assert col in df.columns, f"Column {col} is not in the dataframe"
 
     #mapping sample names
@@ -68,7 +68,7 @@ def process_for_visualization(df):
     df['sample_group_breaks'] = df['Status'].apply(lambda x: sample_name_w_breaks[x])
     df['sample_group'] = df['Status'].apply(lambda x: sample_name[x])
 
-    general_data = df[['ID', 'Status', 'Age (years)', 'BMI (kg/m²)', 'Gender', 'sample_group', 'sample_group_breaks']]
+    general_data = df[['ID', 'Status', 'Age', 'BMI', 'Gender', 'sample_group', 'sample_group_breaks']]
 
     return general_data
 
@@ -89,13 +89,13 @@ def plot_general_dist_altair(df):
     df = process_for_visualization(df)
 
     #check that the columns we need are present
-    for col in ['Status', 'BMI (kg/m²)', 'Age (years)', 'Gender']:
+    for col in ['Status', 'BMI', 'Age', 'Gender']:
         assert col in df.columns
 
     #creating first boxplot of bmi using altair
     chart1 = alt.Chart(df).mark_boxplot().encode(
         alt.X('sample_group', title='', axis=alt.Axis(labels=False)),
-        alt.Y('BMI (kg/m²)'),
+        alt.Y('BMI'),
         alt.Color('sample_group', legend=alt.Legend(title='Patient Group'))
     )
 

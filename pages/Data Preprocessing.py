@@ -41,7 +41,6 @@ def load_data(sheets_url, sheets = False):
         # st.write(f"attempting to access {csv_url}")
         data = pd.read_csv(csv_url)
     else:
-        st.write(wdir + "/data" + sheets_url)
         data = pd.read_excel(wdir + "/data" + sheets_url)
     return data
 
