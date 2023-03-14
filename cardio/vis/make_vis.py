@@ -84,6 +84,7 @@ def plot_general_dist_altair(df):
     -------
     fig, altair figure object
     """
+    assert isinstance(df, pd.core.frame.DataFrame)
 
     #processing data for visualization
     df = process_for_visualization(df)
@@ -134,6 +135,7 @@ def plot_general_dist_altair(df):
     fig = alt.vconcat(chart1_2, chart3).resolve_scale(color='independent')
 
     return fig
+
 
 def ttest(hc, subgroup, microtype):
     """
@@ -416,6 +418,7 @@ def cluster_age_bmi(df):
             ).interactive()
     return chart
 
+
 def feature_histograms(df, patient_data, features):
     """
     Takes in training data and patient data and plots patient values against the training data with IHD for
@@ -429,6 +432,11 @@ def feature_histograms(df, patient_data, features):
     ------
     fig, altair plot
     """
+    assert 'Status' in df.columns
+
+    for feature in features:
+        assert feature in df.columns
+        assert feature in patient_data
 
     #filtering data for IHD only
     df = df[df['Status'] == 'IHD372']
