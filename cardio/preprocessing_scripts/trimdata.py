@@ -4,6 +4,11 @@ diversity,
 filters out rare features (present in > some % samples).
 """
 
+import pandas as pd
+import numpy as np
+import scipy.stats
+import skbio.diversity
+
 
 def read_csvs():
     """
@@ -86,7 +91,8 @@ def sparse_filt(df, remove_str, na_lim):
     """
     Filtering out sparse and uncharacterized features in a data subset
     -----------------------------------------------
-    Inputs: dataframe, identifier of unchar. columns (str), number of acceptable nas in col (int)
+    Inputs: dataframe, identifier of unchar. columns (str), number of
+    acceptable nas in col (int)
     -----------------------------------------------
     Outputs: trimmed dataframe
     """
@@ -99,23 +105,15 @@ def sparse_filt(df, remove_str, na_lim):
 
 def preprocess():
     """
-    Main preprocessing function that runs all others. Saves pkl files in root/data
+    Main preprocessing function that runs all others. Saves pkl files in
+    root/data
     No inputs
     Outputs: processed dataframe, microbe columns, metabolite columns
     """
-    import pandas as pd
-    import numpy as np
-    import scipy
-    import skbio
-    
-    import pandas as pd
-    import numpy as np
-    import scipy.stats
-    import skbio.diversity
-    from os.path import dirname, abspath, join
 
     raw_data, metadata_cols, microbiome_cols, metabolome_cols = read_csvs()
-    basicfilt_data, df_meta, df_micro = basic_filtering(raw_data, microbiome_cols,
+    basicfilt_data, df_meta, df_micro = basic_filtering(raw_data, 
+                                                        microbiome_cols,
                                                         metabolome_cols)
     abundance = count_to_abundance(df_micro)
 
@@ -126,15 +124,19 @@ def preprocess():
 
     # calculate shannon diversity from raw microbiome counts
     df_divers = calculate_shannon_diversity(df_micro.drop
-                                        (columns=['MGS count', 'Gene count',
-                                                  'Microbial load',
-                                                  'ID', 'Status']).fillna(0))
+                                            (columns=['MGS count',
+                                                      'Gene count',
+                                                      'Microbial load', 'ID',
+                                                      'Status']).fillna(0))
 
     # merge together metadata, filtered metabolites, and filtered abundances
     df_basic = basicfilt_data[metadata_cols].merge(df_divers, how='inner',
-                                                   right_index=True, left_index=True)
-    df_metabs = df_basic.merge(df_meta_filt, how='inner', on=['ID', 'Status'])
-    df_metamicro = df_metabs.merge(df_micro_filt, how='inner', on=['ID', 'Status'])
+                                                   right_index=True,
+                                                   left_index=True)
+    df_metabs = df_basic.merge(df_meta_filt, how='inner',
+                               on=['ID', 'Status'])
+    df_metamicro = df_metabs.merge(df_micro_filt, how='inner', 
+                                   on=['ID', 'Status'])
     
     # update microbiome and metabolome columns
     micro_cols = df_metamicro.columns[df_metamicro.columns.isin(microbiome_cols[2:])]
