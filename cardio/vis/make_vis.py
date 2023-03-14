@@ -18,7 +18,6 @@ import sklearn.manifold
 # Packages for visualisation
 from sklearn.manifold import TSNE
 from sklearn.impute import SimpleImputer
-from vega_datasets import data
 from umap import UMAP
 from statsmodels.stats.weightstats import ztest
 from statsmodels.stats.multitest import multipletests
