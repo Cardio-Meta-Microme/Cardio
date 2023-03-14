@@ -35,7 +35,7 @@ class ProcessForVisualization(unittest.TestCase):
         test_df = TEST_DATA.copy()
         test_output = process_for_visualization(test_df)
 
-        col_names = ['ID', 'Status', 'Age', 'BMI', 'Gender', 'sample_group', 'sample_group_breaks']
+        col_names = ['ID', 'Status', 'Age', 'BMI', 'Gender', 'shannon','sample_group', 'sample_group_breaks']
 
         for col in col_names:
             assert col in test_output.columns
@@ -73,7 +73,7 @@ class FeatureHistograms(unittest.TestCase):
 
     def test_patient_features_in_test_col(self):
         test_df = TEST_DATA.copy()
-        rand_features = []
+        rand_features = list(test_df.columns.to_series().sample(20).index)
         patient = test_df.iloc[0]
         test_df = test_df.drop([rand_features[0]], axis=1)
 
