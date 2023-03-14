@@ -114,5 +114,8 @@ with st.expander(label = "See Preprocessing", expanded=False):
 
 if 'processed_datasets' not in st.session_state:
     st.session_state['metamicro_filt'] = abundance_new
+
+if st.button(label="download data"):
+    abundance_new[0].to_csv("processed_data.csv")
     
 

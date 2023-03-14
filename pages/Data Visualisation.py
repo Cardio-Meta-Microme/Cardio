@@ -19,9 +19,17 @@ fig = make_vis.plot_general_dist_altair(st.session_state['metamicro_filt'][0])
 st.write("## General Distributions")
 st.altair_chart(fig)
 
-fig_micro = make_vis.plot_micro_abundance(st.session_state['metamicro_filt'][0].drop('Gender', axis=1), 'Bacteria')
-fig_metabolite = make_vis.plot_micro_abundance(st.session_state['metamicro_filt'][0].drop('Gender', axis=1), 'Metabolite')
+all_microbiome_columns = ["ID", "Status", "Age", "BMI", "Gender", "shannon"]
+all_microbiome_columns.extend(st.session_state['metamicro_filt'][1].values.tolist())
+all_metabolome_columns = ["ID", "Status", "Age", "BMI", "Gender", "shannon"]
+all_metabolome_columns.extend(st.session_state['metamicro_filt'][2].values.tolist())
+
+st.dataframe(st.session_state['metamicro_filt'][0][all_microbiome_columns])
+
+fig_micro = make_vis.plot_micro_abundance(st.session_state['metamicro_filt'][0][all_microbiome_columns], 'Bacteria')
+fig_metabolite = make_vis.plot_micro_abundance(st.session_state['metamicro_filt'][0][all_metabolome_columns], 'Metabolite')
 
 st.write("## New Figure (Lit 😎 🔥🔥🔥🔥)")
 st.altair_chart(fig_micro)
 st.altair_chart(fig_metabolite)
+

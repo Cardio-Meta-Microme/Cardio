@@ -131,7 +131,7 @@ def plot_general_dist_altair(df):
         width=50)
 
     #horizontally concatenate each figure keeping the legends / colors independent
-    fig = alt.hconcat(chart1_2, chart3).resolve_scale(color='independent')
+    fig = alt.vconcat(chart1_2, chart3).resolve_scale(color='independent')
 
     return fig
 
