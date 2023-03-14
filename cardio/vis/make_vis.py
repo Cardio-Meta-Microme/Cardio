@@ -294,20 +294,44 @@ def mk_chart(HCDF, IHDDF, MMCDF, UMCCDF, valtype):
 
     return chart
 
-def plot_micro_abundance(df, microtype):
+def plot_micro_abundance(df, microtype, bacteria, metabolites):
     """
     Wrapper function to generate a chart of mean normalized read counts for either bacterial species or metabolites sorted based off the healthy control subtype for all four subgroups
 
         Parameters:
             df(Pandas dataframe): entire dataframe
             microtype(string): either "Bacteria" or "Metabolites"
+	    bacteria(list): column names of all bacterial species
+            metabolites(list): column names of all bacterial species
         Returns:
             chart(Altair chart): chart of mean normalized read counts for either bacterial species or metabolites sorted based off the healthy control subtype for all four subgroups
     """
 
-    bacteria = [column for column in df.columns if 'CAG' in column and 'unclassified' not in column]
-    metabolites = list(df.columns[339:1551])
-
+    if type(microtype) == str:
+        pass
+    else:
+        raise TypeError('microtype should be string type, either "Bacteria" or "Metabolites"')
+    
+    if type(bacteria) == list:
+        pass
+    else:
+        raise TypeError('bacteria should be list type containing all bacterial species columns')
+        
+    if type(metabolites) == list:
+        pass
+    else:
+        raise TypeError('metabolites should be list type containing all metabolite columns')
+    
+    try:
+        df[bacteria]
+    except KeyError:
+        print('bacteria columns do not exist in df')
+    
+    try:
+        df[metabolites]
+    except KeyError:
+        print('metabolite columns do not exist in df')
+        
     if microtype == "Bacteria":
         mtype = bacteria
     elif microtype == "Metabolite":
