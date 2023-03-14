@@ -43,7 +43,7 @@ def process_for_visualization(df):
     Processed data for visualization by changing chort names to more memorable titles
     Parameters
     ---------
-    data, pandas df with columsn ID, Status, Age (years), BMI (kg/m²), Gender
+    data, pandas df with columsn ID, Status, Age, BMI, Gender
     Returns
     -------
     general_data, pandas df with columns mentioned above and new cols sample_group, and sample_group_breaks
@@ -78,8 +78,8 @@ def plot_general_dist_altair(df):
     Make boxplots showing general characteristics of each cohort we are trying to classify
     Parameters
     ----------
-    df, pandas df with cohort info with colnames sample_group, sample_group_breaks, BMI (kg/m²),
-    Age (years), Gender
+    df, pandas df with cohort info with colnames sample_group, sample_group_breaks, BMI,
+    Age, Gender
     Returns
     -------
     fig, altair figure object
@@ -102,7 +102,7 @@ def plot_general_dist_altair(df):
     #creating second boxplot of Age using altair
     chart2 = alt.Chart(df).mark_boxplot().encode(
         alt.X('sample_group', title='', axis=alt.Axis(labels=False)),
-        alt.Y('Age (years)'),
+        alt.Y('Age'),
         alt.Color('sample_group', legend=alt.Legend(title='Patient Group'))
     )
     #concatenating the charts using altair
@@ -359,7 +359,7 @@ def plot_UMAP(df, columns, hivar):
     bacteria = [column for column in df.columns if 'CAG' in column and 'unclassified' not in column]
     metabolites = list(df.columns[339:1551])
     default_modeling_columns = bacteria + metabolites
-    all_modeling_columns = bacteria + metabolites + ['Age (years)', 'BMI (kg/m²)']
+    all_modeling_columns = bacteria + metabolites + ['Age', 'BMI']
 
     # specify the dataframe at either all_modeling_columns or default_modeling_columns, depending on inclusion of age and BMI
     if columns == "all":
@@ -402,8 +402,8 @@ def cluster_age_bmi(df):
             chart(Altair chart): clusters patients based off their age and BMI
     """
     chart = alt.Chart(df).mark_circle(size=15).encode(
-                alt.X('Age (years)'),
-                alt.Y('BMI (kg/m²)'),
+                alt.X('Age'),
+                alt.Y('BMI'),
                 color='Status',
                 tooltip=['Status']
             ).interactive()
