@@ -141,7 +141,12 @@ def preprocess():
                                on=['ID', 'Status'])
     df_metamicro = df_metabs.merge(df_micro_filt, how='inner', 
                                    on=['ID', 'Status'])
-    
+
+    # drop duplicate patients
+    df_metamicro.set_index(['ID', 'Status'], inplace=True)
+    df_metamicro.drop_duplicates(keep='first', inplace=True)
+    df_metamicro.reset_index(inplace=True)
+
     # update microbiome and metabolome columns
     micro_cols = df_metamicro.columns[df_metamicro.columns.isin(microbiome_cols[2:])]
     metabo_cols = df_metamicro.columns[df_metamicro.columns.isin(metabolome_cols[2:])]
