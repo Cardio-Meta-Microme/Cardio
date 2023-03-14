@@ -43,14 +43,14 @@ def process_for_visualization(df):
     Processed data for visualization by changing chort names to more memorable titles
     Parameters
     ---------
-    data, pandas df with columsn ID, Status, Age, BMI, Gender
+    data, pandas df with columsn ID, Status, Age (years), BMI (kg/m²), Gender
     Returns
     -------
     general_data, pandas df with columns mentioned above and new cols sample_group, and sample_group_breaks
     """
     #check that the columns we need are present
     #['Status', 'BMI (kg/m²)', 'Age (years)', 'Gender']
-    for col in ['Status', 'BMI', 'Age', 'Gender']:
+    for col in ['Status', 'BMI', 'Age', 'Gender', 'shannon']:
         assert col in df.columns
 
     #mapping sample names
@@ -69,18 +69,18 @@ def process_for_visualization(df):
     df['sample_group_breaks'] = df['Status'].apply(lambda x: sample_name_w_breaks[x])
     df['sample_group'] = df['Status'].apply(lambda x: sample_name[x])
 
-    general_data = df[['ID', 'Status', 'Age', 'BMI', 'Gender', 'sample_group', 'sample_group_breaks']]
+    general_data = df[['ID', 'Status', 'Age', 'BMI', 'Gender','shannon', 'sample_group', 'sample_group_breaks']]
 
     return general_data
 
 
-ddef plot_general_dist_altair(df):
+def plot_general_dist_altair(df):
     """
     Make boxplots showing general characteristics of each cohort we are trying to classify
     Parameters
     ----------
-    df, pandas df with cohort info with colnames sample_group, sample_group_breaks, BMI,
-    Age, Gender
+    df, pandas df with cohort info with colnames sample_group, sample_group_breaks, BMI (kg/m²),
+    Age (years), Gender
     Returns
     -------
     fig, altair figure object
@@ -90,24 +90,32 @@ ddef plot_general_dist_altair(df):
     df = process_for_visualization(df)
 
     #check that the columns we need are present
-    for col in ['sample_group', 'BMI', 'Age', 'Gender']:
+    for col in ['sample_group', 'BMI', 'Age', 'Gender', 'shannon']:
         assert col in df.columns
 
     #creating first boxplot of bmi using altair
     chart1 = alt.Chart(df).mark_boxplot().encode(
         alt.X('sample_group', title='', axis=alt.Axis(labels=False)),
-        alt.Y('BMI'),
+        alt.Y('BMI', title='BMI (kg/m²)'),
         alt.Color('sample_group', legend=alt.Legend(title='Patient Group'))
     )
 
     #creating second boxplot of Age using altair
     chart2 = alt.Chart(df).mark_boxplot().encode(
         alt.X('sample_group', title='', axis=alt.Axis(labels=False)),
-        alt.Y('Age'),
+        alt.Y('Age', title='Age (years)'),
         alt.Color('sample_group', legend=alt.Legend(title='Patient Group'))
     )
+
+    chart4 = alt.Chart(df).mark_boxplot().encode(
+        alt.X('sample_group', title='', axis=alt.Axis(labels=False)),
+        alt.Y('shannon', title='Shannon Index'),
+        alt.Color('sample_group', legend=alt.Legend(title='Patient Group'))
+    )
+    chart4
+
     #concatenating the charts using altair
-    chart1_2 = alt.hconcat(chart1, chart2)
+    chart1_2 = alt.hconcat(chart1, chart2, chart4)
 
     #creating a df that groups by disease classification and counts the number of Males and Females
     gender_counts = df.groupby(['sample_group_breaks','Gender']).count()
