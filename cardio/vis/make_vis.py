@@ -112,7 +112,6 @@ def plot_general_dist_altair(df):
         alt.Y('shannon', title='Shannon Index'),
         alt.Color('sample_group', legend=alt.Legend(title='Patient Group'))
     )
-    chart4
 
     #concatenating the charts using altair
     chart1_2 = alt.hconcat(chart1, chart2, chart4)
