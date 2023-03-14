@@ -9,7 +9,6 @@ final data that were fed into the model.
 import streamlit as st
 import pandas as pd
 import numpy as np
-from cardio.preprocessing_scripts import norm_filt
 from cardio.vis import make_vis
 from cardio.preprocessing_scripts import trimdata
 import seaborn as sns
@@ -114,5 +113,8 @@ with st.expander(label = "See Preprocessing", expanded=False):
 
 if 'processed_datasets' not in st.session_state:
     st.session_state['metamicro_filt'] = abundance_new
+
+if st.button(label="download data"):
+    abundance_new[0].to_csv("processed_data.csv")
     
 
