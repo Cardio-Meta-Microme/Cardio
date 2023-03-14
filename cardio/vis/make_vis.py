@@ -79,8 +79,8 @@ ddef plot_general_dist_altair(df):
     Make boxplots showing general characteristics of each cohort we are trying to classify
     Parameters
     ----------
-    df, pandas df with cohort info with colnames sample_group, sample_group_breaks, BMI (kg/m²),
-    Age (years), Gender
+    df, pandas df with cohort info with colnames sample_group, sample_group_breaks, BMI,
+    Age, Gender
     Returns
     -------
     fig, altair figure object
@@ -360,7 +360,7 @@ def plot_UMAP(df, columns, hivar):
     bacteria = [column for column in df.columns if 'CAG' in column and 'unclassified' not in column]
     metabolites = list(df.columns[339:1551])
     default_modeling_columns = bacteria + metabolites
-    all_modeling_columns = bacteria + metabolites + ['Age (years)', 'BMI (kg/m²)']
+    all_modeling_columns = bacteria + metabolites + ['Age', 'BMI']
 
     # specify the dataframe at either all_modeling_columns or default_modeling_columns, depending on inclusion of age and BMI
     if columns == "all":
@@ -403,8 +403,8 @@ def cluster_age_bmi(df):
             chart(Altair chart): clusters patients based off their age and BMI
     """
     chart = alt.Chart(df).mark_circle(size=15).encode(
-                alt.X('Age (years)'),
-                alt.Y('BMI (kg/m²)'),
+                alt.X('Age'),
+                alt.Y('BMI'),
                 color='Status',
                 tooltip=['Status']
             ).interactive()
