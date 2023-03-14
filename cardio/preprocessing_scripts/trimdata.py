@@ -8,21 +8,25 @@ import pandas as pd
 import numpy as np
 import scipy.stats
 import skbio.diversity
+import os
 
 
 def read_csvs():
     """
     Read raw data csv files and merge into one large dataframe
     """
-    metadata = pd.read_csv('metacard_metadata.csv')
+    # Get the current working directory to use absolute paths.
+    wdir = os.getcwd()
+
+    metadata = pd.read_csv(wdir + "/data" + '/metacard_metadata.csv')
     metadata = metadata[['ID', 'Status', 'Age (years)', 'BMI (kg/m²)', 'Gender']]
     metadata.columns = ['ID', 'Status', 'Age', 'BMI', 'Gender']
     metadata_columns = metadata.columns
 
-    microbiome = pd.read_csv('metacard_microbiome.csv')
+    microbiome = pd.read_csv(wdir + "/data" + '/metacard_microbiome.csv')
     microbiome_columns = microbiome.columns
 
-    metabolome = pd.read_csv('metacard_serum.csv')
+    metabolome = pd.read_csv(wdir + "/data" + '/metacard_serum.csv')
     metabolome_columns = metabolome.columns
 
     all_joined = metadata.merge(microbiome, how='inner',

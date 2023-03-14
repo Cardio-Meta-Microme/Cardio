@@ -16,7 +16,7 @@ st.write(st.session_state['metamicro_filt'])
 
 labels = st.session_state['metamicro_filt'].columns.values
 fig = make_vis.plot_general_dist_altair(st.session_state['metamicro_filt'])
-st.write("## Old Figure (Lame)")
+st.write("## General Distributions")
 st.altair_chart(fig)
 
 fig_micro = make_vis.plot_micro_abundance(st.session_state['metamicro_filt'].drop('Gender', axis=1), 'Bacteria')

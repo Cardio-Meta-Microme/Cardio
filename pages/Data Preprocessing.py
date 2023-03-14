@@ -1,6 +1,9 @@
 """
-# My first app
-Here's our first attempt at using data to create a table:
+# Data Preprocessing Page
+In which we show the transformations that took place between the raw data and the 
+final data that were fed into the model.
+
+
 """
 
 import streamlit as st
@@ -8,13 +11,13 @@ import pandas as pd
 import numpy as np
 from cardio.preprocessing_scripts import norm_filt
 from cardio.vis import make_vis
+from cardio.preprocessing_scripts import trimdata
 import seaborn as sns
 import matplotlib.pyplot as plt
 import os
 
 # Read in data from the Google Sheet.
 # Getting data from a google sheet: https://docs.streamlit.io/knowledge-base/tutorials/databases/public-gsheet
-# Uses st.cache_data to only rerun when the query changes or after 10 min.
 @st.cache_data()
 def load_data(sheets_url, sheets = False):
     """
@@ -51,8 +54,9 @@ metacard_taxonomy = load_data("/metacard_taxonomy.xlsx")
 metacard_urine = load_data("/metacard_urine.xlsx")
 
 
-# Loading data in from the google sheet URLs
-if st.button(label="Fetch Data"):
+# Loading data in from the google sheet URLs.
+# ONLY USE IF YOU DON'T HAVE THE LOCAL FILES.
+if st.button(label="Fetch Data (DO NOT PRESS ON UNIVERSITY WIFI)"):
     with st.spinner('Wait for it...'):
         metacard_drug = load_data(sheets_url = st.secrets["metacard_drug_public_gsheets_url"], sheets=True)
         metacard_kegg = load_data(sheets_url = st.secrets["metacard_kegg_public_gsheets_url"], sheets=True)
@@ -77,31 +81,39 @@ datasets = {"metacard_drug": metacard_drug,
 if 'datasets' not in st.session_state:
     st.session_state['datasets'] = datasets
 
-abundance = norm_filt.count_to_abundance(metacard_microbiome)
+# Calling the new preprocessing
+abundance_new = trimdata.preprocess()
 
-processed_datasets = {"abundance" : abundance}
+st.markdown("""
+# GOAL: Classifier Model for Heart Disease Risk from Microbiome and Metabolome
 
-with st.expander(label = "Count to Abundance", expanded=False):
+There are a few things that we need to do before we can train a model that will try to classify a person at risk for Ischemic Heart
+Disease (IHD).
+
+Firstly, microbiome data typically come processed as raw read counts (actually there are some steps before this but our dataset already had those 
+transformations done).
+
+
+
+## Preprocessing Steps
+
+
+""")
+
+with st.expander(label = "See Preprocessing", expanded=False):
     st.write("## Raw Microbiome")
     st.dataframe(metacard_microbiome.head(50))
     st.write("## Processed Microbiome")
-    st.dataframe(abundance)
-
-metamicro = norm_filt.combine_metamicro(metacard_metadata, metacard_serum, abundance)
-
-# Filter sparse for metabolites and species seperately then merge
-# Add a slider widget that can change how much to filter. Report on number species removed.
-
- # this is where we could remove X-metabolites
-metamicro_filt = norm_filt.filter_sparse(metamicro, metamicro.columns[2:], percent=0.1)
-
-processed_datasets['metamicro_filt'] = metamicro_filt
+    st.dataframe(abundance_new[0])
+    columns_original = len(metacard_microbiome.columns.values) + len(metacard_serum.columns.values)
+    columns_processed = len(abundance_new[0].columns.values)
+    st.write(f"The unprocessed dataframe had {columns_original} columns, the processed dataframe has {columns_processed} columns")
+    fig, ax = plt.subplots()
+    sns.histplot(data=abundance_new[0], x = 'shannon', ax = ax, hue="Gender")
+    ax.set_title("Shannon Diversity of Sample")
+    st.pyplot(fig)
 
 if 'processed_datasets' not in st.session_state:
-    st.session_state['processed_datasets'] = processed_datasets
-    st.session_state['metamicro'] = metamicro
-
-with st.expander(label="Combine Datasets", expanded=False):
-    st.dataframe(metamicro)
+    st.session_state['metamicro_filt'] = abundance_new
     
 
