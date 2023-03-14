@@ -9,7 +9,6 @@ final data that were fed into the model.
 import streamlit as st
 import pandas as pd
 import numpy as np
-from cardio.preprocessing_scripts import norm_filt
 from cardio.vis import make_vis
 from cardio.preprocessing_scripts import trimdata
 import seaborn as sns
