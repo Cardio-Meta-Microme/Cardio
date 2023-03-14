@@ -151,9 +151,9 @@ def preprocess():
     metabo_cols = list(df_metamicro.columns[df_metamicro.columns.isin(metabolome_cols[2:])])
 
     # output micro/metabo columns to json
-    json.dump(micro_cols, open('./data/microbiome_columns.json', 'w'))
-    json.dump(metabo_cols, open('./data/metabolite_columns.json', 'w'))
-    return df_metamicro
+    # json.dump(micro_cols, open('./data/microbiome_columns.json', 'w'))
+    # json.dump(metabo_cols, open('./data/metabolite_columns.json', 'w'))
+    return df_metamicro, micro_cols, metabo_cols
 
-if __name__ == "__main__":
-    preprocess()
+# if __name__ == "__main__":
+#     preprocess()
