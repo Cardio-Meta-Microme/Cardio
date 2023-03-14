@@ -118,6 +118,3 @@ clf.fit(X_subset, Y)
 pickle.dump(clf, open('Trained_Production_RF_Classifier_230314.pkl', 'wb'))
 
 pickle.dump(X_columns, open('Trained_Production_RF_Classifier_features_230314.pkl', 'wb'))
-
-
-
