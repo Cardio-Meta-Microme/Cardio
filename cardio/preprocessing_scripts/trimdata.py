@@ -171,7 +171,7 @@ def sparse_filt(df, remove_str, na_lim):
     return df
 
 
-def preprocess():
+def preprocess(fill_na=False):
     """
     Main preprocessing function that runs all others.
 
@@ -219,12 +219,12 @@ def preprocess():
     micro_cols = list(df_metamicro.columns[df_metamicro.columns.isin(microbiome_cols[2:])])
     metabo_cols = list(df_metamicro.columns[df_metamicro.columns.isin(metabolome_cols[2:])])
 
-    fill_values = df_metamicro[df_metamicro.columns[5:]].min(axis=0) - 1
-    filled = df_metamicro[df_metamicro.columns[5:]].fillna(fill_values, axis=0)
+    if fill_na:
+        fill_values = df_metamicro[df_metamicro.columns[5:]].min(axis=0) - 1
+        filled = df_metamicro[df_metamicro.columns[5:]].fillna(fill_values, axis=0)
 
-    pickle.dump(fill_values, open('cardio/model/na_fill_values.pkl', 'wb'))
-
-    df_metamicro = pd.concat((df_metamicro[df_metamicro.columns[:5]], filled), axis=1)
+        pickle.dump(fill_values, open('cardio/model/na_fill_values.pkl', 'wb'))
+        df_metamicro = pd.concat((df_metamicro[df_metamicro.columns[:5]], filled), axis=1)
 
     return df_metamicro, micro_cols, metabo_cols
 
