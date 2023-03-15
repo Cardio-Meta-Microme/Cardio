@@ -24,4 +24,8 @@ model_features = pd.read_pickle(wdir + "/cardio/Trained_Production_RF_Classifier
 
 st.write(type(model_features[:10].tolist()))
 
+st.markdown("## Patient Input")
+
+st.file_uploader(label="Upload a Single Row to Predict", type="csv", accept_multiple_files=False)
+
 st.pyplot(make_vis.feature_histograms(st.session_state['metamicro_filt'][0], st.session_state['metamicro_filt'][0].iloc[10], model_features[:20].tolist()), )
