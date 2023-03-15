@@ -294,7 +294,7 @@ def plot_confusion_matrix(Y_true, Y_pred, filepath):
 
 
 class RF_Classifier():
-    def __init__(self, model_path, columns_path):
+    def __init__(self, model_path, columns_path, fill_nas_path):
         """Initializes a RF_Classifier object.
 
         Parameters:
@@ -310,6 +310,7 @@ class RF_Classifier():
         """
         self.model = pickle.load(open(model_path, 'rb'))
         self.columns = pickle.load(open(columns_path, 'rb'))
+        self.na_fill = pickle.load(open(fill_nas_path, 'rb'))
 
     def classify(self, df):
         """Makes predictions on a given dataframe using the trained random forest model.
@@ -324,13 +325,13 @@ class RF_Classifier():
         predictions : numpy array
             The predicted target labels for the input dataframe.
         """
-        X = df.loc[:, self.columns].values
+        X = df[self.columns].fillna(self.na_fill, axis=0).values
         predictions = self.model.predict(X)
         return predictions
     
 
 if __name__ == '__main__':
-    path = '../data/cleaned_data.pkl'
+    path = '../../data/cleaned_data.pkl'
     print('loading data')
     df = load_data(path)
 
