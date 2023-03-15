@@ -295,3 +295,74 @@ class TestPlotMicroAbundance(unittest.TestCase):
         
 suite = unittest.TestLoader().loadTestsFromTestCase(TestPlotMicroAbundance)
 _ = unittest.TextTestRunner().run(suite)
+
+class TestHighVar(unittest.TestCase):
+        
+    def test_shape(self):
+        df, microcols, metabcols = trimdata.preprocess()
+        self.assertTrue(math.isclose(make_vis.high_var(df).shape[1],500), "Not returning 500 features")
+    
+suite = unittest.TestLoader().loadTestsFromTestCase(TestHighVar)
+_ = unittest.TextTestRunner().run(suite)
+
+class TestPlotUMAP(unittest.TestCase):
+        
+    def test_column_input(self):
+        df, microcols, metabcols = trimdata.preprocess()
+        try:
+            make_vis.plot_UMAP(df, 2, False, microcols, metabcols)
+            self.assertTrue(False, "Allowing non-string columns")
+        except (TypeError) as err:
+            self.assertTrue(True)
+            
+    def test_hivar_input(self):
+        df, microcols, metabcols = trimdata.preprocess()
+        try:
+            make_vis.plot_UMAP(df, "all", 3, microcols, metabcols)
+            self.assertTrue(False, "Allowing non-bool hivar")
+        except (TypeError) as err:
+            self.assertTrue(True)
+            
+    def test_bacteria_type_input(self):
+        df, microcols, metabcols = trimdata.preprocess()
+        try:
+            make_vis.plot_UMAP(df, "all", True, 1, metabcols)
+            self.assertTrue(False, "Allowing non-list bacteria columns")
+        except (TypeError) as err:
+            self.assertTrue(True)
+        
+    def test_metabolite_type_input(self):
+        df, microcols, metabcols = trimdata.preprocess()
+        try:
+            make_vis.plot_UMAP(df, "all", True, microcols, 8)
+            self.assertTrue(False, "Allowing non-list metabolites columns")
+        except (TypeError) as err:
+            self.assertTrue(True)
+            
+    def test_bacteria_input(self):
+        df, microcols, metabcols = trimdata.preprocess()
+        try:
+            make_vis.plot_UMAP(df, "all", True,  ['thing1', 'thing2'], metabcols)
+            self.assertTrue(False, "Allowing bacteria columns which do not exist in the df")
+        except (TypeError) as err:
+            self.assertTrue(True)
+    
+    def test_metabolite_input(self):
+        df, microcols, metabcols = trimdata.preprocess()
+        try:
+            make_vis.plot_UMAP(df, "all", True, microcols, ['thing1', 'thing2'])
+            self.assertTrue(False, "Allowing metabolite columns which do not exist in the df")
+        except (TypeError) as err:
+            self.assertTrue(True)
+        
+suite = unittest.TestLoader().loadTestsFromTestCase(TestPlotUMAP)
+_ = unittest.TextTestRunner().run(suite)
+
+class TestClusterAgeBMI(unittest.TestCase):
+        
+    def test_output_type(self):
+        df, microcols, metabcols = trimdata.preprocess()
+        self.assertTrue(type(make_vis.cluster_age_bmi(df)) == alt.vegalite.v4.api.Chart, "Returned type is not an altair plot")
+    
+suite = unittest.TestLoader().loadTestsFromTestCase(TestClusterAgeBMI)
+_ = unittest.TextTestRunner().run(suite)
