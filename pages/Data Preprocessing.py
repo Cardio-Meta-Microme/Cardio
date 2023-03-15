@@ -32,13 +32,13 @@ def load_data(path, sheets = False):
     wdir = os.getcwd()
     if sheets:
         # Test that the URLs are correct
-        assert "/edit#gid=" in sheets_url, "URL specified is not a public google sheet. Please check permissions."
+        assert "/edit#gid=" in path, "URL specified is not a public google sheet. Please check permissions."
 
-        csv_url = sheets_url.replace("/edit#gid=", "/export?format=csv&gid=")
+        csv_url = path.replace("/edit#gid=", "/export?format=csv&gid=")
         # st.write(f"attempting to access {csv_url}")
         data = pd.read_csv(csv_url)
     else:
-        data = pd.read_excel(wdir + "/data" + sheets_url)
+        data = pd.read_excel(wdir + "/data" + path)
     return data
 
 metacard_drug = load_data("/metacard_drug.xlsx")
@@ -54,16 +54,14 @@ metacard_urine = load_data("/metacard_urine.xlsx")
 # ONLY USE IF YOU DON'T HAVE THE LOCAL FILES.
 if st.button(label="Fetch Data (DO NOT PRESS ON UNIVERSITY WIFI)"):
     with st.spinner('Wait for it...'):
-        metacard_drug = load_data(sheets_url = st.secrets["metacard_drug_public_gsheets_url"], sheets=True)
-        metacard_kegg = load_data(sheets_url = st.secrets["metacard_kegg_public_gsheets_url"], sheets=True)
-        metacard_metadata = load_data(sheets_url = st.secrets["metacard_metadata_public_gsheets_url"], sheets=True)
-        metacard_microbiome = load_data(sheets_url = st.secrets["metacard_microbiome_public_gsheets_url"], sheets=True)
-        metacard_serum = load_data(sheets_url = st.secrets["metacard_serum_public_gsheets_url"], sheets=True)
-        metacard_taxonomy = load_data(sheets_url = st.secrets["metacard_taxonomy_public_gsheets_url"], sheets=True)
-        metacard_urine = load_data(sheets_url = st.secrets["metacard_urine_public_gsheets_url"], sheets=True)
+        metacard_drug = load_data(path = st.secrets["metacard_drug_public_gsheets_url"], sheets=True)
+        metacard_kegg = load_data(path = st.secrets["metacard_kegg_public_gsheets_url"], sheets=True)
+        metacard_metadata = load_data(path = st.secrets["metacard_metadata_public_gsheets_url"], sheets=True)
+        metacard_microbiome = load_data(path = st.secrets["metacard_microbiome_public_gsheets_url"], sheets=True)
+        metacard_serum = load_data(path = st.secrets["metacard_serum_public_gsheets_url"], sheets=True)
+        metacard_taxonomy = load_data(path = st.secrets["metacard_taxonomy_public_gsheets_url"], sheets=True)
+        metacard_urine = load_data(path = st.secrets["metacard_urine_public_gsheets_url"], sheets=True)
         st.write("Success!")
-
-
 
 # Displaying a view of the data.
 datasets = {"metacard_drug": metacard_drug, 
@@ -89,16 +87,23 @@ Disease (IHD).
 Firstly, microbiome data typically come processed as raw read counts (actually there are some steps before this but our dataset already had those 
 transformations done).
 
-
-
-## Preprocessing Steps
-
-
 """)
 
 with st.expander(label = "See Preprocessing", expanded=False):
     st.write("## Raw Microbiome")
     st.dataframe(metacard_microbiome.head(50))
+    st.markdown("""
+    ## Preprocessing Steps
+    - combine metadata, microbiome, and metabolome into one dataframe with patients as indices
+    - drop patients missing over 1000 features from model
+    - calculate each patient’s shannon diversity from microbe counts
+    - centered log ratio (CLR) transform counts to relative abundance:
+        - we have to do this because compositional data is constrained by total 
+        - image address: Aitchison_triadlogratio.jpg
+        - formula:  $ clr(x) =  \ln\left[\\frac{x_1}{g_m(x)},\ldots,\\frac{x_D}{g_m(x)}\\right] $ where $ g_m(x) = (\prod\limits_{i=1}^{D} x_i)^{1/D} $ is the geometric mean of x 
+    - filter sparse features separately for microbiome/metabolome
+        - sparse defined as having more than a certain number of NAs
+    """)
     st.write("## Processed Microbiome")
     st.dataframe(abundance_new[0])
     columns_original = len(metacard_microbiome.columns.values) + len(metacard_serum.columns.values)

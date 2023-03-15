@@ -1,26 +1,14 @@
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 import math
+
 import altair as alt
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
 import statsmodels
-
-import sklearn.model_selection
-import sklearn.preprocessing
-import sklearn.decomposition
-import sklearn.gaussian_process
-import sklearn.cluster
-import sklearn.inspection
-import sklearn.impute
-import sklearn.manifold
-
-# Packages for visualisation
-from sklearn.manifold import TSNE
-from sklearn.impute import SimpleImputer
-from umap import UMAP
 from statsmodels.stats.weightstats import ztest
 from statsmodels.stats.multitest import multipletests
+from umap import UMAP
 
 #Global variable for matplotlib fonts
 SMALL_SIZE = 10
@@ -34,12 +22,14 @@ plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
 plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
 plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
 plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
-plt.rc("figure", labelsize=BIGGER_SIZE)
-plt.style.use("dark_background")
+plt.rc('figure', labelsize=BIGGER_SIZE)
+plt.style.use('dark_background')
+
 
 def process_for_visualization(df):
     """
-    Processed data for visualization by changing chort names to more memorable titles
+    Processed data for visualization by changing chort names to more memorable
+        titles
         Parameters:
             data(pandas df): with columsn ID, Status, Age, BMI, Gender, shannon
         Returns:
@@ -61,9 +51,9 @@ def process_for_visualization(df):
      'IHD372': 'Heart Disease n=372',
      'UMCC222': 'NoTx. Metabolically Matched n=222'}
 
-
     #mapping ID to these sample names
-    df['sample_group_breaks'] = df['Status'].apply(lambda x: sample_name_w_breaks[x])
+    df['sample_group_breaks'] = df['Status'].apply(lambda x: \
+                                                         sample_name_w_breaks[x])
     df['sample_group'] = df['Status'].apply(lambda x: sample_name[x])
 
     general_data = df[['ID', 'Status', 'Age', 'BMI', 'Gender','shannon',
@@ -74,12 +64,14 @@ def process_for_visualization(df):
 
 def plot_general_dist_altair(df):
     """
-    Make boxplots showing general characteristics of each cohort we are trying to classify
+    Make boxplots showing general characteristics of each cohort we are trying
+        to classify
         Parameters:
-            df(pandas df): with cohort info with colnames sample_group, sample_group_breaks, BMI (kg/m²),
-                            Age (years), Gender
+            df(pandas df): with cohort info with colnames sample_group,
+                sample_group_breaks, BMI (kg/m²),Age (years), Gender
         Returns:
-            fig(altair figure object): with boxplots for Age, BMI, Gender and Shannon Index
+            fig(altair figure object): with boxplots for Age, BMI, Gender and
+                Shannon Index
     """
     assert isinstance(df, pd.core.frame.DataFrame)
 
@@ -113,18 +105,21 @@ def plot_general_dist_altair(df):
     #concatenating the charts using altair
     boxplots = alt.hconcat(chart1, chart2, chart4)
 
-    #creating a df that groups by disease classification and counts the number of Males and Females
-    gender_counts = df.groupby(['sample_group_breaks','Gender']).count()
-    gender_counts.reset_index(inplace=True)
+    #creating a df that groups by disease classification and counts the number
+    #of Males and Females
+    gender_df = df.groupby(['sample_group_breaks','Gender']).count()
+    gender_df.reset_index(inplace=True)
     #This just makes the title wrapping for the altair bar chart easier
-    gender_counts['sample_group_breaks'] = gender_counts.sample_group_breaks.str.split('\n')
+    gender_df['sample_group_breaks'] = gender_df.sample_group_breaks.str.split('\n')
 
     #using altair to make a bar chart by gender for each cohort
-    gender_dis = alt.Chart(gender_counts).mark_bar().encode(
+    gender_dis = alt.Chart(gender_df).mark_bar().encode(
         alt.X('Gender:N', title=''),
         alt.Y('ID:Q', title='Patient Count'),
-        alt.Color('Gender:N'),
-        alt.Column('sample_group_breaks:N', header=alt.Header(labelAlign='center'), title='')
+        alt.Color('Gender:N'), \
+        alt.Column('sample_group_breaks:N', \
+                    header=alt.Header(labelAlign='center', labelColor='white'),\
+                    title='')
     )
 
     return boxplots, gender_dis
@@ -135,28 +130,37 @@ def ttest(hc, subgroup, microtype):
     Evaluates a t test for each feature of the dataframe
 
         Parameters:
-            hc(Pandas dataframe): subgroup of whole dataset for only the healthy control group
-            subgroup(Pandas dataframe): subgroup of whole dataset for only one disease condition
-            microtype(list): names of bacterial or metabolite species, matches the column names in the df
+            hc(Pandas dataframe): subgroup of whole dataset for only the healthy
+                control group
+            subgroup(Pandas dataframe): subgroup of whole dataset for only one
+                disease condition
+            microtype(list): names of bacterial or metabolite species, matches
+                the column names in the df
         Returns:
             pvals(list): p values of each t test
     """
     pvals = []
     for species in microtype:
-        t, pval = statsmodels.stats.weightstats.ztest(hc[species].dropna(), subgroup[species].dropna())
+        t, pval = statsmodels.stats.weightstats.ztest(hc[species].dropna(), \
+                                                      subgroup[species].dropna())
         pvals.append(pval)
     return pvals
 
+
 def multtest(hc, subgroup, microtype):
     """
-    Evaluates a Benjamini/Hochberg test for each p value of the t test of each feature of the dataframe
+    Evaluates a Benjamini/Hochberg test for each p value of the t test of each
+        feature of the dataframe
 
         Parameters:
-            hc(Pandas dataframe): subgroup of whole dataset for only the healthy control group
-            subgroup(Pandas dataframe): subgroup of whole dataset for only one disease condition
-            microtype(list): names of bacterial or metabolite species, matches the column names in the df
+            hc(Pandas dataframe): subgroup of whole dataset for only the healthy
+                control group subgroup(Pandas dataframe): subgroup of whole
+                dataset for only one disease condition
+            microtype(list): names of bacterial or metabolite species, matches
+                the column names in the df
         Returns:
-            siglist(list): boolean values for each feature if it has significantly deviated from the healthy control group
+            siglist(list): boolean values for each feature if it has
+                significantly deviated from the healthy control group
     """
     tlist = ttest(hc, subgroup, microtype)
     sigbool = statsmodels.stats.multitest.multipletests(tlist, method="fdr_bh")[0]
@@ -164,15 +168,20 @@ def multtest(hc, subgroup, microtype):
 
     return siglist
 
+
 def mk_dict(colnames, df):
     """
-    Makes a dictionary of mean normalized read counts for either bacterial species or metabolites for a dataframe
+    Makes a dictionary of mean normalized read counts for either bacterial
+        species or metabolites for a dataframe
 
         Parameters:
-            colnames(list): names of bacterial species, matches the column names in the df
-            df(Pandas dataframe): subgroup of whole dataset for only one disease condition
+            colnames(list): names of bacterial species, matches the column names
+                in the df
+            df(Pandas dataframe): subgroup of whole dataset for only one
+                disease condition
         Returns:
-            micro_dict(dict): mean normalized read counts (values) for bacterial species or metabolites (key)
+            micro_dict(dict): mean normalized read counts (values) for bacterial
+                species or metabolites (key)
     """
     micro_dict = {}
     if df['Status'].eq('HC275').any():
@@ -184,36 +193,48 @@ def mk_dict(colnames, df):
 
     return micro_dict
 
+
 def mk_control_df(micro_dict, valtype):
     """
-    Makes a sorted dataframe of mean normalized read counts for either bacterial species or metabolites ONLY for the healthy control disease subtype
+    Makes a sorted dataframe of mean normalized read counts for either bacterial
+        species or metabolites ONLY for the healthy control disease subtype
 
         Parameters:
-            micro_dict(dict): mean normalized read counts (values) for bacterial species or metabolites (key)
+            micro_dict(dict): mean normalized read counts (values) for bacterial
+                species or metabolites (key)
             valtype(string): either "Bacteria" or "Metabolites"
         Returns:
-            micro_dict(Pandas dataframe): sorted dataframe of normalized read counts for either bacterial species or metabolites
+            micro_dict(Pandas dataframe): sorted dataframe of normalized read
+                counts for either bacterial species or metabolites
     """
     micro_dict = dict(sorted(micro_dict.items(), key=lambda x:x[1]))
     micro_type = list(micro_dict.keys())
     type_counts = list(micro_dict.values())
 
     micro_dict = pd.DataFrame(micro_dict, index=[0]).T.reset_index()
-    micro_dict.rename(columns={'index': valtype, 0: 'Normalized Read Count'}, inplace=True)
+    micro_dict.rename(columns={'index': valtype, 0: 'Normalized Read Count'}, \
+                      inplace=True)
 
     return micro_dict
 
+
 def mk_df(micro_dict, control_dict, valtype, siglist):
     """
-    Makes a dataframe of mean normalized read counts for either bacterial species or metabolites sorted based off the healthy control subtype
+    Makes a dataframe of mean normalized read counts for either bacterial
+        species or metabolites sorted based off the healthy control subtype
 
         Parameters:
-            micro_dict(dict): mean normalized read counts (values) for bacterial species or metabolites (key)
-            control_dict(dict): mean normalized read counts (values) for bacterial species or metabolites (key) for healthy control subtype
+            micro_dict(dict): mean normalized read counts (values) for bacterial
+                species or metabolites (key)
+            control_dict(dict): mean normalized read counts (values) for
+                bacterial species or metabolites (key) for healthy control
+                subtype
             valtype(string): either "Bacteria" or "Metabolites"
-	    siglist(list): boolean values for each feature if significantly deviated from healthy
+	    siglist(list): boolean values for each feature if significantly deviated
+            from healthy
 	Returns:
-            micro_df(Pandas dataframe): sorted dataframe of normalized read counts for either bacterial species or metabolites
+            micro_df(Pandas dataframe): sorted dataframe of normalized read
+                counts for either bacterial species or metabolites
     """
     micro_dict = dict(sorted(micro_dict.items(), key=lambda kv: control_dict[kv[0]]))
     micro_type = list(micro_dict.keys())
@@ -221,78 +242,97 @@ def mk_df(micro_dict, control_dict, valtype, siglist):
 
     for species in micro_dict.keys():
         if siglist[species]:
-            micro_dict[species].append("Significant Change")
+            micro_dict[species].append('Significant Change')
         else:
-            micro_dict[species].append("No Significant Change")
+            micro_dict[species].append('No Significant Change')
 
     micro_df = pd.DataFrame(micro_dict).T.reset_index()
-    micro_df.rename(columns={'index': valtype, 0: 'Normalized Read Count', 1: 'Change from Healthy Control'}, inplace=True)
+    micro_df.rename(columns={'index': valtype, 0: 'Normalized Read Count', 1: \
+                    'Change from Healthy Control'}, inplace=True)
 
     return micro_df
 
+
 def mk_chart(HCDF, IHDDF, MMCDF, UMCCDF, valtype):
     """
-    Makes a chart of mean normalized read counts for either bacterial species or metabolites sorted based off the healthy control subtype for all four subgroups
+    Makes a chart of mean normalized read counts for either bacterial species or
+        metabolites sorted based off the healthy control subtype for all four
+        subgroups
 
         Parameters:
-            HCDF(Pandas dataframe): subset of dataframe information for healthy controls
-            IHDDF(Pandas dataframe): subset of dataframe information for IHD group
-            MMCDF(Pandas dataframe): subset of dataframe information for MMC group
+            HCDF(Pandas dataframe): subset of dataframe information for healthy
+            controls
+            IHDDF(Pandas dataframe): subset of dataframe information for IHD
+            group
+            MMCDF(Pandas dataframe): subset of dataframe information for MMC
+            group
             UMCCDF(Pandas dataframe): subset of dataframe information for UMCC
             valtype(string): either "Bacteria" or "Metabolites"
         Returns:
-            chart(Altair chart): chart of mean normalized read counts for either bacterial species or metabolites sorted based off the healthy control subtype for all four subgroups
+            chart(Altair chart): chart of mean normalized read counts for either
+                bacterial species or metabolites sorted based off the healthy
+                control subtype for all four subgroups
     """
     domain = ['No Significant Change', 'Significant Change']
     range_ = ['grey', 'red']
 
     chartHC = alt.Chart(HCDF, title='Healthy Controls').mark_bar(size=1).encode(
-    alt.X('Normalized Read Count'),
-    alt.Y(valtype, sort=None, axis=alt.Axis(labels=False, tickSize=0)),
-    color=alt.value('grey'),
-    tooltip=[valtype, 'Normalized Read Count']
-    ).properties(
-    width=300,
-    height=300
-    ).interactive()
+        alt.X('Normalized Read Count'),
+        alt.Y(valtype, sort=None, axis=alt.Axis(labels=False, tickSize=0)),
+        color=alt.value('grey'),
+        tooltip=[valtype, 'Normalized Read Count']
+        ).properties(
+        width=300,
+        height=300
+        ).interactive()
 
-    chartUMCC = alt.Chart(UMCCDF, title='Untreated Metabolically Matched Controls').mark_bar(size=1).encode(
-    alt.X('Normalized Read Count'),
-    alt.Y(valtype, sort=None, axis=alt.Axis(labels=False, tickSize=0)),
-    color=alt.Color('Change from Healthy Control', scale=alt.Scale(domain=domain, range=range_)),
-    tooltip=[valtype, 'Normalized Read Count']
-    ).properties(
-    width=300,
-    height=300
-    ).interactive()
+    chartUMCC = alt.Chart(UMCCDF, title='Untreated Metabolically Matched \
+                          Controls').mark_bar(size=1).encode(
+        alt.X('Normalized Read Count'),
+        alt.Y(valtype, sort=None, axis=alt.Axis(labels=False, tickSize=0)),
+        color=alt.Color('Change from Healthy Control', \
+                        scale=alt.Scale(domain=domain, range=range_)),
+        tooltip=[valtype, 'Normalized Read Count']
+        ).properties(
+        width=300,
+        height=300
+        ).interactive()
 
-    chartIHD = alt.Chart(IHDDF, title='Ischemic Heart Disease').mark_bar(size=1).encode(
-    alt.X('Normalized Read Count'),
-    alt.Y(valtype, sort=None, axis=alt.Axis(labels=False, tickSize=0)),
-    color=alt.Color('Change from Healthy Control', scale=alt.Scale(domain=domain, range=range_)),
-    tooltip=[valtype, 'Normalized Read Count']
-    ).properties(
-    width=300,
-    height=300
-    ).interactive()
+    chartIHD = alt.Chart(IHDDF, \
+                         title='Ischemic Heart Disease').mark_bar(size=1).encode(
+        alt.X('Normalized Read Count'),
+        alt.Y(valtype, sort=None, axis=alt.Axis(labels=False, tickSize=0)),
+        color=alt.Color('Change from Healthy Control', \
+                        scale=alt.Scale(domain=domain, range=range_)),
+        tooltip=[valtype, 'Normalized Read Count']
+        ).properties(
+        width=300,
+        height=300
+        ).interactive()
 
-    chartMMC = alt.Chart(MMCDF, title='Metabolically Matched Controls').mark_bar(size=1).encode(
-    alt.X('Normalized Read Count'),
-    alt.Y(valtype, sort=None, axis=alt.Axis(labels=False, tickSize=0)),
-    color=alt.Color('Change from Healthy Control', scale=alt.Scale(domain=domain, range=range_)),
-    tooltip=[valtype, 'Normalized Read Count']
-    ).properties(
-    width=300,
-    height=300
-    ).interactive()
+    chartMMC = alt.Chart(MMCDF, \
+                title='Metabolically Matched Controls').mark_bar(size=1).encode(
+        alt.X('Normalized Read Count'),
+        alt.Y(valtype, sort=None, axis=alt.Axis(labels=False, tickSize=0)),
+        color=alt.Color('Change from Healthy Control', \
+                        scale=alt.Scale(domain=domain, range=range_)),
+        tooltip=[valtype, 'Normalized Read Count']
+        ).properties(
+        width=300,
+        height=300
+        ).interactive()
 
-    chart = alt.vconcat(alt.hconcat(chartHC, chartIHD),alt.hconcat(chartMMC, chartUMCC))
+    chart = alt.vconcat(alt.hconcat(chartHC, chartIHD),alt.hconcat(chartMMC, \
+    chartUMCC))
 
     return chart
 
+
 def plot_micro_abundance(df, microtype, bacteria, metabolites):
     """
-    Wrapper function to generate a chart of mean normalized read counts for either bacterial species or metabolites sorted based off the healthy control subtype for all four subgroups
+    Wrapper function to generate a chart of mean normalized read counts for
+        either bacterial species or metabolites sorted based off the healthy
+        control subtype for all four subgroups
 
         Parameters:
             df(Pandas dataframe): entire dataframe
@@ -300,23 +340,28 @@ def plot_micro_abundance(df, microtype, bacteria, metabolites):
 	    bacteria(list): column names of all bacterial species
             metabolites(list): column names of all bacterial species
         Returns:
-            chart(Altair chart): chart of mean normalized read counts for either bacterial species or metabolites sorted based off the healthy control subtype for all four subgroups
+            chart(Altair chart): chart of mean normalized read counts for either
+            bacterial species or metabolites sorted based off the healthy
+            control subtype for all four subgroups.
     """
 
     if type(microtype) == str:
         pass
     else:
-        raise TypeError('microtype should be string type, either "Bacteria" or "Metabolites"')
+        raise TypeError('microtype should be string type, either "Bacteria" or \
+                        "Metabolites"')
 
     if type(bacteria) == list:
         pass
     else:
-        raise TypeError('bacteria should be list type containing all bacterial species columns')
+        raise TypeError('bacteria should be list type containing all bacterial \
+                        species columns')
 
     if type(metabolites) == list:
         pass
     else:
-        raise TypeError('metabolites should be list type containing all metabolite columns')
+        raise TypeError('metabolites should be list type containing all \
+                        metabolite columns')
 
     try:
         df[bacteria]
@@ -328,15 +373,15 @@ def plot_micro_abundance(df, microtype, bacteria, metabolites):
     except KeyError:
         print('metabolite columns do not exist in df')
 
-    if microtype == "Bacteria":
+    if microtype == 'Bacteria':
         mtype = bacteria
-    elif microtype == "Metabolite":
+    elif microtype == 'Metabolite':
         mtype = metabolites
 
-    df_HC275 = df[df["Status"] == "HC275"]
-    df_MMC269 = df[df["Status"] == "MMC269"]
-    df_IHD372 = df[df["Status"] == "IHD372"]
-    df_UMCC222 = df[df["Status"] == "UMCC222"]
+    df_HC275 = df[df['Status'] == 'HC275']
+    df_MMC269 = df[df['Status'] == 'MMC269']
+    df_IHD372 = df[df['Status'] == 'IHD372']
+    df_UMCC222 = df[df['Status'] == 'UMCC222']
 
     hcdict = mk_dict(mtype, df_HC275)
     hcdf = mk_control_df(hcdict, microtype)
@@ -357,6 +402,7 @@ def plot_micro_abundance(df, microtype, bacteria, metabolites):
 
     return chart
 
+
 def high_var(df):
     """
     Returns 500 most variable features in dataframe
@@ -364,12 +410,14 @@ def high_var(df):
         Parameters:
             df(Pandas dataframe): entire dataframe
         Returns:
-            hv_data(Pandas dataframe): only includes the 500 most variable features
+            hv_data(Pandas dataframe): only includes the 500 most variable \
+            features
     """
     high_var = df.var(axis=0).sort_values(ascending=False)[:500].index
     hv_data = df[high_var]
 
     return hv_data
+
 
 def plot_UMAP(df, columns, hivar, bacteria, metabolites):
     """
@@ -377,8 +425,10 @@ def plot_UMAP(df, columns, hivar, bacteria, metabolites):
 
         Parameters:
             df(Pandas dataframe): entire dataframe
-            columns(str): either "all" or "default", specifies if you want to include age and BMI or not
-            hivar(bool): True or False, specifies if you want to only include the high variable
+            columns(str): either "all" or "default", specifies if you want to \
+                include age and BMI or not
+            hivar(bool): True or False, specifies if you want to only include \
+                the high variable
             bacteria(list): column names of all bacterial species
             metabolites(list): column names of all bacterial species
         Returns:
@@ -388,22 +438,26 @@ def plot_UMAP(df, columns, hivar, bacteria, metabolites):
     if type(columns) == str:
         pass
     else:
-        raise TypeError('columns should be string type, either "all" or "default"')
+        raise TypeError('columns should be string type, either "all" or \
+            "default"')
 
     if type(hivar) == bool:
         pass
     else:
-        raise TypeError('hivar should be bool type dictating if you want to include only high variable features or not')
+        raise TypeError('hivar should be bool type dictating if you want to \
+                        include only high variable features or not')
 
     if type(bacteria) == list:
         pass
     else:
-        raise TypeError('bactera should be list type containing all bacterial species columns')
+        raise TypeError('bactera should be list type containing all bacterial \
+                        species columns')
 
     if type(metabolites) == list:
         pass
     else:
-        raise TypeError('metabolites should be list type containing all metabolite columns')
+        raise TypeError('metabolites should be list type containing all \
+                        metabolite columns')
 
     try:
         df[bacteria]
@@ -419,9 +473,9 @@ def plot_UMAP(df, columns, hivar, bacteria, metabolites):
     all_modeling_columns = bacteria + metabolites + ['Age', 'BMI']
 
     # specify the dataframe at either all_modeling_columns or default_modeling_columns, depending on inclusion of age and BMI
-    if columns == "all":
+    if columns == 'all':
         X = df[all_modeling_columns]
-    elif columns == "default":
+    elif columns == 'default':
         X = df[default_modeling_columns]
 
     if hivar:
@@ -436,7 +490,8 @@ def plot_UMAP(df, columns, hivar, bacteria, metabolites):
     reducer = UMAP()
     X = reducer.fit_transform(X)
 
-    principal_df = pd.DataFrame(data=X, columns=['component_one', 'component_two'])
+    principal_df = pd.DataFrame(data=X, columns=['component_one', \
+                                                'component_two'])
     final_df = pd.concat([principal_df, df[['Status']]], axis=1)
 
     chart = alt.Chart(final_df).mark_circle(size=10).encode(
@@ -447,6 +502,7 @@ def plot_UMAP(df, columns, hivar, bacteria, metabolites):
             ).interactive()
 
     return chart
+
 
 def cluster_age_bmi(df):
     """
@@ -468,12 +524,15 @@ def cluster_age_bmi(df):
 
 def feature_histograms(df, patient_data, features):
     """
-    Takes in training data and patient data and plots patient values against the training data with IHD for
+    Takes in training data and patient data and plots patient values against
+        the training data with IHD for
     certain list of predictive features
         Parameters:
             df(pandas df): training data with columns 'Status'
-            patient data(pandas series): where each row is a feature to plot against training data
-            features(list): list of features, should be columns in both patient data and df
+                patient data(pandas series): where each row is a feature to plot
+                against training data
+            features(list): list of features, should be columns in both patient
+                data and df
         Returns:
             fig(altair plot)
     """
@@ -513,7 +572,8 @@ def feature_histograms(df, patient_data, features):
         else:
             pass
         #making kdeplot
-        sns.kdeplot(df[feature], legend=False, fill=True, color='lightgray', ax=axs[i//5,counter])
+        sns.kdeplot(df[feature], legend=False, fill=True, color='lightgray', \
+                    ax=axs[i//5,counter])
         #adding vertical line for patient data
         axs[i//5,counter].axvline(patient_data.loc[feature], color='r')
         axs[i//5,counter].set_axis_on()

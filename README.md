@@ -10,19 +10,47 @@ Tool for Analysis of meta microbiomes and metabolomes.
 
 ![cox interaction model](https://github.com/Cardio-Meta-Microme/Cardio/tree/main/assets/cox_interaction_model.png)
 
-#### Preprocessing Scripts
- - 'trimdata' is the main function. Can be called using the 'trimdata.preprocess()' method.
-    - This takes a pandas dataframe (read internally) and removes columns that have fewer than a threshold value (default is columns with fewer than 20% prevalence).
-    - It transforms the raw microbiome counts into abundance.
-    - It then calculates the Shannon diversity on the microbiome
-    - The function returns the transformed microbiome abundance and metabolome data in a merged pandas dataframe.
-#### Data Visualization
+### Preprocessing Scripts
 
-There are a several useful visualizations in this component.
+Data preprocessing inputs:
 
-#### Modelling
+- log-transformed metabolites
+- microbiome read-normalized counts
+- patient health metrics (Age, BMI, sex, ID, health status)
 
-#### User Input Predictions
+
+Processing steps:
+
+- read CSV files from data folder
+- combine metadata, microbiome, and metabolome into one dataframe with patients as indices
+- drop patients missing over 1000 features from model
+- calculate each patient’s shannon diversity from microbe counts
+- centered log ratio (CLR) transform counts to relative abundance:
+    - we have to do this because compositional data is constrained by total 
+    - image address: Aitchison_triadlogratio.jpg
+    - formula:  $ clr(x) =  \ln\left[\frac{x_1}{g_m(x)}, \ldots, \frac{x_D}{g_m(x)}\right] $ where $ g_m(x) = (\prod\limits_{i=1}^{D} x_i)^{1/D} $ is the geometric mean of x 
+- filter sparse features separately for microbiome/metabolome
+    - sparse defined as having more than a certain number of NAs
+
+
+Before ML feature selection and training: 
+
+    impute NAs as lowest value in distribution -1
+
+### Data Visualization
+
+There are a several useful visualizations in this component. 
+
+Firstly we visualise the general distributions of our cohort using Altair, this includes a boxplot of the BMI, age,
+and shannon diversity of the sample.
+
+Next we plot the the relative abundance of bacterial species among all four of the cohorts. These display the bacterial species or metabolites that are significantly changed from the healthy cohort. This change is deemed significant by a [Benjamini-Hochberg](https://link.springer.com/referenceworkentry/10.1007/978-1-4419-9863-7_1215) test.
+
+Finally there are two Uniform Manifold Approximation Projections (UMAPs) which reduce the dimensionality
+
+### Modelling
+
+### User Input Predictions
 
 ### Patient status abbreviations:
 - IHD: ischemic heart disease patients

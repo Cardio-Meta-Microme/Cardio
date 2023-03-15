@@ -1,88 +1,88 @@
-import pandas as pd
-from sklearn.feature_selection import f_classif, GenericUnivariateSelect, RFECV
-from sklearn.model_selection import train_test_split, StratifiedKFold
-from sklearn import linear_model, tree
-from sklearn.metrics import accuracy_score, precision_score, recall_score, precision_recall_curve, confusion_matrix
-from sklearn.preprocessing import StandardScaler
-from sklearn.ensemble import RandomForestClassifier
 import pickle
-import numpy as np
+
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 import seaborn as sns
+from sklearn import linear_model, tree
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.feature_selection import GenericUnivariateSelect, RFECV, f_classif
+from sklearn.metrics import accuracy_score, confusion_matrix, precision_recall_curve, precision_score, recall_score
+from sklearn.model_selection import StratifiedKFold, train_test_split
+from sklearn.preprocessing import StandardScaler
+
 
 def load_data(path):
     """
-    Load data from a pickle file and clean it by dropping any patient with NaN values and the Gender column.
+    Load data from a pickle file and clean it by dropping any patient
+    with NaN values and the Gender column.
 
-    Parameters:
-    -----------
-    path : str
-        Path to the pickle file containing the data.
+        Parameters
+            path : str
+                Path to the pickle file containing the data.
 
-    Returns:
-    --------
-    df : pandas.DataFrame
-        Cleaned DataFrame of the data.
+        Returns
+            data_frame : pandas.DataFrame
+                Cleaned DataFrame of the data.
     """
 
-    df = pd.read_pickle(path).copy()
-    df = df.dropna(axis=0)
-    del df['Gender']
-    return df
+    data_frame = pd.read_pickle(path).copy()
+    data_frame = data_frame.dropna(axis=0)
+    del data_frame['Gender']
+    return data_frame
 
-def make_X_Y(df):
+def make_x_y(data_frame):
     """
     Create numpy arrays X and Y from a pandas DataFrame.
 
-    Parameters:
-    -----------
-    df : pandas.DataFrame
-        The input DataFrame.
+        Parameters
+            data_frame : pandas.DataFrame
+                The input DataFrame.
 
-    Returns:
-    --------
-    X : numpy.ndarray
-        The input DataFrame's columns from 2 (inclusive) to second-to-last (exclusive).
-    Y : numpy.ndarray
-        A binary array with 1 if the patient's Status is IHD372 or CIHD158, 0 otherwise.
-    X_cols : numpy.ndarray
-        The column labels of X.
+        Returns
+            X : numpy.ndarray
+                The input DataFrame's columns from 2 (inclusive)
+                to second-to-last (exclusive).
+            Y : numpy.ndarray
+                A binary array with 1 if the patient's Status is
+                IHD372 or CIHD158, 0 otherwise.
+            x_cols : numpy.ndarray
+                The column labels of X.
     """
 
-    df['IHD'] = ((df.Status == 'IHD372') ^ (df.Status == 'CIHD158')).astype(int)
-    X_cols = df.columns[2:-1]
-    Y_cols = ['IHD']
-    
-    X = df.loc[:, X_cols].values
-    Y = df.loc[:, Y_cols].values.flatten()
-    
-    return X, Y, X_cols
+    data_frame['IHD'] = ((data_frame.Status == 'IHD372') ^ (data_frame.Status == 'CIHD158')).astype(int)
+    x_cols = data_frame.columns[2:-1]
+    y_cols = ['IHD']
+
+    X = data_frame.loc[:, x_cols].values
+    Y = data_frame.loc[:, y_cols].values.flatten()
+
+    return X, Y, x_cols
 
 def compute_metrics(true, pred):
     """
-    Compute accuracy, precision and recall scores from true and predicted labels.
+    Compute accuracy, precision and recall scores from true and
+    predicted labels.
 
-    Parameters:
-    -----------
-    true : numpy.ndarray
-        The true labels.
-    pred : numpy.ndarray
-        The predicted labels.
+        Parameters
+            true : numpy.ndarray
+                The true labels.
+            pred : numpy.ndarray
+                The predicted labels.
 
-    Returns:
-    --------
-    accuracy : float
-        The accuracy score.
-    precision : float
-        The precision score.
-    recall : float
-        The recall score.
+        Returns
+            accuracy : float
+                The accuracy score.
+            precision : float
+                The precision score.
+            recall : float
+                The recall score.
     """
 
     accuracy, precision, recall = round(accuracy_score(true, pred), 2),\
                                   round(precision_score(true, pred), 2),\
                                   round(recall_score(true, pred), 2)
-            
+
     print('accuracy: {}, precision: {}, recall: {}'.format(accuracy, precision, recall))
     return accuracy, precision, recall
 
@@ -90,105 +90,101 @@ def univariate_ftest_feature_subset(X, Y):
     """
     Select a subset of features using a univariate F-test.
 
-    Parameters:
-    -----------
-    X : numpy.ndarray
-        The feature matrix.
-    Y : numpy.ndarray
-        The target vector.
+        Parameters
+            X : numpy.ndarray
+                The feature matrix.
+            Y : numpy.ndarray
+                The target vector.
 
-    Returns:
-    --------
-    keep_columns : numpy.ndarray
-        A boolean array with True values for columns with F-test p-values less than 0.025.
+        Returns
+            keep_columns : numpy.ndarray
+                A boolean array with True values for columns with
+                F-test p-values less than 0.025.
     """
 
     print('selecting subset of features using univariate f-test')
     selection = GenericUnivariateSelect(f_classif).fit(X, Y)
     keep_columns = selection.pvalues_ < 0.025
-    print('keeping {}/{} features with f-statistic p-values < 0.025'.format(sum(keep_columns), len(keep_columns)))
+    print('keeping {}/{} features with f-statistic p-values < 0.025'.format(
+        sum(keep_columns), len(keep_columns)))
     return keep_columns
     # X = X[:, keep_columns]
-    # X_columns = np.array(X_cols)[keep_columns]
+    # x_columns = np.array(x_cols)[keep_columns]
 
 def split_data(X, Y):
     """
     Split the data into training, validation and testing sets.
 
-    Parameters:
-    -----------
-    X : numpy.ndarray
-        The feature matrix.
-    Y : numpy.ndarray
-        The target vector.
+        Parameters
+            X : numpy.ndarray
+                The feature matrix.
+            Y : numpy.ndarray
+                The target vector.
 
-    Returns:
-    --------
-    X_train : numpy.ndarray
-        The training set features.
-    Y_train : numpy.ndarray
-        The training set targets.
-    X_valid : numpy.ndarray
-        The validation set features.
-    Y_valid : numpy.ndarray
-        The validation set targets.
-    X_train_valid : numpy.ndarray
-        The combined training and validation set features.
-    Y_train_valid : numpy.ndarray
-        The combined training and validation set targets.
-    X_test : numpy.ndarray
-        The test set features.
-    Y_test : numpy.ndarray
-        The test set targets.
+        Returns
+            x_train : numpy.ndarray
+                The training set features.
+            y_train : numpy.ndarray
+                The training set targets.
+            x_valid : numpy.ndarray
+                The validation set features.
+            y_valid : numpy.ndarray
+                The validation set targets.
+            x_train_valid : numpy.ndarray
+                The combined training and validation set features.
+            y_train_valid : numpy.ndarray
+                The combined training and validation set targets.
+            x_test : numpy.ndarray
+                The test set features.
+            y_test : numpy.ndarray
+                The test set targets.
     """
 
     print('splitting data into train, valid and test')
-    X_train_valid, X_test, Y_train_valid, Y_test = train_test_split(X, Y, test_size=0.05)
-    X_train, X_valid, Y_train, Y_valid = train_test_split(X_train_valid, Y_train_valid, test_size=0.1)
-    print('train size: {}, valid size: {}, test size: {}'.format(len(X_train), len(X_valid), len(X_test)))
+    x_train_valid, x_test, y_train_valid, y_test = train_test_split(X, Y, test_size=0.05)
+    x_train, x_valid, y_train, y_valid = train_test_split(x_train_valid, y_train_valid, test_size=0.1)
+    print('train size: {}, valid size: {}, test size: {}'.format(
+        len(x_train), len(x_valid), len(x_test)))
 
-    return X_train, Y_train, X_valid, Y_valid, X_train_valid, Y_train_valid, X_test, Y_test
+    return x_train, y_train, x_valid, y_valid, x_train_valid, y_train_valid, x_test, y_test
 
-def evaluate_model(model, X_eval, Y_eval):
-    """Evaluates the performance of a given model on a given evaluation set and prints the accuracy, precision and recall 
-    scores.
+def evaluate_model(model, x_eval, y_eval):
+    """Evaluates the performance of a given model on a given evaluation set and
+       prints the accuracy, precision and recall scores.
 
-    Parameters:
-    -----------
-    model : sklearn estimator
-        A trained estimator that will be used to make predictions on the evaluation set.
-    X_eval : numpy array
-        The feature matrix of the evaluation set.
-    Y_eval : numpy array
-        The target labels of the evaluation set.
+        Parameters
+            model : sklearn estimator
+                A trained estimator that will be used to make predictions on the evaluation set.
+            x_eval : numpy array
+                The feature matrix of the evaluation set.
+            y_eval : numpy array
+                The target labels of the evaluation set.
 
-    Returns:
-    --------
-    accuracy : float
-        The accuracy score.
-    precision : float
-        The precision score.
-    recall : float
-        The recall score.
+        Returns
+            accuracy : float
+                The accuracy score.
+            precision : float
+                The precision score.
+            recall : float
+                The recall score.
     """
 
-    Yhat_eval = model.predict(X_eval)
-    return compute_metrics(Y_eval, Yhat_eval)
+    Yhat_eval = model.predict(x_eval)
+    return compute_metrics(y_eval, Yhat_eval)
 
 def reverse_selection_feature_subset(X, Y):
-    """Selects a subset of features by recursively removing features using the RFECV scikitlearn class. 
+    """Selects a subset of features by recursively removing features
+       using the RFECV scikitlearn class. 
 
-    Parameters:
-    -----------
-    X : numpy array
-        A matrix of shape (n_samples, n_features) containing the input data.
-    Y : numpy array
-        A vector of shape (n_samples,) containing the target labels.
+        Parameters
+            X : numpy array
+                A matrix of shape (n_samples, n_features) containing the input data.
+            Y : numpy array
+                A vector of shape (n_samples,) containing the target labels.
 
-    Returns:
-    --------
-    keep_columns : numpy array
-        A boolean mask that indicates which columns of X were selected to be kept.
+        Returns
+            keep_columns : numpy array
+                A boolean mask that indicates which columns of X were selected to be kept.
     """
 
     scaler = StandardScaler()
@@ -199,34 +195,32 @@ def reverse_selection_feature_subset(X, Y):
     rfecv.fit(X_scaled, Y)
     return rfecv.support_
 
-def hyperparam_optimize_n_trees(X_train, Y_train, X_valid, Y_valid, n_trees):
+def hyperparam_optimize_n_trees(x_train, y_train, x_valid, y_valid, n_trees):
     """Optimizes the number of trees in a random forest classifier using the validation set. 
 
-    Parameters:
-    -----------
-    X_train : numpy array
-        The feature matrix of the training set.
-    Y_train : numpy array
-        The target labels of the training set.
-    X_valid : numpy array
-        The feature matrix of the validation set.
-    Y_valid : numpy array
-        The target labels of the validation set.
-    n_trees : list
-        A list of integers representing the number of trees to try.
+        Parameters
+            x_train : numpy array
+                The feature matrix of the training set.
+            y_train : numpy array
+                The target labels of the training set.
+            x_valid : numpy array
+                The feature matrix of the validation set.
+            y_valid : numpy array
+                The target labels of the validation set.
+            n_trees : list
+                A list of integers representing the number of trees to try.
 
-    Returns:
-    --------
-    best_n_trees : int
-        The number of trees that resulted in the highest accuracy on the validation set.
+        Returns
+            best_n_trees : int
+                The number of trees that resulted in the highest accuracy on the validation set.
     """
 
     result_estimator = []
     for n_estimator in n_trees:
-        clf = RandomForestClassifier(n_estimator).fit(X_train, Y_train)
-        Yhat_valid = clf.predict(X_valid)
+        clf = RandomForestClassifier(n_estimator).fit(x_train, y_train)
+        Yhat_valid = clf.predict(x_valid)
         print('Performance on validation set of Random Forest with {} trees'.format(n_estimator))
-        accuracy, _, _ = compute_metrics(Y_valid, Yhat_valid)
+        accuracy, _, _ = compute_metrics(y_valid, Yhat_valid)
         result_estimator.append((accuracy, n_estimator))
 
     print('N_Trees - Accuracy')
@@ -238,18 +232,18 @@ def hyperparam_optimize_n_trees(X_train, Y_train, X_valid, Y_valid, n_trees):
     return best[1]
 
 
-def plot_precision_recall_curve(Y_true, Y_proba, filepath):
+def plot_precision_recall_curve(y_true, y_proba, filepath):
     """Plots and saves to file a precision-recall curve.
 
-    Args:
-        Y_true (array-like): True binary labels.
-        Y_proba (array-like): Predicted probabilities.
-        filepath (str): File path to save the plot.
+        Parameters:
+            y_true (array-like): True binary labels.
+            y_proba (array-like): Predicted probabilities.
+            filepath (str): File path to save the plot.
 
-    Returns:
-        None
+        Returns:
+            None
     """
-    precision, recall, _ = precision_recall_curve(Y_true, Y_proba)
+    precision, recall, _ = precision_recall_curve(y_true, y_proba)
 
     sns.set(style="darkgrid")
     plt.style.use("dark_background")
@@ -265,21 +259,21 @@ def plot_precision_recall_curve(Y_true, Y_proba, filepath):
     plt.savefig(filepath)
 
 
-def plot_confusion_matrix(Y_true, Y_pred, filepath):
+def plot_confusion_matrix(y_true, y_pred, filepath):
     """Plots and saves to file a confusion matrix.
 
-    Args:
-        Y_true (array-like): True binary labels.
-        Y_pred (array-like): Predicted binary labels.
-        filepath (str): File path to save the plot.
+        Parameters:
+            y_true (array-like): True binary labels.
+            y_pred (array-like): Predicted binary labels.
+            filepath (str): File path to save the plot.
 
-    Returns:
-        None
+        Returns:
+            None
     """
-    labels = np.unique(Y_true)
-    cm = confusion_matrix(Y_true, Y_pred, labels=labels)
+    labels = np.unique(y_true)
+    cm = confusion_matrix(y_true, y_pred, labels=labels)
 
-    fig, ax = plt.subplots(figsize=(8, 6))
+    _, ax = plt.subplots(figsize=(8, 6))
     sns.set(style="darkgrid")
     plt.style.use("dark_background")
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False, ax=ax)
@@ -297,45 +291,41 @@ class RF_Classifier():
     def __init__(self, model_path, columns_path, fill_nas_path):
         """Initializes a RF_Classifier object.
 
-        Parameters:
-        -----------
-        model_path : str
-            The path to the saved model.
-        columns_path : str
-            The path to the saved list of column names.
+            Parameters:
+                model_path : str
+                    The path to the saved model.
+                columns_path : str
+                    The path to the saved list of column names.
 
-        Returns:
-        --------
-        None
+            Returns:
+                None
         """
         self.model = pickle.load(open(model_path, 'rb'))
         self.columns = pickle.load(open(columns_path, 'rb'))
         self.na_fill = pickle.load(open(fill_nas_path, 'rb'))
 
-    def classify(self, df):
+    def classify(self, data_frame):
         """Makes predictions on a given dataframe using the trained random forest model.
 
-        Parameters:
-        -----------
-        df : pandas dataframe
-            The dataframe to make predictions on.
+            Parameters:
+                data_frame : pandas dataframe
+                    The dataframe to make predictions on.
 
-        Returns:
-        --------
-        predictions : numpy array
-            The predicted target labels for the input dataframe.
+            Returns:
+                predictions : numpy array
+                    The predicted target labels for the input dataframe.
         """
-        X = df[self.columns].fillna(self.na_fill, axis=0).values
+        X = data_frame[self.columns].fillna(self.na_fill, axis=0).values
         predictions = self.model.predict(X)
         return predictions
-    
+
 
 if __name__ == '__main__':
     path = '../../data/cleaned_data.pkl'
     print('loading data')
-    df = load_data(path)
+    data_frame = load_data(path)
 
-    X, Y, X_columns = make_X_Y(df)
+    X, Y, x_columns = make_x_y(data_frame)
 
     print('target is presence of IHD, codes IHD372 and CIHD158')
     print('dataset contains {} patients with IHD, {} patients without, {} patients total'.format(
@@ -346,48 +336,48 @@ if __name__ == '__main__':
     keep_columns = univariate_ftest_feature_subset(X, Y)
 
     X = X[:, keep_columns]
-    X_columns = np.array(X_columns)[keep_columns]
+    x_columns = np.array(x_columns)[keep_columns]
 
-    X_train, Y_train, X_valid, Y_valid, X_train_valid, Y_train_valid, X_test, Y_test = split_data(X, Y)
+    x_train, y_train, x_valid, y_valid, x_train_valid, y_train_valid, x_test, y_test = split_data(X, Y)
 
-    basic = tree.DecisionTreeClassifier().fit(X_train, Y_train)
+    basic = tree.DecisionTreeClassifier().fit(x_train, y_train)
     print('Performance on training set of basic decision tree classifier')
-    evaluate_model(basic, X_train, Y_train)
+    evaluate_model(basic, x_train, y_train)
 
     print('Performance on validation set of basic decision tree classifier')
-    evaluate_model(basic, X_valid, Y_valid)
+    evaluate_model(basic, x_valid, y_valid)
 
     print('running RFECV with 5-fold CV, step size of 25, using a logistic regression model as base')
-    support = reverse_selection_feature_subset(X_train_valid, Y_train_valid)
+    support = reverse_selection_feature_subset(x_train_valid, y_train_valid)
 
     print('RFECV terminated finding {}/{} features useful'.format(sum(support), len(support)))
 
-    X_train_subset = X_train[:, support]
-    X_valid_subset = X_valid[:, support]
-    X_train_valid_subset = X_train_valid[:, support]
-    X_test_subset = X_test[:, support]
+    x_train_subset = x_train[:, support]
+    x_valid_subset = x_valid[:, support]
+    x_train_valid_subset = x_train_valid[:, support]
+    x_test_subset = x_test[:, support]
     X_subset = X[:, support]
-    X_columns = X_columns[support]
+    x_columns = x_columns[support]
 
     print('Now using random forest with a few numbers of estimators and using the features found by the RFECV')
     trees = [100, 250, 500, 1000, 5000, 10000]
 
-    best_n_trees = hyperparam_optimize_n_trees(X_train_subset, Y_train, X_valid_subset, Y_valid, trees)
+    best_n_trees = hyperparam_optimize_n_trees(x_train_subset, y_train, x_valid_subset, y_valid, trees)
 
     print('Retraining random forest on entire train-valid set and testing on test set')
 
-    clf = RandomForestClassifier(best_n_trees).fit(X_train_valid_subset, Y_train_valid)
+    clf = RandomForestClassifier(best_n_trees).fit(x_train_valid_subset, y_train_valid)
     print('Performance on test set:')
-    evaluate_model(clf, X_test_subset, Y_test)
+    evaluate_model(clf, x_test_subset, y_test)
 
     print('plotting test set performance')
-    probabilities = clf.predict_proba(X_test_subset)[:, 1]
-    predictions = clf.predict(X_test_subset)
-    plot_precision_recall_curve(Y_test, probabilities, 'precision_recall_curve.png')
-    plot_confusion_matrix(Y_test, predictions, 'confusion_matrix.png')
+    probabilities = clf.predict_proba(x_test_subset)[:, 1]
+    predictions = clf.predict(x_test_subset)
+    plot_precision_recall_curve(y_test, probabilities, 'precision_recall_curve.png')
+    plot_confusion_matrix(y_test, predictions, 'confusion_matrix.png')
 
 
     print('Retraining classifier on entire dataset and saving to pickle')
     clf = RandomForestClassifier(best_n_trees).fit(X_subset, Y)
     pickle.dump(clf, open('Trained_Production_RF_Classifier_230314.pkl', 'wb'))
-    pickle.dump(X_columns, open('Trained_Production_RF_Classifier_features_230314.pkl', 'wb'))
+    pickle.dump(x_columns, open('Trained_Production_RF_Classifier_features_230314.pkl', 'wb'))

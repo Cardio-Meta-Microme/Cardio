@@ -9,5 +9,32 @@ train size: 870, valid size: 97, test size: 51
 Performance on training set of basic decision tree classifier
 accuracy: 1.0, precision: 1.0, recall: 1.0
 Performance on validation set of basic decision tree classifier
-accuracy: 0.82, precision: 0.69, recall: 0.88
+accuracy: 0.88, precision: 0.84, recall: 0.84
 running RFECV with 5-fold CV, step size of 25, using a logistic regression model as base
+RFECV terminated finding 321/696 features useful
+Now using random forest with a few numbers of estimators and using the features found by the RFECV
+Performance on validation set of Random Forest with 100 trees
+accuracy: 0.88, precision: 0.88, recall: 0.78
+Performance on validation set of Random Forest with 250 trees
+accuracy: 0.91, precision: 0.94, recall: 0.81
+Performance on validation set of Random Forest with 500 trees
+accuracy: 0.89, precision: 0.91, recall: 0.78
+Performance on validation set of Random Forest with 1000 trees
+accuracy: 0.89, precision: 0.91, recall: 0.78
+Performance on validation set of Random Forest with 5000 trees
+accuracy: 0.88, precision: 0.88, recall: 0.78
+Performance on validation set of Random Forest with 10000 trees
+accuracy: 0.88, precision: 0.88, recall: 0.78
+N_Trees - Accuracy
+100 0.88
+250 0.91
+500 0.89
+1000 0.89
+5000 0.88
+10000 0.88
+Best n_trees: 250
+Retraining random forest on entire train-valid set and testing on test set
+Performance on test set:
+accuracy: 0.92, precision: 1.0, recall: 0.79
+plotting test set performance
+Retraining classifier on entire dataset and saving to pickle
