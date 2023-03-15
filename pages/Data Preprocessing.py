@@ -18,17 +18,15 @@ import os
 # Read in data from the Google Sheet.
 # Getting data from a google sheet: https://docs.streamlit.io/knowledge-base/tutorials/databases/public-gsheet
 @st.cache_data()
-def load_data(sheets_url, sheets = False):
+def load_data(path, sheets = False):
     """
     Takes a secret url, for a public google spreadsheet and formats it to download.
 
-    Parameter
-    ---------
-    sheets_url: String that specifies 
-
-    Returns
-    -------
-    A pandas DataFrame
+        Parameters:
+            path(string): A string that is either the google sheet URL, or the local path to the csv datafiles.
+            sheets(boolean): Flag that indicates whether you are pulling from google sheets or from local. Default False.
+        Returns:
+            data(pandas dataframe): 
     """
     # Check whether you download locally or doesnload from a google sheet
     wdir = os.getcwd()
