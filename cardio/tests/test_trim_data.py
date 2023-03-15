@@ -1,21 +1,27 @@
+import collections
+import math
+import os
+import pickle
+import sys
 import unittest
+import warnings
+
 import numpy as np
 import pandas as pd
+
 import scipy.stats
 import skbio.diversity
-import os
-import math
-import warnings
-warnings.simplefilter(action='ignore', category=RuntimeWarning)
-import collections
-collections.Callable = collections.abc.Callable
-import sys
-sys.path.append('../..')
 from cardio.preprocessing_scripts import trimdata
 
+collections.Callable = collections.abc.Callable
+sys.path.append('../..')
+warnings.simplefilter(action='ignore', category=RuntimeWarning)
 
-# Define a class in which the tests will run
+
 class TestPreprocessing(unittest.TestCase):
+    """
+    Test functions within preprocessing script trimdata.py
+    """
 
     def test_readcsvs(self):
         """
@@ -73,8 +79,10 @@ class TestPreprocessing(unittest.TestCase):
         Test that function count_to_abundance throws AssertionError if
         counts are not numerical dtype
         """
-        df = pd.DataFrame(data=[['a', 'b', 'c', 'd', 'e', 'f']], 
-                        columns=['MGS count', 'Gene count', 'Microbial load', 'ID', 'Status', 'count'])
+        df = pd.DataFrame(data=[['a', 'b', 'c', 'd', 'e', 'f']],
+                          columns=['MGS count', 'Gene count',
+                                   'Microbial load', 'ID', 'Status',
+                                   'count'])
         try:
             trimdata.count_to_abundance(df)
             self.assertTrue(False)
