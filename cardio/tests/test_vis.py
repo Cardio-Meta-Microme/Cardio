@@ -4,26 +4,11 @@ import sys
 import pandas as pd
 import seaborn as sns
 import numpy as np
-import matplotlib.pyplot as plt
 import altair as alt
-import statsmodels
 import unittest
 import math
 import collections
 
-import sklearn.model_selection
-import sklearn.preprocessing
-import sklearn.decomposition
-import sklearn.gaussian_process
-import sklearn.cluster
-import sklearn.inspection
-import sklearn.impute
-import sklearn.manifold
-
-from statsmodels.stats.weightstats import ztest
-from statsmodels.stats.multitest import multipletests
-from sklearn.manifold import TSNE
-from umap import UMAP
 from cardio.vis import make_vis
 from vis.make_vis import process_for_visualization, plot_general_dist_altair, \
 			feature_histograms
