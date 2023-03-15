@@ -375,51 +375,81 @@ def high_var(df):
 
     return hv_data
 
-def plot_UMAP(df, columns, hivar):
+def plot_UMAP(df, columns, hivar, bacteria, metabolites):
     """
     Creates a UMAP
-
+    
         Parameters:
             df(Pandas dataframe): entire dataframe
             columns(str): either "all" or "default", specifies if you want to include age and BMI or not
-            hivar(bool): True or False, specifies if you want to only include the high variable
+            hivar(bool): True or False, specifies if you want to only include the high variable 
+            bacteria(list): column names of all bacterial species
+            metabolites(list): column names of all bacterial species
         Returns:
             chart(Altair chart): clusters patients
-    """
-    bacteria = [column for column in df.columns if 'CAG' in column and 'unclassified' not in column]
-    metabolites = list(df.columns[339:1551])
+    """    
+    
+    if type(columns) == str:
+        pass
+    else:
+        raise TypeError('columns should be string type, either "all" or "default"')
+    
+    if type(hivar) == bool:
+        pass
+    else:
+        raise TypeError('hivar should be bool type dictating if you want to include only high variable features or not')
+        
+    if type(bacteria) == list:
+        pass
+    else:
+        raise TypeError('bactera should be list type containing all bacterial species columns')
+    
+    if type(metabolites) == list:
+        pass
+    else:
+        raise TypeError('metabolites should be list type containing all metabolite columns')
+    
+    try:
+        df[bacteria]
+    except KeyError:
+        print('bacteria columns do not exist in df')
+    
+    try:
+        df[metabolites]
+    except KeyError:
+        print('metabolite columns do not exist in df')
+    
     default_modeling_columns = bacteria + metabolites
     all_modeling_columns = bacteria + metabolites + ['Age', 'BMI']
-
+    
     # specify the dataframe at either all_modeling_columns or default_modeling_columns, depending on inclusion of age and BMI
     if columns == "all":
         X = df[all_modeling_columns]
     elif columns == "default":
         X = df[default_modeling_columns]
-
+    
     if hivar:
         X = high_var(X)
     else:
         pass
-
-    # replace NaN values with zero (do we want to impute with mean???)
+    
+    # replace NaN values with zero
     for col in X.columns:
         X[col] = np.where(X[col].isna(), 0, X[col])
-
-    # Dimensionality
+     
     reducer = UMAP()
     X = reducer.fit_transform(X)
-
+    
     principal_df = pd.DataFrame(data=X, columns=['component_one', 'component_two'])
     final_df = pd.concat([principal_df, df[['Status']]], axis=1)
-
+    
     chart = alt.Chart(final_df).mark_circle(size=10).encode(
                 alt.X('component_one'),
                 alt.Y('component_two'),
                 color='Status',
                 tooltip=['Status']
             ).interactive()
-
+    
     return chart
 
 def cluster_age_bmi(df):
