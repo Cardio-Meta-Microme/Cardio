@@ -40,15 +40,13 @@ plt.style.use("dark_background")
 def process_for_visualization(df):
     """
     Processed data for visualization by changing chort names to more memorable titles
-    Parameters
-    ---------
-    data, pandas df with columsn ID, Status, Age (years), BMI (kg/m²), Gender
-    Returns
-    -------
-    general_data, pandas df with columns mentioned above and new cols sample_group, and sample_group_breaks
+        Parameters:
+            data(pandas df): with columsn ID, Status, Age, BMI, Gender, shannon
+        Returns:
+            general_data(pandas df): with columns mentioned above and new cols
+            sample_group, and sample_group_breaks
     """
     #check that the columns we need are present
-    #['Status', 'BMI (kg/m²)', 'Age (years)', 'Gender']
     for col in ['Status', 'BMI', 'Age', 'Gender', 'shannon']:
         assert col in df.columns
 
@@ -68,7 +66,8 @@ def process_for_visualization(df):
     df['sample_group_breaks'] = df['Status'].apply(lambda x: sample_name_w_breaks[x])
     df['sample_group'] = df['Status'].apply(lambda x: sample_name[x])
 
-    general_data = df[['ID', 'Status', 'Age', 'BMI', 'Gender','shannon', 'sample_group', 'sample_group_breaks']]
+    general_data = df[['ID', 'Status', 'Age', 'BMI', 'Gender','shannon',
+                    'sample_group', 'sample_group_breaks']]
 
     return general_data
 
@@ -76,13 +75,11 @@ def process_for_visualization(df):
 def plot_general_dist_altair(df):
     """
     Make boxplots showing general characteristics of each cohort we are trying to classify
-    Parameters
-    ----------
-    df, pandas df with cohort info with colnames sample_group, sample_group_breaks, BMI (kg/m²),
-    Age (years), Gender
-    Returns
-    -------
-    fig, altair figure object
+        Parameters:
+            df(pandas df): with cohort info with colnames sample_group, sample_group_breaks, BMI (kg/m²),
+                            Age (years), Gender
+        Returns:
+            fig(altair figure object): with boxplots for Age, BMI, Gender and Shannon Index
     """
     assert isinstance(df, pd.core.frame.DataFrame)
 
@@ -423,14 +420,12 @@ def feature_histograms(df, patient_data, features):
     """
     Takes in training data and patient data and plots patient values against the training data with IHD for
     certain list of predictive features
-    Parameters
-    ----------
-    df, pandas df with the training data with columns 'Status'
-    patient data, pandas series where each row is a feature to plot against training data
-    features, list of features, should be columns in both patient data and df
-    Returns
-    ------
-    fig, altair plot
+        Parameters:
+            df(pandas df): training data with columns 'Status'
+            patient data(pandas series): where each row is a feature to plot against training data
+            features(list): list of features, should be columns in both patient data and df
+        Returns:
+            fig(altair plot)
     """
     assert 'Status' in df.columns
 
