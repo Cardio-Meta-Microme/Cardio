@@ -452,7 +452,7 @@ def feature_histograms(df, patient_data, features):
 
     #creating said grid
     fig, axs = plt.subplots(int(rows), 5)
-    fig.set_size_inches(20, 10)
+    fig.set_size_inches(40, 20)
 
     #so only the axis with plots show
     for ax in axs:
