@@ -357,3 +357,12 @@ class TestPlotUMAP(unittest.TestCase):
         
 suite = unittest.TestLoader().loadTestsFromTestCase(TestPlotUMAP)
 _ = unittest.TextTestRunner().run(suite)
+
+class TestClusterAgeBMI(unittest.TestCase):
+        
+    def test_output_type(self):
+        df, microcols, metabcols = trimdata.preprocess()
+        self.assertTrue(type(make_vis.cluster_age_bmi(df)) == alt.vegalite.v4.api.Chart, "Returned type is not an altair plot")
+    
+suite = unittest.TestLoader().loadTestsFromTestCase(TestClusterAgeBMI)
+_ = unittest.TextTestRunner().run(suite)
