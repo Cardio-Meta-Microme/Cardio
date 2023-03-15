@@ -91,6 +91,17 @@ def hyperparam_optimize_n_trees(X_train, Y_train, X_valid, Y_valid, n_trees):
     return best[1]
 
 
+class RF_Classifier():
+    def __init__(self, model_path, columns_path):
+        self.model = pickle.load(open(model_path, 'rb'))
+        self.columns = pickle.load(open(columns_path, 'rb'))
+
+    def classify(self, df):
+        X = df.loc[:, self.columns].values
+        predictions = self.model.predict(X)
+        return predictions
+    
+
 if __name__ == '__main__':
     path = '../data/cleaned_data.pkl'
     print('loading data')
