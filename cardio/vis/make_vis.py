@@ -111,7 +111,7 @@ def plot_general_dist_altair(df):
     )
 
     #concatenating the charts using altair
-    chart1_2 = alt.hconcat(chart1, chart2, chart4)
+    boxplots = alt.hconcat(chart1, chart2, chart4)
 
     #creating a df that groups by disease classification and counts the number of Males and Females
     gender_counts = df.groupby(['sample_group_breaks','Gender']).count()
@@ -120,18 +120,14 @@ def plot_general_dist_altair(df):
     gender_counts['sample_group_breaks'] = gender_counts.sample_group_breaks.str.split('\n')
 
     #using altair to make a bar chart by gender for each cohort
-    chart3 = alt.Chart(gender_counts).mark_bar().encode(
+    gender_dis = alt.Chart(gender_counts).mark_bar().encode(
         alt.X('Gender:N', title=''),
         alt.Y('ID:Q', title='Patient Count'),
         alt.Color('Gender:N'),
         alt.Column('sample_group_breaks:N', header=alt.Header(labelAlign='center'), title='')
-    ).properties(
-        width=50)
+    )
 
-    #horizontally concatenate each figure keeping the legends / colors independent
-    fig = alt.vconcat(chart1_2, chart3).resolve_scale(color='independent')
-
-    return fig
+    return boxplots, gender_dis
 
 
 def ttest(hc, subgroup, microtype):
@@ -311,27 +307,27 @@ def plot_micro_abundance(df, microtype, bacteria, metabolites):
         pass
     else:
         raise TypeError('microtype should be string type, either "Bacteria" or "Metabolites"')
-    
+
     if type(bacteria) == list:
         pass
     else:
         raise TypeError('bacteria should be list type containing all bacterial species columns')
-        
+
     if type(metabolites) == list:
         pass
     else:
         raise TypeError('metabolites should be list type containing all metabolite columns')
-    
+
     try:
         df[bacteria]
     except KeyError:
         print('bacteria columns do not exist in df')
-    
+
     try:
         df[metabolites]
     except KeyError:
         print('metabolite columns do not exist in df')
-        
+
     if microtype == "Bacteria":
         mtype = bacteria
     elif microtype == "Metabolite":
@@ -378,78 +374,78 @@ def high_var(df):
 def plot_UMAP(df, columns, hivar, bacteria, metabolites):
     """
     Creates a UMAP
-    
+
         Parameters:
             df(Pandas dataframe): entire dataframe
             columns(str): either "all" or "default", specifies if you want to include age and BMI or not
-            hivar(bool): True or False, specifies if you want to only include the high variable 
+            hivar(bool): True or False, specifies if you want to only include the high variable
             bacteria(list): column names of all bacterial species
             metabolites(list): column names of all bacterial species
         Returns:
             chart(Altair chart): clusters patients
-    """    
-    
+    """
+
     if type(columns) == str:
         pass
     else:
         raise TypeError('columns should be string type, either "all" or "default"')
-    
+
     if type(hivar) == bool:
         pass
     else:
         raise TypeError('hivar should be bool type dictating if you want to include only high variable features or not')
-        
+
     if type(bacteria) == list:
         pass
     else:
         raise TypeError('bactera should be list type containing all bacterial species columns')
-    
+
     if type(metabolites) == list:
         pass
     else:
         raise TypeError('metabolites should be list type containing all metabolite columns')
-    
+
     try:
         df[bacteria]
     except KeyError:
         print('bacteria columns do not exist in df')
-    
+
     try:
         df[metabolites]
     except KeyError:
         print('metabolite columns do not exist in df')
-    
+
     default_modeling_columns = bacteria + metabolites
     all_modeling_columns = bacteria + metabolites + ['Age', 'BMI']
-    
+
     # specify the dataframe at either all_modeling_columns or default_modeling_columns, depending on inclusion of age and BMI
     if columns == "all":
         X = df[all_modeling_columns]
     elif columns == "default":
         X = df[default_modeling_columns]
-    
+
     if hivar:
         X = high_var(X)
     else:
         pass
-    
+
     # replace NaN values with zero
     for col in X.columns:
         X[col] = np.where(X[col].isna(), 0, X[col])
-     
+
     reducer = UMAP()
     X = reducer.fit_transform(X)
-    
+
     principal_df = pd.DataFrame(data=X, columns=['component_one', 'component_two'])
     final_df = pd.concat([principal_df, df[['Status']]], axis=1)
-    
+
     chart = alt.Chart(final_df).mark_circle(size=10).encode(
                 alt.X('component_one'),
                 alt.Y('component_two'),
                 color='Status',
                 tooltip=['Status']
             ).interactive()
-    
+
     return chart
 
 def cluster_age_bmi(df):
