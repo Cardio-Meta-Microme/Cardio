@@ -125,8 +125,7 @@ def plot_general_dist_altair(df):
         alt.Y('ID:Q', title='Patient Count'),
         alt.Color('Gender:N'),
         alt.Column('sample_group_breaks:N', header=alt.Header(labelAlign='center'), title='')
-    ).properties(
-        width=50)
+    )
 
     return boxplots, gender_dis
 
