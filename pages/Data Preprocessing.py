@@ -87,17 +87,23 @@ Disease (IHD).
 Firstly, microbiome data typically come processed as raw read counts (actually there are some steps before this but our dataset already had those 
 transformations done).
 
-
-
-## Preprocessing Steps
-
-
-
 """)
 
 with st.expander(label = "See Preprocessing", expanded=False):
     st.write("## Raw Microbiome")
     st.dataframe(metacard_microbiome.head(50))
+    st.markdown("""
+    ## Preprocessing Steps
+    - combine metadata, microbiome, and metabolome into one dataframe with patients as indices
+    - drop patients missing over 1000 features from model
+    - calculate each patient’s shannon diversity from microbe counts
+    - centered log ratio (CLR) transform counts to relative abundance:
+        - we have to do this because compositional data is constrained by total 
+        - image address: Aitchison_triadlogratio.jpg
+        - formula:  $ clr(x) =  \ln\left[\\frac{x_1}{g_m(x)},\ldots,\\frac{x_D}{g_m(x)}\\right] $ where $ g_m(x) = (\prod\limits_{i=1}^{D} x_i)^{1/D} $ is the geometric mean of x 
+    - filter sparse features separately for microbiome/metabolome
+        - sparse defined as having more than a certain number of NAs
+    """)
     st.write("## Processed Microbiome")
     st.dataframe(abundance_new[0])
     columns_original = len(metacard_microbiome.columns.values) + len(metacard_serum.columns.values)

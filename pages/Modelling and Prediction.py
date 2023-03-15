@@ -17,12 +17,10 @@ from sklearn.ensemble import RandomForestClassifier
 
 st.write("## The Final Model")
 
-if st.button(label="download data"):
-    st.session_state['metamicro_filt'][0].iloc[0:5].to_csv("example_data.csv")
-
 wdir = os.getcwd()
 
 st.write(f"Retrieving from directory: {wdir}/cardio/")
+
 
 #model = pd.read_pickle(wdir + "/cardio/Trained_Production_RF_Classifier_230314.pkl")
 model_path = wdir + "/cardio/model/Trained_Production_RF_Classifier_230314.pkl"
@@ -35,8 +33,20 @@ model_features = pd.read_pickle(wdir + "/cardio/model/Trained_Production_RF_Clas
 #st.write(type(model_features[:10].tolist()))
 st.write(model)
 
-if st.button(label= "download some sample"):
-    st.session_state['metamicro_filt'][0].sample(1).to_csv("example_data3.csv")
+st.markdown("""
+Our best model was a random forest classifier that was trained on patient data from the metaCARDIS sample set. 
+
+Final test set performance:
+- Accuracy: 0.92
+- Precision: 1.0
+- Recall 0.79
+
+Before ML feature selection and training: 
+
+- impute NAs as lowest value in distribution -1
+
+
+""")
 
 st.markdown("## Patient Input")
 
