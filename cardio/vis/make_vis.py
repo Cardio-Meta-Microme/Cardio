@@ -40,15 +40,13 @@ plt.style.use("dark_background")
 def process_for_visualization(df):
     """
     Processed data for visualization by changing chort names to more memorable titles
-    Parameters
-    ---------
-    data, pandas df with columsn ID, Status, Age (years), BMI (kg/m²), Gender
-    Returns
-    -------
-    general_data, pandas df with columns mentioned above and new cols sample_group, and sample_group_breaks
+        Parameters:
+            data(pandas df): with columsn ID, Status, Age, BMI, Gender, shannon
+        Returns:
+            general_data(pandas df): with columns mentioned above and new cols
+            sample_group, and sample_group_breaks
     """
     #check that the columns we need are present
-    #['Status', 'BMI (kg/m²)', 'Age (years)', 'Gender']
     for col in ['Status', 'BMI', 'Age', 'Gender', 'shannon']:
         assert col in df.columns
 
@@ -68,7 +66,8 @@ def process_for_visualization(df):
     df['sample_group_breaks'] = df['Status'].apply(lambda x: sample_name_w_breaks[x])
     df['sample_group'] = df['Status'].apply(lambda x: sample_name[x])
 
-    general_data = df[['ID', 'Status', 'Age', 'BMI', 'Gender','shannon', 'sample_group', 'sample_group_breaks']]
+    general_data = df[['ID', 'Status', 'Age', 'BMI', 'Gender','shannon',
+                    'sample_group', 'sample_group_breaks']]
 
     return general_data
 
@@ -76,14 +75,13 @@ def process_for_visualization(df):
 def plot_general_dist_altair(df):
     """
     Make boxplots showing general characteristics of each cohort we are trying to classify
-    Parameters
-    ----------
-    df, pandas df with cohort info with colnames sample_group, sample_group_breaks, BMI (kg/m²),
-    Age (years), Gender
-    Returns
-    -------
-    fig, altair figure object
+        Parameters:
+            df(pandas df): with cohort info with colnames sample_group, sample_group_breaks, BMI (kg/m²),
+                            Age (years), Gender
+        Returns:
+            fig(altair figure object): with boxplots for Age, BMI, Gender and Shannon Index
     """
+    assert isinstance(df, pd.core.frame.DataFrame)
 
     #processing data for visualization
     df = process_for_visualization(df)
@@ -131,9 +129,10 @@ def plot_general_dist_altair(df):
         width=50)
 
     #horizontally concatenate each figure keeping the legends / colors independent
-    fig = alt.hconcat(chart1_2, chart3).resolve_scale(color='independent')
+    fig = alt.vconcat(chart1_2, chart3).resolve_scale(color='independent')
 
     return fig
+
 
 def ttest(hc, subgroup, microtype):
     """
@@ -295,20 +294,44 @@ def mk_chart(HCDF, IHDDF, MMCDF, UMCCDF, valtype):
 
     return chart
 
-def plot_micro_abundance(df, microtype):
+def plot_micro_abundance(df, microtype, bacteria, metabolites):
     """
     Wrapper function to generate a chart of mean normalized read counts for either bacterial species or metabolites sorted based off the healthy control subtype for all four subgroups
 
         Parameters:
             df(Pandas dataframe): entire dataframe
             microtype(string): either "Bacteria" or "Metabolites"
+	    bacteria(list): column names of all bacterial species
+            metabolites(list): column names of all bacterial species
         Returns:
             chart(Altair chart): chart of mean normalized read counts for either bacterial species or metabolites sorted based off the healthy control subtype for all four subgroups
     """
 
-    bacteria = [column for column in df.columns if 'CAG' in column and 'unclassified' not in column]
-    metabolites = list(df.columns[339:1551])
-
+    if type(microtype) == str:
+        pass
+    else:
+        raise TypeError('microtype should be string type, either "Bacteria" or "Metabolites"')
+    
+    if type(bacteria) == list:
+        pass
+    else:
+        raise TypeError('bacteria should be list type containing all bacterial species columns')
+        
+    if type(metabolites) == list:
+        pass
+    else:
+        raise TypeError('metabolites should be list type containing all metabolite columns')
+    
+    try:
+        df[bacteria]
+    except KeyError:
+        print('bacteria columns do not exist in df')
+    
+    try:
+        df[metabolites]
+    except KeyError:
+        print('metabolite columns do not exist in df')
+        
     if microtype == "Bacteria":
         mtype = bacteria
     elif microtype == "Metabolite":
@@ -416,19 +439,23 @@ def cluster_age_bmi(df):
             ).interactive()
     return chart
 
+
 def feature_histograms(df, patient_data, features):
     """
     Takes in training data and patient data and plots patient values against the training data with IHD for
     certain list of predictive features
-    Parameters
-    ----------
-    df, pandas df with the training data with columns 'Status'
-    patient data, pandas series where each row is a feature to plot against training data
-    features, list of features, should be columns in both patient data and df
-    Returns
-    ------
-    fig, altair plot
+        Parameters:
+            df(pandas df): training data with columns 'Status'
+            patient data(pandas series): where each row is a feature to plot against training data
+            features(list): list of features, should be columns in both patient data and df
+        Returns:
+            fig(altair plot)
     """
+    assert 'Status' in df.columns
+
+    for feature in features:
+        assert feature in df.columns
+        assert feature in patient_data
 
     #filtering data for IHD only
     df = df[df['Status'] == 'IHD372']
@@ -444,7 +471,7 @@ def feature_histograms(df, patient_data, features):
 
     #creating said grid
     fig, axs = plt.subplots(int(rows), 5)
-    fig.set_size_inches(20, 10)
+    fig.set_size_inches(40, 20)
 
     #so only the axis with plots show
     for ax in axs:
