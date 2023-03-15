@@ -26,9 +26,9 @@
 
 
 # Database and Data Interface
-### 1. Raw Data Upload
-- What it does: Exposes an API that allows for uploading of raw data
-- Input: CSV files of datasets
+### 1. Accesses Training Data
+- What it does: Reads in data from https://www.nature.com/articles/s41591-022-01688-4#data-availability
+- Input: CSV files of datasets from papter
 - Output: Dataset saved to database
 - Doesn’t directly interact with other components
 
@@ -36,15 +36,14 @@
 - Check that the input data are valid for the visualizations.
 - Inputs: One or more csv files containing patient cohort data
 - Outputs: Tells the user if the input is valid or not
-- Gives suggestions as to why the input doesn’t work (have some expected format etc)
 - Feeds into the data processing module.
 - Interacts with the front end, receives data from the user. Also passes data to the back end. 
 
 # Documentation
 - README.md file for an overview of the function of the project and tool.
-- Input: Doc strings and descriptive, well styled code
-- Output: Readable project
-- Interacts with the backend, front end, and database and data interface
+- components.md file outlines the components of the package
+- use_cases.md file that contains relevent use cases
+- index.html is the html documentation
 
 ![image](https://user-images.githubusercontent.com/121842230/225170316-110b3766-a636-45bd-a05c-eb9bde0e33f0.png)
 
