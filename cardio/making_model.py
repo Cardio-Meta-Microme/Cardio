@@ -1,17 +1,18 @@
 import pandas as pd
 from sklearn.feature_selection import f_classif, GenericUnivariateSelect, RFECV
 from sklearn.model_selection import train_test_split, StratifiedKFold
-from sklearn import tree
-from sklearn import linear_model
-from sklearn.metrics import accuracy_score, precision_score, recall_score
+from sklearn import linear_model, tree
+from sklearn.metrics import accuracy_score, precision_score, recall_score, precision_recall_curve, confusion_matrix
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 import pickle
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 def load_data(path):
     """
-    Load data from a pickle file and clean it by dropping any rows with NaN values and the Gender column.
+    Load data from a pickle file and clean it by dropping any patient with NaN values and the Gender column.
 
     Parameters:
     -----------
@@ -43,7 +44,7 @@ def make_X_Y(df):
     X : numpy.ndarray
         The input DataFrame's columns from 2 (inclusive) to second-to-last (exclusive).
     Y : numpy.ndarray
-        A binary array with 1 if the row's Status is IHD372 or CIHD158, 0 otherwise.
+        A binary array with 1 if the patient's Status is IHD372 or CIHD158, 0 otherwise.
     X_cols : numpy.ndarray
         The column labels of X.
     """
@@ -87,7 +88,7 @@ def compute_metrics(true, pred):
 
 def univariate_ftest_feature_subset(X, Y):
     """
-    Select a subset of features from X using an univariate F-test.
+    Select a subset of features using a univariate F-test.
 
     Parameters:
     -----------
@@ -148,50 +149,6 @@ def split_data(X, Y):
 
     return X_train, Y_train, X_valid, Y_valid, X_train_valid, Y_train_valid, X_test, Y_test
 
-def decision_tree(X, Y):
-    """
-    Train a decision tree classifier on X and Y.
-
-    Parameters:
-    -----------
-    X : numpy.ndarray
-        The feature matrix.
-    Y : numpy.ndarray
-        The target vector.
-
-    Returns:
-    --------
-    basic : sklearn.tree.DecisionTreeClassifier
-        A trained decision tree classifier.
-    """
-
-    basic = tree.DecisionTreeClassifier()
-    basic.fit(X, Y)
-    return basic
-
-def RF(X, Y, n_trees):
-    """
-    Train a random forest classifier on X and Y.
-
-    Parameters:
-    -----------
-    X : numpy.ndarray
-        The feature matrix.
-    Y : numpy.ndarray
-        The target vector.
-    n_trees : int
-        The number of decision trees to use in the random forest.
-
-    Returns:
-    --------
-    clf : sklearn.ensemble.RandomForestClassifier
-        A trained random forest classifier.
-    """
-
-    clf = RandomForestClassifier(n_estimators=n_trees)
-    clf.fit(X, Y)
-    return clf
-
 def evaluate_model(model, X_eval, Y_eval):
     """Evaluates the performance of a given model on a given evaluation set and prints the accuracy, precision and recall 
     scores.
@@ -207,15 +164,19 @@ def evaluate_model(model, X_eval, Y_eval):
 
     Returns:
     --------
-    None
+    accuracy : float
+        The accuracy score.
+    precision : float
+        The precision score.
+    recall : float
+        The recall score.
     """
 
     Yhat_eval = model.predict(X_eval)
-    compute_metrics(Y_eval, Yhat_eval)
+    return compute_metrics(Y_eval, Yhat_eval)
 
 def reverse_selection_feature_subset(X, Y):
-    """Selects a subset of features by recursively removing features with the least absolute correlation with the target
-    variable. 
+    """Selects a subset of features by recursively removing features using the RFECV scikitlearn class. 
 
     Parameters:
     -----------
@@ -262,7 +223,7 @@ def hyperparam_optimize_n_trees(X_train, Y_train, X_valid, Y_valid, n_trees):
 
     result_estimator = []
     for n_estimator in n_trees:
-        clf = RF(X_train, Y_train, n_estimator)
+        clf = RandomForestClassifier(n_estimator).fit(X_train, Y_train)
         Yhat_valid = clf.predict(X_valid)
         print('Performance on validation set of Random Forest with {} trees'.format(n_estimator))
         accuracy, _, _ = compute_metrics(Y_valid, Yhat_valid)
@@ -275,6 +236,61 @@ def hyperparam_optimize_n_trees(X_train, Y_train, X_valid, Y_valid, n_trees):
     best = max(result_estimator)
     print('Best n_trees: {}'.format(best[1]))
     return best[1]
+
+
+def plot_precision_recall_curve(Y_true, Y_proba, filepath):
+    """Plots and saves to file a precision-recall curve.
+
+    Args:
+        Y_true (array-like): True binary labels.
+        Y_proba (array-like): Predicted probabilities.
+        filepath (str): File path to save the plot.
+
+    Returns:
+        None
+    """
+    precision, recall, _ = precision_recall_curve(Y_true, Y_proba)
+
+    sns.set(style="darkgrid")
+    plt.style.use("dark_background")
+    plt.figure(figsize=(8, 6))
+    plt.plot(recall, precision, label='Precision-Recall Curve')
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
+    plt.ylim([0.0, 1.05])
+    plt.xlim([0.0, 1.0])
+    plt.title('Precision-Recall Curve')
+    plt.legend(loc="lower left")
+
+    plt.savefig(filepath)
+
+
+def plot_confusion_matrix(Y_true, Y_pred, filepath):
+    """Plots and saves to file a confusion matrix.
+
+    Args:
+        Y_true (array-like): True binary labels.
+        Y_pred (array-like): Predicted binary labels.
+        filepath (str): File path to save the plot.
+
+    Returns:
+        None
+    """
+    labels = np.unique(Y_true)
+    cm = confusion_matrix(Y_true, Y_pred, labels=labels)
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+    sns.set(style="darkgrid")
+    plt.style.use("dark_background")
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False, ax=ax)
+    ax.set_xlabel('Predicted labels')
+    ax.set_ylabel('True labels')
+    ax.set_title('Confusion Matrix')
+    ax.xaxis.set_ticklabels(labels)
+    ax.yaxis.set_ticklabels(labels)
+
+    plt.savefig(filepath)
+
 
 
 class RF_Classifier():
@@ -333,7 +349,7 @@ if __name__ == '__main__':
 
     X_train, Y_train, X_valid, Y_valid, X_train_valid, Y_train_valid, X_test, Y_test = split_data(X, Y)
 
-    basic = decision_tree(X_train, Y_train)
+    basic = tree.DecisionTreeClassifier().fit(X_train, Y_train)
     print('Performance on training set of basic decision tree classifier')
     evaluate_model(basic, X_train, Y_train)
 
@@ -359,12 +375,18 @@ if __name__ == '__main__':
 
     print('Retraining random forest on entire train-valid set and testing on test set')
 
-    clf = RF(X_train_valid_subset, Y_train_valid, best_n_trees)
+    clf = RandomForestClassifier(best_n_trees).fit(X_train_valid_subset, Y_train_valid)
     print('Performance on test set:')
     evaluate_model(clf, X_test_subset, Y_test)
 
-    print('Retraining classifier on entire dataset and saving to pickle')
-    clf = RF(X_subset, Y, best_n_trees)
-    pickle.dump(clf, open('Trained_Production_RF_Classifier_230314.pkl', 'wb'))
+    print('plotting test set performance')
+    probabilities = clf.predict_proba(X_test_subset)[:, 1]
+    predictions = clf.predict(X_test_subset)
+    plot_precision_recall_curve(Y_test, probabilities, 'precision_recall_curve.png')
+    plot_confusion_matrix(Y_test, predictions, 'confusion_matrix.png')
 
+
+    print('Retraining classifier on entire dataset and saving to pickle')
+    clf = RandomForestClassifier(best_n_trees).fit(X_subset, Y)
+    pickle.dump(clf, open('Trained_Production_RF_Classifier_230314.pkl', 'wb'))
     pickle.dump(X_columns, open('Trained_Production_RF_Classifier_features_230314.pkl', 'wb'))
