@@ -32,13 +32,13 @@ def load_data(path, sheets = False):
     wdir = os.getcwd()
     if sheets:
         # Test that the URLs are correct
-        assert "/edit#gid=" in sheets_url, "URL specified is not a public google sheet. Please check permissions."
+        assert "/edit#gid=" in path, "URL specified is not a public google sheet. Please check permissions."
 
-        csv_url = sheets_url.replace("/edit#gid=", "/export?format=csv&gid=")
+        csv_url = path.replace("/edit#gid=", "/export?format=csv&gid=")
         # st.write(f"attempting to access {csv_url}")
         data = pd.read_csv(csv_url)
     else:
-        data = pd.read_excel(wdir + "/data" + sheets_url)
+        data = pd.read_excel(wdir + "/data" + path)
     return data
 
 metacard_drug = load_data("/metacard_drug.xlsx")
@@ -54,16 +54,14 @@ metacard_urine = load_data("/metacard_urine.xlsx")
 # ONLY USE IF YOU DON'T HAVE THE LOCAL FILES.
 if st.button(label="Fetch Data (DO NOT PRESS ON UNIVERSITY WIFI)"):
     with st.spinner('Wait for it...'):
-        metacard_drug = load_data(sheets_url = st.secrets["metacard_drug_public_gsheets_url"], sheets=True)
-        metacard_kegg = load_data(sheets_url = st.secrets["metacard_kegg_public_gsheets_url"], sheets=True)
-        metacard_metadata = load_data(sheets_url = st.secrets["metacard_metadata_public_gsheets_url"], sheets=True)
-        metacard_microbiome = load_data(sheets_url = st.secrets["metacard_microbiome_public_gsheets_url"], sheets=True)
-        metacard_serum = load_data(sheets_url = st.secrets["metacard_serum_public_gsheets_url"], sheets=True)
-        metacard_taxonomy = load_data(sheets_url = st.secrets["metacard_taxonomy_public_gsheets_url"], sheets=True)
-        metacard_urine = load_data(sheets_url = st.secrets["metacard_urine_public_gsheets_url"], sheets=True)
+        metacard_drug = load_data(path = st.secrets["metacard_drug_public_gsheets_url"], sheets=True)
+        metacard_kegg = load_data(path = st.secrets["metacard_kegg_public_gsheets_url"], sheets=True)
+        metacard_metadata = load_data(path = st.secrets["metacard_metadata_public_gsheets_url"], sheets=True)
+        metacard_microbiome = load_data(path = st.secrets["metacard_microbiome_public_gsheets_url"], sheets=True)
+        metacard_serum = load_data(path = st.secrets["metacard_serum_public_gsheets_url"], sheets=True)
+        metacard_taxonomy = load_data(path = st.secrets["metacard_taxonomy_public_gsheets_url"], sheets=True)
+        metacard_urine = load_data(path = st.secrets["metacard_urine_public_gsheets_url"], sheets=True)
         st.write("Success!")
-
-
 
 # Displaying a view of the data.
 datasets = {"metacard_drug": metacard_drug, 
@@ -92,6 +90,7 @@ transformations done).
 
 
 ## Preprocessing Steps
+
 
 
 """)

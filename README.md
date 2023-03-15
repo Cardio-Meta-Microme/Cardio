@@ -18,7 +18,14 @@ Tool for Analysis of meta microbiomes and metabolomes.
     - The function returns the transformed microbiome abundance and metabolome data in a merged pandas dataframe.
 #### Data Visualization
 
-There are a several useful visualizations in this component.
+There are a several useful visualizations in this component. 
+
+Firstly we visualise the general distributions of our cohort using Altair, this includes a boxplot of the BMI, age,
+and shannon diversity of the sample.
+
+Next we plot the the relative abundance of bacterial species among all four of the cohorts. These display the bacterial species or metabolites that are significantly changed from the healthy cohort. This change is deemed significant by a [Benjamini-Hochberg](https://link.springer.com/referenceworkentry/10.1007/978-1-4419-9863-7_1215) test.
+
+Finally there are two Uniform Manifold Approximation Projections (UMAPs) which reduce the dimensionality
 
 #### Modelling
 
