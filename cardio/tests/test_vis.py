@@ -1,20 +1,22 @@
 #this will test visualization module
 """importing python modules and modules from make_vis.py"""
+import os
 import sys
+
+import collections
+import math
+import unittest
+
+import altair as alt
+import numpy as np
 import pandas as pd
 import seaborn as sns
-import numpy as np
-import altair as alt
-import unittest
-import math
-import collections
-import os
 
 #adding the current path for imports
 sys.path.append('../../cardio')
 
-from vis import make_vis
 from preprocessing_scripts import trimdata
+from vis import make_vis
 
 
 #Reading testing data
@@ -22,7 +24,6 @@ TEST_DATA = pd.read_csv('../../data/processed_data.csv')
 DATA_DIR = '../../data'
 MICROBIOME = pd.read_csv(DATA_DIR + '/metacard_microbiome.csv')
 MICROBIOME_COL = MICROBIOME.columns
-
 METABOLOME = pd.read_csv(DATA_DIR + '/metacard_serum.csv')
 METABOLOME_COL = METABOLOME.columns
 
@@ -43,7 +44,8 @@ class ProcessForVisualization(unittest.TestCase):
     def test_study_groups(self):
         """Test whether the right patient groups are there"""
         test_df = TEST_DATA.copy()
-        test_df['Status'] = np.where(test_df['Status'] == 'HC275', 'HC276', test_df['Status'])
+        test_df['Status'] = np.where(test_df['Status'] == 'HC275', 'HC276',\
+                                     test_df['Status'])
         try:
             make_vis.process_for_visualization(test_df)
             self.assertTrue(False)
@@ -127,232 +129,302 @@ class FeatureHistograms(unittest.TestCase):
 
 class TestTTest(unittest.TestCase):
 
+    """Class for testing t test function"""
+
     def test_length_match(self):
-        """Tests that the list returned in t test is the same length as the list of features in input"""
-        df, microcols, metabcols = trimdata.preprocess()
-        df_HC275 = df[df["Status"] == "HC275"]
-        df_MMC269 = df[df["Status"] == "MMC269"]
-        self.assertTrue(math.isclose(len(microcols),len(make_vis.ttest(df_HC275, df_MMC269, microcols))), "Length of p values does not match length of input columns")
+        """Tests that the list returned in t test is the same length as the
+        list of features in input"""
+        df = TEST_DATA.copy()
+        df_HC275 = df[df['Status'] == 'HC275']
+        df_MMC269 = df[df['Status'] == 'MMC269']
+        self.assertTrue(math.isclose(len(MICROBIOME_COL),\
+                        len(make_vis.ttest(df_HC275, df_MMC269, MICROBIOME_COL))),\
+                        'Length of p values does not match length of input cols')
 
 
 class TestMultTest(unittest.TestCase):
 
+    """Class for testing multtest function"""
+
     def test_length_match(self):
-        """Tests that the list returned in multtest is the same length as the list of features in input"""
-        df, microcols, metabcols = trimdata.preprocess()
-        df_HC275 = df[df["Status"] == "HC275"]
-        df_MMC269 = df[df["Status"] == "MMC269"]
-        self.assertTrue(math.isclose(len(microcols),len(make_vis.multtest(df_HC275, df_MMC269, microcols))), "Length of p values does not match length of input columns")
+        """Tests that the list returned in multtest is the same length as the
+        list of features in input"""
+        df = TEST_DATA.copy()
+        df_HC275 = df[df['Status'] == 'HC275']
+        df_MMC269 = df[df['Status'] == 'MMC269']
+        self.assertTrue(math.isclose(len(MICROBIOME_COL),\
+                        len(make_vis.multtest(df_HC275, df_MMC269, MICROBIOME_COL))),\
+                        'Length of p values does not match length of input cols')
 
     def test_key_match(self):
         """Tests that multtest is using the same indices as the input list"""
-        df, microcols, metabcols = trimdata.preprocess()
-        df_HC275 = df[df["Status"] == "HC275"]
-        df_MMC269 = df[df["Status"] == "MMC269"]
-        self.assertTrue(set(microcols) == set(make_vis.multtest(df_HC275, df_MMC269, microcols).keys()), "The keys of p value list from multtest do not match original keys")
+        df = TEST_DATA.copy()
+        df_HC275 = df[df['Status'] == 'HC275']
+        df_MMC269 = df[df['Status'] == 'MMC269']
+        self.assertTrue(set(MICROBIOME_COL) == set(make_vis.multtest(df_HC275,\
+                                              df_MMC269, MICROBIOME_COL).keys()),\
+                                              "The keys of p value list from \
+                                              multtest don't match original keys")
 
 
 class TestMkDict(unittest.TestCase):
 
+    """Class for testing mk_dict function"""
+
     def test_length_match(self):
-        """Tests that returned dictionary has same width as the length of the columns provided"""
-        df, microcols, metabcols = trimdata.preprocess()
-        self.assertTrue(math.isclose(len(microcols),len(make_vis.mk_dict(microcols, df))), "Length of dictionary does not match length of input columns")
+        """Tests that returned dictionary has same width as the length of the
+        columns provided"""
+        df = TEST_DATA.copy()
+        self.assertTrue(math.isclose(len(MICROBIOME_COL),\
+                        len(make_vis.mk_dict(MICROBIOME_COL, df))), 'Length of \
+                        dictionary does not match length of input columns')
 
     def test_key_match(self):
         """Tests that the input columns match the dictionary made my mk_dict"""
-        df, microcols, metabcols = trimdata.preprocess()
-        self.assertTrue(set(microcols) == set(make_vis.mk_dict(microcols, df).keys()), "The features provided do not match the dictionary keys")
+        df = TEST_DATA.copy()
+        self.assertTrue(set(MICROBIOME_COL) == set(make_vis.mk_dict(MICROBIOME_COL, df).keys()),\
+                        "The features provided do not match the dictionary keys")
 
 
 class TestMkControlDf(unittest.TestCase):
 
+    """Class for testing mk_control_df function"""
+
     def test_sorted(self):
-        """Tests that the mk_control_df correctly sorts the dictionary by the values"""
-        df, microcols, metabcols = trimdata.preprocess()
-        df_HC275 = df[df["Status"] == "HC275"]
-        cdf = make_vis.mk_control_df(make_vis.mk_dict(microcols, df_HC275), "Bacteria")
+        """Tests that the mk_control_df correctly sorts the dictionary by the
+        values"""
+        df = TEST_DATA.copy()
+        df_HC275 = df[df['Status'] == 'HC275']
+        cdf = make_vis.mk_control_df(make_vis.mk_dict(MICROBIOME_COL, df_HC275),\
+                                     'Bacteria')
         cdfs = sorted(cdf['Normalized Read Count'])
-        self.assertTrue((cdf['Normalized Read Count'] == cdfs).all(), "Values are not sorted correctly")
+        self.assertTrue((cdf['Normalized Read Count'] == cdfs).all(),\
+                         'Values are not sorted correctly')
 
     def test_key_match(self):
         """Tests that mk_control_df uses same indices as the list provided"""
-        df, microcols, metabcols = trimdata.preprocess()
-        df_HC275 = df[df["Status"] == "HC275"]
-        self.assertTrue(math.isclose(len(microcols),len(make_vis.mk_control_df(make_vis.mk_dict(microcols, df_HC275), "Bacteria"))), "Length of sorted df does not match length of input columns")
+        df = TEST_DATA.copy()
+        df_HC275 = df[df['Status'] == 'HC275']
+        self.assertTrue(math.isclose(len(MICROBIOME_COL),len(make_vis.mk_control_df\
+                                    (make_vis.mk_dict(MICROBIOME_COL, df_HC275), \
+                                    'Bacteria'))), 'Length of sorted df does \
+                                    not match length of input columns')
 
 
 class TestMkDf(unittest.TestCase):
 
+    """Class for testing mk_df function"""
+
     def test_sorted(self):
-        """Tests that mk_df is ordering the clinical subgroup by the same order used in the healthy control group"""
-        df, microcols, metabcols = trimdata.preprocess()
-        df_HC275 = df[df["Status"] == "HC275"]
-        df_MMC269 = df[df["Status"] == "MMC269"]
+        """Tests that mk_df is ordering the clinical subgroup by the \
+           same order used in the healthy control group"""
+        df = TEST_DATA.copy()
+        df_HC275 = df[df['Status'] == 'HC275']
+        df_MMC269 = df[df['Status'] == 'MMC269']
 
-        hcdict = make_vis.mk_dict(microcols, df_HC275)
+        hcdict = make_vis.mk_dict(MICROBIOME_COL, df_HC275)
 
-        mmcsiglist = make_vis.multtest(df_HC275, df_MMC269, microcols)
-        mmcdict = make_vis.mk_dict(microcols, df_MMC269)
+        mmcsiglist = make_vis.multtest(df_HC275, df_MMC269, MICROBIOME_COL)
+        mmcdict = make_vis.mk_dict(MICROBIOME_COL, df_MMC269)
 
-        self.assertTrue((mmcdict.keys() == hcdict.keys(), "Subgroup is not sorted according to healthy group"))
+        self.assertTrue((mmcdict.keys() == hcdict.keys(), 'Subgroup is not \
+                        sorted according to healthy group'))
 
     def test_key_match(self):
-        """Tests that mk_df is assigning significance based on p-values computed earlier"""
-        df, microcols, metabcols = trimdata.preprocess()
-        df_HC275 = df[df["Status"] == "HC275"]
-        df_MMC269 = df[df["Status"] == "MMC269"]
+        """Tests that mk_df is assigning significance based on p-values \
+           computed earlier"""
+        df = TEST_DATA.copy()
+        df_HC275 = df[df['Status'] == 'HC275']
+        df_MMC269 = df[df['Status'] == 'MMC269']
 
-        hcdict = make_vis.mk_dict(microcols, df_HC275)
+        hcdict = make_vis.mk_dict(MICROBIOME_COL, df_HC275)
 
-        mmcsiglist = make_vis.multtest(df_HC275, df_MMC269, microcols)
-        mmcdict = make_vis.mk_dict(microcols, df_MMC269)
-        mmcdf = make_vis.mk_df(mmcdict, hcdict, "Bacteria", mmcsiglist)
-        self.assertTrue((mmcdf.columns == ['Bacteria', 'Normalized Read Count', 'Change from Healthy Control']).all(), "Columns of df incorrect")
+        mmcsiglist = make_vis.multtest(df_HC275, df_MMC269, MICROBIOME_COL)
+        mmcdict = make_vis.mk_dict(MICROBIOME_COL, df_MMC269)
+        mmcdf = make_vis.mk_df(mmcdict, hcdict, 'Bacteria', mmcsiglist)
+        self.assertTrue((mmcdf.columns == ['Bacteria', 'Normalized Read Count',\
+                         'Change from Healthy Control']).all(), 'Columns of df \
+                         incorrect')
 
 
 class TestMkChart(unittest.TestCase):
 
+    """Class for testing mk_chart"""
+
     def test_sorted(self):
         """Tests that mk_chart is creating an altair stacked chart"""
-        df, microcols, metabcols = trimdata.preprocess()
-        df_HC275 = df[df["Status"] == "HC275"]
-        df_MMC269 = df[df["Status"] == "MMC269"]
-        df_IHD372 = df[df["Status"] == "IHD372"]
-        df_UMCC222 = df[df["Status"] == "UMCC222"]
+        df = TEST_DATA.copy()
+        df_HC275 = df[df['Status'] == 'HC275']
+        df_MMC269 = df[df['Status'] == 'MMC269']
+        df_IHD372 = df[df['Status'] == 'IHD372']
+        df_UMCC222 = df[df['Status'] == 'UMCC222']
 
-        hcdict = make_vis.mk_dict(microcols, df_HC275)
-        hcdf = make_vis.mk_control_df(hcdict, "Bacteria")
+        hcdict = make_vis.mk_dict(MICROBIOME_COL, df_HC275)
+        hcdf = make_vis.mk_control_df(hcdict, 'Bacteria')
 
-        mmcsiglist = make_vis.multtest(df_HC275, df_MMC269, microcols)
-        mmcdict = make_vis.mk_dict(microcols, df_MMC269)
-        mmcdf = make_vis.mk_df(mmcdict, hcdict, "Bacteria", mmcsiglist)
+        mmcsiglist = make_vis.multtest(df_HC275, df_MMC269, MICROBIOME_COL)
+        mmcdict = make_vis.mk_dict(MICROBIOME_COL, df_MMC269)
+        mmcdf = make_vis.mk_df(mmcdict, hcdict, 'Bacteria', mmcsiglist)
 
-        ihdsiglist = make_vis.multtest(df_HC275, df_IHD372, microcols)
-        ihddict = make_vis.mk_dict(microcols, df_IHD372)
-        ihddf = make_vis.mk_df(ihddict, hcdict, "Bacteria", ihdsiglist)
+        ihdsiglist = make_vis.multtest(df_HC275, df_IHD372, MICROBIOME_COL)
+        ihddict = make_vis.mk_dict(MICROBIOME_COL, df_IHD372)
+        ihddf = make_vis.mk_df(ihddict, hcdict, 'Bacteria', ihdsiglist)
 
-        umccsiglist = make_vis.multtest(df_HC275, df_UMCC222, microcols)
-        umccdict = make_vis.mk_dict(microcols, df_UMCC222)
-        umccdf = make_vis.mk_df(umccdict, hcdict, "Bacteria", umccsiglist)
+        umccsiglist = make_vis.multtest(df_HC275, df_UMCC222, MICROBIOME_COL)
+        umccdict = make_vis.mk_dict(MICROBIOME_COL, df_UMCC222)
+        umccdf = make_vis.mk_df(umccdict, hcdict, 'Bacteria', umccsiglist)
 
-        self.assertTrue(isinstance(make_vis.mk_chart(hcdf, ihddf, mmcdf, umccdf, "Bacteria"), alt.vegalite.v4.api.VConcatChart), "Chart type is incorrect")
+        self.assertTrue(isinstance(make_vis.mk_chart(hcdf, ihddf, mmcdf, \
+                        umccdf, 'Bacteria'), alt.vegalite.v4.api.VConcatChart)\
+                        , 'Chart type is incorrect')
 
 
 class TestPlotMicroAbundance(unittest.TestCase):
 
+    """Class for testing plot_micro_abundance"""
+
     def test_microtype_input(self):
         """Tests that user is entering microtype specification as a string"""
-        df, microcols, metabcols = trimdata.preprocess()
+        df = TEST_DATA.copy()
+
         try:
-            make_vis.plot_micro_abundance(df, 3, microcols, metabcols)
-            self.assertTrue(False, "Allowing non-string microtypes")
+            make_vis.plot_micro_abundance(df, 3, MICROBIOME_COL, METABOLOME_COL)
+            self.assertTrue(False, 'Allowing non-string microtypes')
         except (TypeError) as err:
             self.assertTrue(True)
 
     def test_bacteria_type_input(self):
-        """Tests that user is entering microcols specification as a list"""
-        df, microcols, metabcols = trimdata.preprocess()
+        """Tests that user is entering MICROBIOME_COL specification as a list"""
+        df = TEST_DATA.copy()
+
         try:
-            make_vis.plot_micro_abundance(df, "Bacteria", 3, metabcols)
-            self.assertTrue(False, "Allowing non-list bacteria columns")
+            make_vis.plot_micro_abundance(df, 'Bacteria', 3, METABOLOME_COL)
+            self.assertTrue(False, 'Allowing non-list bacteria columns')
         except (TypeError) as err:
             self.assertTrue(True)
 
     def test_metabolite_type_input(self):
-        """Tests that user is entering metabcols specification as a list"""
-        df, microcols, metabcols = trimdata.preprocess()
+        """Tests that user is entering METABOLOME_COL specification as a list"""
+        df = TEST_DATA.copy()
+
         try:
-            make_vis.plot_micro_abundance(df, "Bacteria", microcols, 5)
-            self.assertTrue(False, "Allowing non-list metabolites columns")
+            make_vis.plot_micro_abundance(df, 'Bacteria', MICROBIOME_COL, 5)
+            self.assertTrue(False, 'Allowing non-list metabolites columns')
         except (TypeError) as err:
             self.assertTrue(True)
 
     def test_bacteria_input(self):
-        """Tests that user is specifying micrcols which exist in the entered dataframe"""
-        df, microcols, metabcols = trimdata.preprocess()
+        """Tests that user is specifying micrcols which exist in the entered \
+           dataframe"""
+        df = TEST_DATA.copy()
+
         try:
-            make_vis.plot_micro_abundance(df, "Bacteria", ['thing1', 'thing2'], metabcols)
-            self.assertTrue(False, "Allowing bacteria columns which do not exist in the df")
+            make_vis.plot_micro_abundance(df, 'Bacteria', ['thing1', 'thing2'], \
+                                          METABOLOME_COL)
+            self.assertTrue(False, 'Allowing bacteria columns which do not \
+                            exist in the df')
         except (KeyError) as err:
             self.assertTrue(True)
 
     def test_metabolite_input(self):
-        """Tests that user is specifying metabcols which exist in the entered dataframe"""
-        df, microcols, metabcols = trimdata.preprocess()
+        """Tests that user is specifying METABOLOME_COL which exist in the entered \
+           dataframe"""
+        df = TEST_DATA.copy()
+
         try:
-            make_vis.plot_micro_abundance(df, "Metabolite", microcols, ['thing1', 'thing2'])
-            self.assertTrue(False, "Allowing metabolite columns which do not exist in the df")
+            make_vis.plot_micro_abundance(df, 'Metabolite', MICROBIOME_COL, \
+                                          ['thing1', 'thing2'])
+            self.assertTrue(False, 'Allowing metabolite columns which do \
+                            not exist in the df')
         except (KeyError) as err:
             self.assertTrue(True)
 
 class TestHighVar(unittest.TestCase):
 
+    """Class for testing high_var"""
+
     def test_shape(self):
         """Tests that high_var is returning 500 most variable features"""
-        df, microcols, metabcols = trimdata.preprocess()
-        self.assertTrue(math.isclose(make_vis.high_var(df).shape[1],500), "Not returning 500 features")
+        df = TEST_DATA.copy()
+        self.assertTrue(math.isclose(make_vis.high_var(df).shape[1],500),\
+                        'Not returning 500 features')
 
 class TestPlotUMAP(unittest.TestCase):
 
+    """Class for testing plot_UMAP"""
+
     def test_column_input(self):
         """Tests that user is entering columns specification as a string"""
-        df, microcols, metabcols = trimdata.preprocess()
+        df = TEST_DATA.copy()
+
         try:
-            make_vis.plot_UMAP(df, 2, False, microcols, metabcols)
-            self.assertTrue(False, "Allowing non-string columns")
+            make_vis.plot_UMAP(df, 2, False, MICROBIOME_COL, METABOLOME_COL)
+            self.assertTrue(False, 'Allowing non-string columns')
         except (TypeError) as err:
             self.assertTrue(True)
 
     def test_hivar_input(self):
         """Tests that user is entering hivar specification as a boolean"""
-        df, microcols, metabcols = trimdata.preprocess()
+        df = TEST_DATA.copy()
+
         try:
-            make_vis.plot_UMAP(df, "all", 3, microcols, metabcols)
-            self.assertTrue(False, "Allowing non-bool hivar")
+            make_vis.plot_UMAP(df, 'all', 3, MICROBIOME_COL, METABOLOME_COL)
+            self.assertTrue(False, 'Allowing non-bool hivar')
         except (TypeError) as err:
             self.assertTrue(True)
 
     def test_bacteria_type_input(self):
         """Tests that user is entering micrcols specification as a list"""
-        df, microcols, metabcols = trimdata.preprocess()
+        df = TEST_DATA.copy()
+
         try:
-            make_vis.plot_UMAP(df, "all", True, 1, metabcols)
-            self.assertTrue(False, "Allowing non-list bacteria columns")
+            make_vis.plot_UMAP(df, 'all', True, 1, METABOLOME_COL)
+            self.assertTrue(False, 'Allowing non-list bacteria columns')
         except (TypeError) as err:
             self.assertTrue(True)
 
     def test_metabolite_type_input(self):
-        """Tests that user is entering metabcols specification as a list"""
-        df, microcols, metabcols = trimdata.preprocess()
+        """Tests that user is entering METABOLOME_COL specification as a list"""
+        df = TEST_DATA.copy()
+
         try:
-            make_vis.plot_UMAP(df, "all", True, microcols, 8)
-            self.assertTrue(False, "Allowing non-list metabolites columns")
+            make_vis.plot_UMAP(df, 'all', True, MICROBIOME_COL, 8)
+            self.assertTrue(False, 'Allowing non-list metabolites columns')
         except (TypeError) as err:
             self.assertTrue(True)
 
     def test_bacteria_input(self):
-        """Tests that user is specifying microcols which exist in the entered dataframe"""
-        df, microcols, metabcols = trimdata.preprocess()
+        """Tests that user is specifying MICROBIOME_COL which exist in the entered \
+        dataframe"""
+        df = TEST_DATA.copy()
+
         try:
-            make_vis.plot_UMAP(df, "all", True,  ['thing1', 'thing2'], metabcols)
-            self.assertTrue(False, "Allowing bacteria columns which do not exist in the df")
+            make_vis.plot_UMAP(df, 'all', True,  ['thing1', 'thing2'], METABOLOME_COL)
+            self.assertTrue(False, 'Allowing bacteria columns which do not \
+                            exist in the df')
         except (KeyError) as err:
             self.assertTrue(True)
 
     def test_metabolite_input(self):
-        """Tests that user is specifying metabcols which exist in the entered dataframe"""
-        df, microcols, metabcols = trimdata.preprocess()
+        """Tests that user is specifying METABOLOME_COL which exist in the \
+        entered dataframe"""
+        df = TEST_DATA.copy()
+
         try:
-            make_vis.plot_UMAP(df, "all", True, microcols, ['thing1', 'thing2'])
-            self.assertTrue(False, "Allowing metabolite columns which do not exist in the df")
+            make_vis.plot_UMAP(df, 'all', True, MICROBIOME_COL, ['thing1', 'thing2'])
+            self.assertTrue(False, 'Allowing metabolite columns which do not \
+                            exist in the df')
         except (KeyError) as err:
             self.assertTrue(True)
 
 
 class TestClusterAgeBMI(unittest.TestCase):
 
+    """Class for testing cluster_age_bmi"""
+
     def test_output_type(self):
         """Tests that cluster_age_bmi is returning an altair plot"""
-        df, microcols, metabcols = trimdata.preprocess()
-        self.assertTrue(type(make_vis.cluster_age_bmi(df)) == alt.vegalite.v4.api.Chart, "Returned type is not an altair plot")
+        df = TEST_DATA.copy()
+        self.assertTrue(type(make_vis.cluster_age_bmi(df)) == \
+                        alt.vegalite.v4.api.Chart, 'Returned type is \
+                        not an altair plot')
