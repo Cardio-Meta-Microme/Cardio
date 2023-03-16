@@ -10,3 +10,4 @@ dependencies:
   - altair
   - streamlit
   - plotly
+  - seaborn
