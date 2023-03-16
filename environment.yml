@@ -3,6 +3,7 @@ channels:
   - plotly
   - anaconda
   - defaults
+  - conda-forge
 dependencies:
   - abseil-cpp=20211102.0=hc377ac9_0
   - altair=4.1.0=py_1
