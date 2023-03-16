@@ -10,3 +10,6 @@ dependencies:
   - altair
   - streamlit
   - plotly
+  - seaborn
+  - skbio
+  - sklearn
