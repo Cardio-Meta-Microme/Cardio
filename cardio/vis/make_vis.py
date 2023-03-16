@@ -116,14 +116,10 @@ def plot_general_dist_altair(df):
     gender_dis = alt.Chart(gender_df).mark_bar().encode(
         alt.X('Gender:N', title=''),
         alt.Y('ID:Q', title='Patient Count'),
-        alt.Color('Gender:N'),
-<<<<<<< HEAD
-        alt.Column('sample_group_breaks:N', header=alt.Header(labelAlign='center', labelColor='white'), title='')
-=======
+        alt.Color('Gender:N'), \
         alt.Column('sample_group_breaks:N', \
                     header=alt.Header(labelAlign='center', labelColor='white'),\
                     title='')
->>>>>>> b2bd74285f434f716fe49bc02960dd35bbc3f596
     )
 
     return boxplots, gender_dis
