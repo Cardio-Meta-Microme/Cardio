@@ -7,6 +7,7 @@ import seaborn as sns
 from sklearn import linear_model, tree
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import GenericUnivariateSelect, RFECV, f_classif
+from sklearn.inspection import permutation_importance
 from sklearn.metrics import accuracy_score, confusion_matrix, precision_recall_curve, precision_score, recall_score
 from sklearn.model_selection import StratifiedKFold, train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -375,6 +376,17 @@ if __name__ == '__main__':
     predictions = clf.predict(x_test_subset)
     plot_precision_recall_curve(y_test, probabilities, 'precision_recall_curve.png')
     plot_confusion_matrix(y_test, predictions, 'confusion_matrix.png')
+
+    print('computing feature importance on the test set')
+    result = permutation_importance(clf, x_test_subset, y_test, n_repeats=100, n_jobs=6)
+    importances = result.importances_mean
+    features_sorted = x_columns[np.argsort(importances)[::-1]]
+    importances_sorted = importances[np.argsort(importances)[::-1]]
+    pickle.dump([features_sorted, importances_sorted], open('features_importances_sorted.pkl', 'wb'))
+    print('top 10 most important features:')
+    print('feature - importance')
+    for feature, importance in zip(features_sorted[:10], importances_sorted[:10]):
+        print(feature, '-', importance)
 
 
     print('Retraining classifier on entire dataset and saving to pickle')

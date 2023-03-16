@@ -1,6 +1,8 @@
 import sys
+import os
 import unittest
 sys.path.append('../..')
+os.chdir('../..')
 
 import numpy as np
 
@@ -65,7 +67,7 @@ class TestModelingFunctions(unittest.TestCase):
         """test reverse_selection_feature_subset function"""
         X, Y, X_cols = make_x_y(DF.copy())
         keep_columns = univariate_ftest_feature_subset(X, Y)
-        X = X[:, keep_columns[:100]]
+        X = X[:, keep_columns]
         support = reverse_selection_feature_subset(X, Y)
         assert len(support) > 0
         assert sum(support) <= len(support)
