@@ -2,16 +2,17 @@
 This script reads csv files, calculates microbe relative abundance and alpha
 diversity, filters out rare features (present in > some % samples).
 """
+import math
+import os
+import pickle
+import warnings
+warnings.simplefilter(action='ignore', category=RuntimeWarning)
 
-import pandas as pd
 import numpy as np
+import pandas as pd
+
 import scipy.stats
 import skbio.diversity
-import os
-import math
-import warnings
-import pickle
-warnings.simplefilter(action='ignore', category=RuntimeWarning)
 
 
 def read_csvs():
@@ -31,22 +32,26 @@ def read_csvs():
     # Get the current working directory to use absolute paths.
     wdir = os.getcwd()
 
+    # read in metadata csv, keeping only necessary columns
     metadata = pd.read_csv(wdir + "/data" + '/metacard_metadata.csv')
-    metadata = metadata[['ID', 'Status', 'Age (years)', 'BMI (kg/m²)', 'Gender']]
+    metadata = metadata[['ID', 'Status', 'Age (years)', 'BMI (kg/m²)',
+                         'Gender']]
     metadata.columns = ['ID', 'Status', 'Age', 'BMI', 'Gender']
     metadata_columns = metadata.columns
 
+    # read in microbiome csv, get columns
     microbiome = pd.read_csv(wdir + "/data" + '/metacard_microbiome.csv')
     microbiome_columns = microbiome.columns
 
+    # read in metabolome csv, get columns
     metabolome = pd.read_csv(wdir + "/data" + '/metacard_serum.csv')
     metabolome_columns = metabolome.columns
 
+    # join all dataframes by ID/Status
     all_joined = metadata.merge(microbiome, how='inner',
                                 on=['ID', 'Status']).merge(metabolome,
                                                            how='inner',
                                                            on=['ID', 'Status'])
-
     return all_joined, metadata_columns, microbiome_columns, metabolome_columns
 
 
@@ -72,6 +77,7 @@ def basic_filtering(df, microbiome_columns, metabolome_columns):
     drop_patients = pd.isna(df).sum(axis=1) < 1000
     df = df.loc[drop_patients]
 
+    # throw error if all patients were filtered out
     if df.shape[0] == 0:
         raise ValueError('Empty dataframe: all patients removed due to lack \
                          of features.')
@@ -81,7 +87,6 @@ def basic_filtering(df, microbiome_columns, metabolome_columns):
     # get separate dataframes for micro/metabo
     df_meta = df.loc[:, metabolome_columns]
     df_micro = df.loc[:, microbiome_columns]
-
     return df, df_meta, df_micro
 
 
@@ -97,18 +102,21 @@ def calculate_shannon_diversity(data):
             shannon_diversity(Pandas df): 1-column df where each index is a
             patient and the column is their shannon diversity value
     """
-
     shannon_diversity = pd.DataFrame()
     null_shannon = []
+    
+    # calculate shannon diversity for each row (patient)
     for ind in data.index:
         shannon_diversity.loc[ind,'shannon'] = skbio.diversity.alpha.shannon(data.loc[ind])
         if math.isnan(shannon_diversity.loc[ind,'shannon']):
             null_shannon.append(ind)
         else:
             pass
+
+    # print a list of indices with N/A Shannon Diversity
     if len(null_shannon) > 0:
-        print('Shannon diversity could not be calculated for the following indices: ',
-              null_shannon)
+        print('Shannon diversity could not be calculated for the following \
+              indices: ', null_shannon)
     return shannon_diversity
 
 
@@ -124,17 +132,17 @@ def count_to_abundance(df):
             abund(Pandas dataframe): microbe center-log ratio abundances per
             species with metadata columns ID and Status
     """
-
     counts = df.drop(columns=['MGS count', 'Gene count', 'Microbial load'])
     counts.set_index(['ID', 'Status'], inplace=True)
 
-    # assert that all count columns are dtype int
+    # assert that all count columns are dtype float
     assert counts.iloc[:, 0].dtype == 'float64'
 
+    # calculate geometric mean of each row
     counts['gmean'] = counts.apply(scipy.stats.mstats.gmean,
                                    axis=1, nan_policy='omit')
 
-
+    # center log transform, drop gmean column
     abund = np.log(counts.divide(counts['gmean'], axis=0))
     abund.drop(columns='gmean', inplace=True)
     abund.reset_index(inplace=True)
@@ -163,9 +171,9 @@ def sparse_filt(df, remove_str, na_lim):
 
     if df.shape[1] == 0:
         print('N/A limit (max. acceptable NAs per column): ', na_lim)
-        raise ValueError('Oops! You have removed all features from your dataframe! \
-                        This likely means all of your columns surpassed the NA limit \
-                        above.')
+        raise ValueError('Oops! You have removed all features from your \
+                         dataframe! This likely means all of your \
+                         columns surpassed the NA limit above.')
     else:
         pass
     return df
@@ -182,7 +190,6 @@ def preprocess(fill_na=False):
             micro_cols(list): feature columns of microbial species
             metabo_cols(list): feature coumns of metabolites
     """
-
     raw_data, metadata_cols, microbiome_cols, metabolome_cols = read_csvs()
     basicfilt_data, df_meta, df_micro = basic_filtering(raw_data,
                                                         microbiome_cols,
@@ -221,10 +228,11 @@ def preprocess(fill_na=False):
 
     if fill_na:
         fill_values = df_metamicro[df_metamicro.columns[5:]].min(axis=0) - 1
-        filled = df_metamicro[df_metamicro.columns[5:]].fillna(fill_values, axis=0)
+        filled = df_metamicro[df_metamicro.columns[5:]].fillna(fill_values,
+                                                               axis=0)
 
         pickle.dump(fill_values, open('cardio/model/na_fill_values.pkl', 'wb'))
-        df_metamicro = pd.concat((df_metamicro[df_metamicro.columns[:5]], filled), axis=1)
+        df_metamicro = pd.concat((df_metamicro[df_metamicro.columns[:5]],
+                                  filled), axis=1)
 
     return df_metamicro, micro_cols, metabo_cols
-
