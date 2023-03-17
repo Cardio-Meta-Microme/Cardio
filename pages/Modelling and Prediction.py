@@ -28,7 +28,10 @@ features_path = wdir + "/cardio/model/Trained_Production_RF_Classifier_features_
 na_fill_path = wdir + "/cardio/model/na_fill_values.pkl"
 model = making_model.RF_Classifier(model_path,features_path,na_fill_path)
 
-model_features = pd.read_pickle(wdir + "/cardio/model/Trained_Production_RF_Classifier_features_230314.pkl")
+model_features = pd.read_pickle(wdir + "/cardio/model/features_importances_sorted.pkl")[0]
+
+st.write("Important Model Features")
+st.dataframe(model_features)
 
 #st.write(type(model_features[:10].tolist()))
 st.write(model)

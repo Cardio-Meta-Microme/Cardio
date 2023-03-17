@@ -2,11 +2,21 @@
 Tool for Analysis of meta microbiomes and metabolomes.
 
 [![Python Tests](https://github.com/Cardio-Meta-Microme/Cardio/actions/workflows/pytest_pip.yml/badge.svg)](https://github.com/Cardio-Meta-Microme/Cardio/actions/workflows/pytest_pip.yml)
-=======
+
+## Running the App
+
+The app is easy to run. 
+
+1. Install the required packages from requirements.txt
+2. Navigate to the Cardio directory (base directory) in command line or IDE
+3. Run the command `streamlit run README.py'
+4. Open the server instance on your desired browser.
+
+**Note: Navigating through the pages in a non-linear way will not work. In future we would silently load all data on the README page. However, if you do navigate in a non-linear way, simply return to the Data Preprocessing page and everythign will be fine.**
 
 ## Components
 
-[Component Model](https://github.com/Cardio-Meta-Microme/Cardio/tree/main/assets/component_diagram.png)
+![Component Model](https://github.com/Cardio-Meta-Microme/Cardio/tree/main/assets/component_diagram.png)
 
 ### Preprocessing Scripts
 
@@ -47,6 +57,8 @@ Next we plot the the relative abundance of bacterial species among all four of t
 Finally there are two Uniform Manifold Approximation Projections (UMAPs) which reduce the dimensionality
 
 ### Modelling
+
+
 
 ### User Input Predictions
 
