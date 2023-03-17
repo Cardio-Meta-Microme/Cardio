@@ -6,7 +6,7 @@ Tool for Analysis of meta microbiomes and metabolomes.
 
 ## Components
 
-![cox interaction model](https://github.com/Cardio-Meta-Microme/Cardio/tree/main/assets/cox_interaction_model.png)
+[Component Model](https://github.com/Cardio-Meta-Microme/Cardio/tree/main/assets/component_diagram.png)
 
 ### Preprocessing Scripts
 
