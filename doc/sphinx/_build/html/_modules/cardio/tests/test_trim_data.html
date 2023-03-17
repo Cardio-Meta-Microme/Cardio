@@ -40,6 +40,8 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules.html">cardio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme_link.html">README Metabolander</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme_link.html#example-event-parameter"></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../use_cases.html">Use Cases</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../user_stories.html">User Stories</a></li>
 </ul>
@@ -89,12 +91,12 @@
 <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">RuntimeWarning</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="TestPreprocessing"><a class="viewcode-back" href="../../../cardio.tests.html#cardio.tests.test_trim_data.TestPreprocessing">[docs]</a><span class="k">class</span> <span class="nc">TestPreprocessing</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestPreprocessing"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_trim_data.TestPreprocessing">[docs]</a><span class="k">class</span> <span class="nc">TestPreprocessing</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Test functions within preprocessing script trimdata.py</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="TestPreprocessing.test_readcsvs"><a class="viewcode-back" href="../../../cardio.tests.html#cardio.tests.test_trim_data.TestPreprocessing.test_readcsvs">[docs]</a>    <span class="k">def</span> <span class="nf">test_readcsvs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestPreprocessing.test_readcsvs"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_trim_data.TestPreprocessing.test_readcsvs">[docs]</a>    <span class="k">def</span> <span class="nf">test_readcsvs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Test whether omics data .csv files are in the correct folder for</span>
 <span class="sd">        function read_csvs</span>
@@ -109,7 +111,7 @@
 <span class="s1">                  and metabolome data must be entitled metacard_metadata.csv, </span><span class="se">\</span>
 <span class="s1">                  metacard_microbiome.csv, and metacard_serum.csv&#39;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TestPreprocessing.testbasicfilt"><a class="viewcode-back" href="../../../cardio.tests.html#cardio.tests.test_trim_data.TestPreprocessing.testbasicfilt">[docs]</a>    <span class="k">def</span> <span class="nf">testbasicfilt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestPreprocessing.testbasicfilt"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_trim_data.TestPreprocessing.testbasicfilt">[docs]</a>    <span class="k">def</span> <span class="nf">testbasicfilt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Test that empty dataframe throws ValueError</span>
 <span class="sd">        in function basic_filtering</span>
@@ -122,7 +124,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Test of basic filtering empty dataframe passed&#39;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TestPreprocessing.test_sparsefilt"><a class="viewcode-back" href="../../../cardio.tests.html#cardio.tests.test_trim_data.TestPreprocessing.test_sparsefilt">[docs]</a>    <span class="k">def</span> <span class="nf">test_sparsefilt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestPreprocessing.test_sparsefilt"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_trim_data.TestPreprocessing.test_sparsefilt">[docs]</a>    <span class="k">def</span> <span class="nf">test_sparsefilt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Test that sparse feature removal throws error if all features</span>
 <span class="sd">        are sparse, and thus removed from df in function sparse_filt</span>
@@ -135,7 +137,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Test of sparse feature filtering empty dataframe passed&#39;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TestPreprocessing.test_shannon"><a class="viewcode-back" href="../../../cardio.tests.html#cardio.tests.test_trim_data.TestPreprocessing.test_shannon">[docs]</a>    <span class="k">def</span> <span class="nf">test_shannon</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestPreprocessing.test_shannon"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_trim_data.TestPreprocessing.test_shannon">[docs]</a>    <span class="k">def</span> <span class="nf">test_shannon</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Test that Shannon diversity function runs, outputting a column of</span>
 <span class="sd">        float64 and that NaNs do not throw errors</span>
@@ -145,7 +147,7 @@
         <span class="k">assert</span> <span class="n">shan</span><span class="o">.</span><span class="n">shannon</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;float64&#39;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Smoke test for shannon calculation worked&#39;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TestPreprocessing.test_counttoabund"><a class="viewcode-back" href="../../../cardio.tests.html#cardio.tests.test_trim_data.TestPreprocessing.test_counttoabund">[docs]</a>    <span class="k">def</span> <span class="nf">test_counttoabund</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestPreprocessing.test_counttoabund"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_trim_data.TestPreprocessing.test_counttoabund">[docs]</a>    <span class="k">def</span> <span class="nf">test_counttoabund</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Test that function count_to_abundance throws AssertionError if</span>
 <span class="sd">        counts are not numerical dtype</span>

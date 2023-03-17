@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cardio.tests.test_make_model &mdash; Cardio 01 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Cardio
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">cardio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme_link.html">README Metabolander</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme_link.html#example-event-parameter"></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases.html">Use Cases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_stories.html">User Stories</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Cardio</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">cardio.tests.test_make_model</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cardio.tests.test_make_model</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="n">current_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+<span class="n">test_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">current_file_path</span><span class="p">)</span>
+<span class="n">cardio_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">test_dir</span><span class="p">)</span>
+<span class="n">root_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">cardio_dir</span><span class="p">)</span>
+
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">root_dir</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">cardio.model.making_model</span> <span class="kn">import</span> <span class="n">load_data</span><span class="p">,</span> <span class="n">make_x_y</span><span class="p">,</span> <span class="n">compute_metrics</span><span class="p">,</span> <span class="n">univariate_ftest_feature_subset</span>
+<span class="kn">from</span> <span class="nn">cardio.model.making_model</span> <span class="kn">import</span> <span class="n">split_data</span><span class="p">,</span> <span class="n">evaluate_model</span><span class="p">,</span> <span class="n">reverse_selection_feature_subset</span>
+<span class="kn">from</span> <span class="nn">cardio.model.making_model</span> <span class="kn">import</span> <span class="n">hyperparam_optimize_n_trees</span><span class="p">,</span> <span class="n">RF_Classifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestClassifier</span>
+
+<span class="n">DATAPATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root_dir</span><span class="p">,</span> <span class="s1">&#39;data/cleaned_data.pkl&#39;</span><span class="p">)</span>
+<span class="n">MODELPATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cardio_dir</span><span class="p">,</span> <span class="s1">&#39;model/Trained_Production_RF_Classifier_230314.pkl&#39;</span><span class="p">)</span>
+<span class="n">COLUMNPATH</span> <span class="o">=</span>  <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cardio_dir</span><span class="p">,</span> <span class="s1">&#39;model/Trained_Production_RF_Classifier_features_230314.pkl&#39;</span><span class="p">)</span>
+<span class="n">NAPATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cardio_dir</span><span class="p">,</span> <span class="s1">&#39;model/na_fill_values.pkl&#39;</span><span class="p">)</span>
+
+<span class="n">DF</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">(</span><span class="n">DATAPATH</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TestModelingFunctions"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_make_model.TestModelingFunctions">[docs]</a><span class="k">class</span> <span class="nc">TestModelingFunctions</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for testing modeling functions</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="TestModelingFunctions.test_load_data"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_make_model.TestModelingFunctions.test_load_data">[docs]</a>    <span class="k">def</span> <span class="nf">test_load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test load_data function&quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">(</span><span class="n">DATAPATH</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="s1">&#39;Status&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span></div>
+
+<div class="viewcode-block" id="TestModelingFunctions.test_make_x_y"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_make_model.TestModelingFunctions.test_make_x_y">[docs]</a>    <span class="k">def</span> <span class="nf">test_make_x_y</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;test make_X_Y function&quot;&quot;&quot;</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">X_cols</span> <span class="o">=</span> <span class="n">make_x_y</span><span class="p">(</span><span class="n">DF</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestModelingFunctions.test_compute_metrics"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_make_model.TestModelingFunctions.test_compute_metrics">[docs]</a>    <span class="k">def</span> <span class="nf">test_compute_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;test compute_metrics function&quot;&quot;&quot;</span>
+        <span class="n">acc</span><span class="p">,</span> <span class="n">prec</span><span class="p">,</span> <span class="n">rec</span> <span class="o">=</span> <span class="n">compute_metrics</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+        <span class="k">assert</span> <span class="n">acc</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="k">assert</span> <span class="n">prec</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="k">assert</span> <span class="n">rec</span> <span class="o">==</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="TestModelingFunctions.test_univariate_ftest"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_make_model.TestModelingFunctions.test_univariate_ftest">[docs]</a>    <span class="k">def</span> <span class="nf">test_univariate_ftest</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;test univariate_ftest_feature_subset function&quot;&quot;&quot;</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">X_cols</span> <span class="o">=</span> <span class="n">make_x_y</span><span class="p">(</span><span class="n">DF</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+        <span class="n">keep_columns</span> <span class="o">=</span> <span class="n">univariate_ftest_feature_subset</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">sum</span><span class="p">(</span><span class="n">keep_columns</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">keep_columns</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">keep_columns</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_cols</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestModelingFunctions.test_split_data"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_make_model.TestModelingFunctions.test_split_data">[docs]</a>    <span class="k">def</span> <span class="nf">test_split_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;test split_data function&quot;&quot;&quot;</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">X_cols</span> <span class="o">=</span> <span class="n">make_x_y</span><span class="p">(</span><span class="n">DF</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+        <span class="n">X_train</span><span class="p">,</span> <span class="n">Y_train</span><span class="p">,</span> <span class="n">X_valid</span><span class="p">,</span> <span class="n">Y_valid</span><span class="p">,</span> <span class="n">X_train_valid</span><span class="p">,</span> <span class="n">Y_train_valid</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">Y_test</span> <span class="o">=</span> <span class="n">split_data</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">Y_train</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_valid</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_train_valid</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestModelingFunctions.test_evaluate_model"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_make_model.TestModelingFunctions.test_evaluate_model">[docs]</a>    <span class="k">def</span> <span class="nf">test_evaluate_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;test evalute_model function&quot;&quot;&quot;</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">X_cols</span> <span class="o">=</span> <span class="n">make_x_y</span><span class="p">(</span><span class="n">DF</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+        <span class="n">keep_columns</span> <span class="o">=</span> <span class="n">univariate_ftest_feature_subset</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="n">keep_columns</span><span class="p">]</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">RandomForestClassifier</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+        <span class="n">acc</span><span class="p">,</span> <span class="n">prec</span><span class="p">,</span> <span class="n">rec</span> <span class="o">=</span> <span class="n">evaluate_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">acc</span> <span class="o">&gt;</span> <span class="mf">0.5</span></div>
+
+<div class="viewcode-block" id="TestModelingFunctions.test_reverse_selection_feature_subset"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_make_model.TestModelingFunctions.test_reverse_selection_feature_subset">[docs]</a>    <span class="k">def</span> <span class="nf">test_reverse_selection_feature_subset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;test reverse_selection_feature_subset function&quot;&quot;&quot;</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">X_cols</span> <span class="o">=</span> <span class="n">make_x_y</span><span class="p">(</span><span class="n">DF</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+        <span class="n">keep_columns</span> <span class="o">=</span> <span class="n">univariate_ftest_feature_subset</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="n">keep_columns</span><span class="p">]</span>
+        <span class="n">support</span> <span class="o">=</span> <span class="n">reverse_selection_feature_subset</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">support</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="k">assert</span> <span class="nb">sum</span><span class="p">(</span><span class="n">support</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">support</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestModelingFunctions.test_hyperparm_optimize"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_make_model.TestModelingFunctions.test_hyperparm_optimize">[docs]</a>    <span class="k">def</span> <span class="nf">test_hyperparm_optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;test hyperparam_optimize_n_trees function&quot;&quot;&quot;</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">X_cols</span> <span class="o">=</span> <span class="n">make_x_y</span><span class="p">(</span><span class="n">DF</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+        <span class="n">X_train</span><span class="p">,</span> <span class="n">Y_train</span><span class="p">,</span> <span class="n">X_valid</span><span class="p">,</span> <span class="n">Y_valid</span><span class="p">,</span> <span class="n">X_train_valid</span><span class="p">,</span> <span class="n">Y_train_valid</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">Y_test</span> <span class="o">=</span> <span class="n">split_data</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+        <span class="n">n_trees</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">25</span><span class="p">]</span>
+        <span class="n">best</span> <span class="o">=</span> <span class="n">hyperparam_optimize_n_trees</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">Y_train</span><span class="p">,</span> <span class="n">X_valid</span><span class="p">,</span> <span class="n">Y_valid</span><span class="p">,</span> <span class="n">n_trees</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">best</span> <span class="o">==</span> <span class="mi">25</span></div></div>
+
+<span class="n">suite</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestLoader</span><span class="p">()</span><span class="o">.</span><span class="n">loadTestsFromTestCase</span><span class="p">(</span><span class="n">TestModelingFunctions</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TextTestRunner</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">suite</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Test_RF_Classifier_Class"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_make_model.Test_RF_Classifier_Class">[docs]</a><span class="k">class</span> <span class="nc">Test_RF_Classifier_Class</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class for testing the RF_Classifier Class&quot;&quot;&quot;</span>
+    
+<div class="viewcode-block" id="Test_RF_Classifier_Class.test_init"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_make_model.Test_RF_Classifier_Class.test_init">[docs]</a>    <span class="k">def</span> <span class="nf">test_init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Tests initialization of the RF_Classifier class&quot;&quot;&quot;</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">RF_Classifier</span><span class="p">(</span><span class="n">MODELPATH</span><span class="p">,</span> <span class="n">COLUMNPATH</span><span class="p">,</span> <span class="n">NAPATH</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="kc">True</span></div>
+    
+<div class="viewcode-block" id="Test_RF_Classifier_Class.test_classify"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_make_model.Test_RF_Classifier_Class.test_classify">[docs]</a>    <span class="k">def</span> <span class="nf">test_classify</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;test classification using the RF_classifier class&quot;&quot;&quot;</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">RF_Classifier</span><span class="p">(</span><span class="n">MODELPATH</span><span class="p">,</span> <span class="n">COLUMNPATH</span><span class="p">,</span> <span class="n">NAPATH</span><span class="p">)</span>
+        <span class="n">predictions</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">classify</span><span class="p">(</span><span class="n">DF</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:</span><span class="mi">10</span><span class="p">])</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">10</span></div></div>
+
+<span class="n">suite</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestLoader</span><span class="p">()</span><span class="o">.</span><span class="n">loadTestsFromTestCase</span><span class="p">(</span><span class="n">Test_RF_Classifier_Class</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TextTestRunner</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">suite</span><span class="p">)</span>
+
+
+
+
+    
+
+
+
+
+        
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kira Olander, Mattias Tolhurst, Paul Kim, Alyssa Easton, Maggie Cook.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

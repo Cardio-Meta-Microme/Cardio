@@ -9,7 +9,7 @@ Welcome to Cardio's documentation!
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
-	
+
    modules
    readme_link.md
    use_cases.md

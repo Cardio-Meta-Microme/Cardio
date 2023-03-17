@@ -40,6 +40,8 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules.html">cardio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme_link.html">README Metabolander</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme_link.html#example-event-parameter"></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../use_cases.html">Use Cases</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../user_stories.html">User Stories</a></li>
 </ul>
@@ -97,7 +99,7 @@
 <span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;dark_background&#39;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="process_for_visualization"><a class="viewcode-back" href="../../../cardio.vis.html#cardio.vis.make_vis.process_for_visualization">[docs]</a><span class="k">def</span> <span class="nf">process_for_visualization</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+<div class="viewcode-block" id="process_for_visualization"><a class="viewcode-back" href="../../../doc/cardio.vis.html#cardio.vis.make_vis.process_for_visualization">[docs]</a><span class="k">def</span> <span class="nf">process_for_visualization</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Processed data for visualization by changing chort names to more memorable</span>
 <span class="sd">        titles</span>
@@ -133,7 +135,7 @@
     <span class="k">return</span> <span class="n">general_data</span></div>
 
 
-<div class="viewcode-block" id="plot_general_dist_altair"><a class="viewcode-back" href="../../../cardio.vis.html#cardio.vis.make_vis.plot_general_dist_altair">[docs]</a><span class="k">def</span> <span class="nf">plot_general_dist_altair</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+<div class="viewcode-block" id="plot_general_dist_altair"><a class="viewcode-back" href="../../../doc/cardio.vis.html#cardio.vis.make_vis.plot_general_dist_altair">[docs]</a><span class="k">def</span> <span class="nf">plot_general_dist_altair</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Make boxplots showing general characteristics of each cohort we are trying</span>
 <span class="sd">        to classify</span>
@@ -196,7 +198,7 @@
     <span class="k">return</span> <span class="n">boxplots</span><span class="p">,</span> <span class="n">gender_dis</span></div>
 
 
-<div class="viewcode-block" id="ttest"><a class="viewcode-back" href="../../../cardio.vis.html#cardio.vis.make_vis.ttest">[docs]</a><span class="k">def</span> <span class="nf">ttest</span><span class="p">(</span><span class="n">hc</span><span class="p">,</span> <span class="n">subgroup</span><span class="p">,</span> <span class="n">microtype</span><span class="p">):</span>
+<div class="viewcode-block" id="ttest"><a class="viewcode-back" href="../../../doc/cardio.vis.html#cardio.vis.make_vis.ttest">[docs]</a><span class="k">def</span> <span class="nf">ttest</span><span class="p">(</span><span class="n">hc</span><span class="p">,</span> <span class="n">subgroup</span><span class="p">,</span> <span class="n">microtype</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Evaluates a t test for each feature of the dataframe</span>
 
@@ -218,7 +220,7 @@
     <span class="k">return</span> <span class="n">pvals</span></div>
 
 
-<div class="viewcode-block" id="multtest"><a class="viewcode-back" href="../../../cardio.vis.html#cardio.vis.make_vis.multtest">[docs]</a><span class="k">def</span> <span class="nf">multtest</span><span class="p">(</span><span class="n">hc</span><span class="p">,</span> <span class="n">subgroup</span><span class="p">,</span> <span class="n">microtype</span><span class="p">):</span>
+<div class="viewcode-block" id="multtest"><a class="viewcode-back" href="../../../doc/cardio.vis.html#cardio.vis.make_vis.multtest">[docs]</a><span class="k">def</span> <span class="nf">multtest</span><span class="p">(</span><span class="n">hc</span><span class="p">,</span> <span class="n">subgroup</span><span class="p">,</span> <span class="n">microtype</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Evaluates a Benjamini/Hochberg test for each p value of the t test of each</span>
 <span class="sd">        feature of the dataframe</span>
@@ -240,7 +242,7 @@
     <span class="k">return</span> <span class="n">siglist</span></div>
 
 
-<div class="viewcode-block" id="mk_dict"><a class="viewcode-back" href="../../../cardio.vis.html#cardio.vis.make_vis.mk_dict">[docs]</a><span class="k">def</span> <span class="nf">mk_dict</span><span class="p">(</span><span class="n">colnames</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+<div class="viewcode-block" id="mk_dict"><a class="viewcode-back" href="../../../doc/cardio.vis.html#cardio.vis.make_vis.mk_dict">[docs]</a><span class="k">def</span> <span class="nf">mk_dict</span><span class="p">(</span><span class="n">colnames</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Makes a dictionary of mean normalized read counts for either bacterial</span>
 <span class="sd">        species or metabolites for a dataframe</span>
@@ -265,7 +267,7 @@
     <span class="k">return</span> <span class="n">micro_dict</span></div>
 
 
-<div class="viewcode-block" id="mk_control_df"><a class="viewcode-back" href="../../../cardio.vis.html#cardio.vis.make_vis.mk_control_df">[docs]</a><span class="k">def</span> <span class="nf">mk_control_df</span><span class="p">(</span><span class="n">micro_dict</span><span class="p">,</span> <span class="n">valtype</span><span class="p">):</span>
+<div class="viewcode-block" id="mk_control_df"><a class="viewcode-back" href="../../../doc/cardio.vis.html#cardio.vis.make_vis.mk_control_df">[docs]</a><span class="k">def</span> <span class="nf">mk_control_df</span><span class="p">(</span><span class="n">micro_dict</span><span class="p">,</span> <span class="n">valtype</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Makes a sorted dataframe of mean normalized read counts for either bacterial</span>
 <span class="sd">        species or metabolites ONLY for the healthy control disease subtype</span>
@@ -289,7 +291,7 @@
     <span class="k">return</span> <span class="n">micro_dict</span></div>
 
 
-<div class="viewcode-block" id="mk_df"><a class="viewcode-back" href="../../../cardio.vis.html#cardio.vis.make_vis.mk_df">[docs]</a><span class="k">def</span> <span class="nf">mk_df</span><span class="p">(</span><span class="n">micro_dict</span><span class="p">,</span> <span class="n">control_dict</span><span class="p">,</span> <span class="n">valtype</span><span class="p">,</span> <span class="n">siglist</span><span class="p">):</span>
+<div class="viewcode-block" id="mk_df"><a class="viewcode-back" href="../../../doc/cardio.vis.html#cardio.vis.make_vis.mk_df">[docs]</a><span class="k">def</span> <span class="nf">mk_df</span><span class="p">(</span><span class="n">micro_dict</span><span class="p">,</span> <span class="n">control_dict</span><span class="p">,</span> <span class="n">valtype</span><span class="p">,</span> <span class="n">siglist</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Makes a dataframe of mean normalized read counts for either bacterial</span>
 <span class="sd">        species or metabolites sorted based off the healthy control subtype</span>
@@ -324,7 +326,7 @@
     <span class="k">return</span> <span class="n">micro_df</span></div>
 
 
-<div class="viewcode-block" id="mk_chart"><a class="viewcode-back" href="../../../cardio.vis.html#cardio.vis.make_vis.mk_chart">[docs]</a><span class="k">def</span> <span class="nf">mk_chart</span><span class="p">(</span><span class="n">HCDF</span><span class="p">,</span> <span class="n">IHDDF</span><span class="p">,</span> <span class="n">MMCDF</span><span class="p">,</span> <span class="n">UMCCDF</span><span class="p">,</span> <span class="n">valtype</span><span class="p">):</span>
+<div class="viewcode-block" id="mk_chart"><a class="viewcode-back" href="../../../doc/cardio.vis.html#cardio.vis.make_vis.mk_chart">[docs]</a><span class="k">def</span> <span class="nf">mk_chart</span><span class="p">(</span><span class="n">HCDF</span><span class="p">,</span> <span class="n">IHDDF</span><span class="p">,</span> <span class="n">MMCDF</span><span class="p">,</span> <span class="n">UMCCDF</span><span class="p">,</span> <span class="n">valtype</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Makes a chart of mean normalized read counts for either bacterial species or</span>
 <span class="sd">        metabolites sorted based off the healthy control subtype for all four</span>
@@ -399,7 +401,7 @@
     <span class="k">return</span> <span class="n">chart</span></div>
 
 
-<div class="viewcode-block" id="plot_micro_abundance"><a class="viewcode-back" href="../../../cardio.vis.html#cardio.vis.make_vis.plot_micro_abundance">[docs]</a><span class="k">def</span> <span class="nf">plot_micro_abundance</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">microtype</span><span class="p">,</span> <span class="n">bacteria</span><span class="p">,</span> <span class="n">metabolites</span><span class="p">):</span>
+<div class="viewcode-block" id="plot_micro_abundance"><a class="viewcode-back" href="../../../doc/cardio.vis.html#cardio.vis.make_vis.plot_micro_abundance">[docs]</a><span class="k">def</span> <span class="nf">plot_micro_abundance</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">microtype</span><span class="p">,</span> <span class="n">bacteria</span><span class="p">,</span> <span class="n">metabolites</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Wrapper function to generate a chart of mean normalized read counts for</span>
 <span class="sd">        either bacterial species or metabolites sorted based off the healthy</span>
@@ -474,7 +476,7 @@
     <span class="k">return</span> <span class="n">chart</span></div>
 
 
-<div class="viewcode-block" id="high_var"><a class="viewcode-back" href="../../../cardio.vis.html#cardio.vis.make_vis.high_var">[docs]</a><span class="k">def</span> <span class="nf">high_var</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+<div class="viewcode-block" id="high_var"><a class="viewcode-back" href="../../../doc/cardio.vis.html#cardio.vis.make_vis.high_var">[docs]</a><span class="k">def</span> <span class="nf">high_var</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns 500 most variable features in dataframe</span>
 
@@ -490,7 +492,7 @@
     <span class="k">return</span> <span class="n">hv_data</span></div>
 
 
-<div class="viewcode-block" id="plot_UMAP"><a class="viewcode-back" href="../../../cardio.vis.html#cardio.vis.make_vis.plot_UMAP">[docs]</a><span class="k">def</span> <span class="nf">plot_UMAP</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">hivar</span><span class="p">,</span> <span class="n">bacteria</span><span class="p">,</span> <span class="n">metabolites</span><span class="p">):</span>
+<div class="viewcode-block" id="plot_UMAP"><a class="viewcode-back" href="../../../doc/cardio.vis.html#cardio.vis.make_vis.plot_UMAP">[docs]</a><span class="k">def</span> <span class="nf">plot_UMAP</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">hivar</span><span class="p">,</span> <span class="n">bacteria</span><span class="p">,</span> <span class="n">metabolites</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a UMAP</span>
 
@@ -575,7 +577,7 @@
     <span class="k">return</span> <span class="n">chart</span></div>
 
 
-<div class="viewcode-block" id="cluster_age_bmi"><a class="viewcode-back" href="../../../cardio.vis.html#cardio.vis.make_vis.cluster_age_bmi">[docs]</a><span class="k">def</span> <span class="nf">cluster_age_bmi</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+<div class="viewcode-block" id="cluster_age_bmi"><a class="viewcode-back" href="../../../doc/cardio.vis.html#cardio.vis.make_vis.cluster_age_bmi">[docs]</a><span class="k">def</span> <span class="nf">cluster_age_bmi</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a scatter plot of age and BMI</span>
 
@@ -593,7 +595,7 @@
     <span class="k">return</span> <span class="n">chart</span></div>
 
 
-<div class="viewcode-block" id="feature_histograms"><a class="viewcode-back" href="../../../cardio.vis.html#cardio.vis.make_vis.feature_histograms">[docs]</a><span class="k">def</span> <span class="nf">feature_histograms</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">patient_data</span><span class="p">,</span> <span class="n">features</span><span class="p">):</span>
+<div class="viewcode-block" id="feature_histograms"><a class="viewcode-back" href="../../../doc/cardio.vis.html#cardio.vis.make_vis.feature_histograms">[docs]</a><span class="k">def</span> <span class="nf">feature_histograms</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">patient_data</span><span class="p">,</span> <span class="n">features</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Takes in training data and patient data and plots patient values against</span>
 <span class="sd">        the training data with IHD for</span>
