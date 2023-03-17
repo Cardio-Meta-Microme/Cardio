@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Front end &mdash; Cardio 01 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Cardio
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">cardio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="use_cases.html">Use Cases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_stories.html">User Stories</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Cardio</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Front end</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/component_specifications.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="front-end">
+<h1>Front end<a class="headerlink" href="#front-end" title="Permalink to this heading"></a></h1>
+<section id="user-interface">
+<h2>User Interface<a class="headerlink" href="#user-interface" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>What it does: GUI that the user interacts with</p></li>
+<li><p>Input: Interactions / clicks from user.</p></li>
+<li><p>Outputs: Data visualization related to how well the model is performing,</p></li>
+<li><p>Interacts with the back end and the data interface</p></li>
+</ul>
+</section>
+</section>
+<section id="back-end">
+<h1>Back end<a class="headerlink" href="#back-end" title="Permalink to this heading"></a></h1>
+<section id="data-processing">
+<h2>1. Data Processing:<a class="headerlink" href="#data-processing" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>What it does: Drop NAs, filter sparse data, remove irrelevant data, merge dfs, data transformation depending on distribution of data (e.g. log transform)</p></li>
+<li><p>Inputs: Validated dataframe(s) (from Data Interface)</p></li>
+<li><p>Outputs: Processed dataframe (for model)</p></li>
+<li><p>How to use w/ other components: gets data from interface, sends processed data to model</p></li>
+</ul>
+</section>
+<section id="model">
+<h2>2. Model:<a class="headerlink" href="#model" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>What it does: Random forest regression or classification</p></li>
+<li><p>Inputs: cleaned dataframe (from Data processing)</p></li>
+<li><p>Outputs: Predictions / classification in dataframe format with additional model stats/info (like regression summary)</p></li>
+<li><p>How to use w/ other components: takes processed data, runs scikitlearn models, returns parameter dataframe and other necessary info in csv format for download</p></li>
+</ul>
+</section>
+<section id="data-visualization">
+<h2>3. Data Visualization:<a class="headerlink" href="#data-visualization" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>What it does: plots that characterize data model was trained on, where patient falls in model cohort, model results, ROC plots</p></li>
+<li><p>Inputs: model results and processed data</p></li>
+<li><p>Outputs: plot(s) object accepted by altaire</p></li>
+<li><p>How to use w/ other components: takes processed data and model results and output for front end.</p></li>
+</ul>
+</section>
+</section>
+<section id="database-and-data-interface">
+<h1>Database and Data Interface<a class="headerlink" href="#database-and-data-interface" title="Permalink to this heading"></a></h1>
+<section id="accesses-training-data">
+<h2>1. Accesses Training Data<a class="headerlink" href="#accesses-training-data" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>What it does: Reads in data from https://www.nature.com/articles/s41591-022-01688-4#data-availability</p></li>
+<li><p>Input: CSV files of datasets from papter</p></li>
+<li><p>Output: Dataset saved to database</p></li>
+<li><p>Doesn’t directly interact with other components</p></li>
+</ul>
+</section>
+<section id="validate-user-input-data">
+<h2>2. Validate User Input Data<a class="headerlink" href="#validate-user-input-data" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Check that the input data are valid for the visualizations.</p></li>
+<li><p>Inputs: One or more csv files containing patient cohort data</p></li>
+<li><p>Outputs: Tells the user if the input is valid or not</p></li>
+<li><p>Feeds into the data processing module.</p></li>
+<li><p>Interacts with the front end, receives data from the user. Also passes data to the back end.</p></li>
+</ul>
+</section>
+</section>
+<section id="documentation">
+<h1>Documentation<a class="headerlink" href="#documentation" title="Permalink to this heading"></a></h1>
+<ul class="simple">
+<li><p>README.md file for an overview of the function of the project and tool.</p></li>
+<li><p>components.md file outlines the components of the package</p></li>
+<li><p>use_cases.md file that contains relevent use cases</p></li>
+<li><p>index.html is the html documentation</p></li>
+</ul>
+<p><img alt="image" src="https://user-images.githubusercontent.com/121842230/225170316-110b3766-a636-45bd-a05c-eb9bde0e33f0.png" /></p>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kira Olander, Mattias Tolhurst, Paul Kim, Alyssa Easton, Maggie Cook.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

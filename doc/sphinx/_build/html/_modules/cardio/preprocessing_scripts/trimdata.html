@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cardio.preprocessing_scripts.trimdata &mdash; Cardio 01 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Cardio
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">cardio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases.html">Use Cases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_stories.html">User Stories</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Cardio</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">cardio.preprocessing_scripts.trimdata</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cardio.preprocessing_scripts.trimdata</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This script reads csv files, calculates microbe relative abundance and alpha</span>
+<span class="sd">diversity, filters out rare features (present in &gt; some % samples).</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">RuntimeWarning</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">import</span> <span class="nn">scipy.stats</span>
+<span class="kn">import</span> <span class="nn">skbio.diversity</span>
+
+
+<div class="viewcode-block" id="read_csvs"><a class="viewcode-back" href="../../../cardio.preprocessing_scripts.html#cardio.preprocessing_scripts.trimdata.read_csvs">[docs]</a><span class="k">def</span> <span class="nf">read_csvs</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read raw data csv files from Cardio/data and merge into one large dataframe</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            None</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            all_joined(Pandas dataframe): dataframe containing metadata,</span>
+<span class="sd">            microbiome, and metabolome for each patient</span>
+<span class="sd">            metadata_columns(column index object): column names of metadata</span>
+<span class="sd">            microbiome_columns(column index object): column names of microbes</span>
+<span class="sd">            metabolome_columns(column index object): column names of</span>
+<span class="sd">            metabolites</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Get the current working directory to use absolute paths.</span>
+    <span class="n">wdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+
+    <span class="c1"># read in metadata csv, keeping only necessary columns</span>
+    <span class="n">metadata</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">wdir</span> <span class="o">+</span> <span class="s2">&quot;/data&quot;</span> <span class="o">+</span> <span class="s1">&#39;/metacard_metadata.csv&#39;</span><span class="p">)</span>
+    <span class="n">metadata</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[[</span><span class="s1">&#39;ID&#39;</span><span class="p">,</span> <span class="s1">&#39;Status&#39;</span><span class="p">,</span> <span class="s1">&#39;Age (years)&#39;</span><span class="p">,</span> <span class="s1">&#39;BMI (kg/m²)&#39;</span><span class="p">,</span>
+                         <span class="s1">&#39;Gender&#39;</span><span class="p">]]</span>
+    <span class="n">metadata</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ID&#39;</span><span class="p">,</span> <span class="s1">&#39;Status&#39;</span><span class="p">,</span> <span class="s1">&#39;Age&#39;</span><span class="p">,</span> <span class="s1">&#39;BMI&#39;</span><span class="p">,</span> <span class="s1">&#39;Gender&#39;</span><span class="p">]</span>
+    <span class="n">metadata_columns</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">columns</span>
+
+    <span class="c1"># read in microbiome csv, get columns</span>
+    <span class="n">microbiome</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">wdir</span> <span class="o">+</span> <span class="s2">&quot;/data&quot;</span> <span class="o">+</span> <span class="s1">&#39;/metacard_microbiome.csv&#39;</span><span class="p">)</span>
+    <span class="n">microbiome_columns</span> <span class="o">=</span> <span class="n">microbiome</span><span class="o">.</span><span class="n">columns</span>
+
+    <span class="c1"># read in metabolome csv, get columns</span>
+    <span class="n">metabolome</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">wdir</span> <span class="o">+</span> <span class="s2">&quot;/data&quot;</span> <span class="o">+</span> <span class="s1">&#39;/metacard_serum.csv&#39;</span><span class="p">)</span>
+    <span class="n">metabolome_columns</span> <span class="o">=</span> <span class="n">metabolome</span><span class="o">.</span><span class="n">columns</span>
+
+    <span class="c1"># join all dataframes by ID/Status</span>
+    <span class="n">all_joined</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">microbiome</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;inner&#39;</span><span class="p">,</span>
+                                <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;ID&#39;</span><span class="p">,</span> <span class="s1">&#39;Status&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">metabolome</span><span class="p">,</span>
+                                                           <span class="n">how</span><span class="o">=</span><span class="s1">&#39;inner&#39;</span><span class="p">,</span>
+                                                           <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;ID&#39;</span><span class="p">,</span> <span class="s1">&#39;Status&#39;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">all_joined</span><span class="p">,</span> <span class="n">metadata_columns</span><span class="p">,</span> <span class="n">microbiome_columns</span><span class="p">,</span> <span class="n">metabolome_columns</span></div>
+
+
+<div class="viewcode-block" id="basic_filtering"><a class="viewcode-back" href="../../../cardio.preprocessing_scripts.html#cardio.preprocessing_scripts.trimdata.basic_filtering">[docs]</a><span class="k">def</span> <span class="nf">basic_filtering</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">microbiome_columns</span><span class="p">,</span> <span class="n">metabolome_columns</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Drop patients missing most measurements, replace zeros with NaN, get</span>
+<span class="sd">    separate dfs for microbiome/metabolome</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            df(Pandas dataframe): entire dataset</span>
+<span class="sd">            microbiome_columns(column index object):</span>
+<span class="sd">            metabolome_columns(column index object):</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            df(Pandas dataframe): entire dataset with null patients dropped</span>
+<span class="sd">            and zeros as NaNs</span>
+<span class="sd">            df_meta(Pandas dataframe): dataframe of metabolite values (already</span>
+<span class="sd">            log transformed)</span>
+<span class="sd">            df_micro(Pandas dataframe): dataframe of microbiome counts</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># drop patients missing measurements for over 1000 features</span>
+    <span class="n">df</span><span class="p">[</span><span class="n">df</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">)</span>
+    <span class="n">drop_patients</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1000</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">drop_patients</span><span class="p">]</span>
+
+    <span class="c1"># throw error if all patients were filtered out</span>
+    <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Empty dataframe: all patients removed due to lack </span><span class="se">\</span>
+<span class="s1">                         of features.&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># get separate dataframes for micro/metabo</span>
+    <span class="n">df_meta</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">metabolome_columns</span><span class="p">]</span>
+    <span class="n">df_micro</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">microbiome_columns</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">df</span><span class="p">,</span> <span class="n">df_meta</span><span class="p">,</span> <span class="n">df_micro</span></div>
+
+
+<div class="viewcode-block" id="calculate_shannon_diversity"><a class="viewcode-back" href="../../../cardio.preprocessing_scripts.html#cardio.preprocessing_scripts.trimdata.calculate_shannon_diversity">[docs]</a><span class="k">def</span> <span class="nf">calculate_shannon_diversity</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates shannon (alpha) diversity index for each patient</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            data(Pandas dataframe): microbiome df where each row is a patient</span>
+<span class="sd">            and .X is their microbiome count data</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            shannon_diversity(Pandas df): 1-column df where each index is a</span>
+<span class="sd">            patient and the column is their shannon diversity value</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">shannon_diversity</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+    <span class="n">null_shannon</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="c1"># calculate shannon diversity for each row (patient)</span>
+    <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+        <span class="n">shannon_diversity</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">ind</span><span class="p">,</span><span class="s1">&#39;shannon&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">skbio</span><span class="o">.</span><span class="n">diversity</span><span class="o">.</span><span class="n">alpha</span><span class="o">.</span><span class="n">shannon</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">shannon_diversity</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">ind</span><span class="p">,</span><span class="s1">&#39;shannon&#39;</span><span class="p">]):</span>
+            <span class="n">null_shannon</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+    <span class="c1"># print a list of indices with N/A Shannon Diversity</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">null_shannon</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Shannon diversity could not be calculated for the following </span><span class="se">\</span>
+<span class="s1">              indices: &#39;</span><span class="p">,</span> <span class="n">null_shannon</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">shannon_diversity</span></div>
+
+
+<div class="viewcode-block" id="count_to_abundance"><a class="viewcode-back" href="../../../cardio.preprocessing_scripts.html#cardio.preprocessing_scripts.trimdata.count_to_abundance">[docs]</a><span class="k">def</span> <span class="nf">count_to_abundance</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Transform microbiome sequencing count data to relative abundance with</span>
+<span class="sd">    Center-log ratio (CLR) transformation.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            df(Pandas dataframe): microbiome counts per species with metadata</span>
+<span class="sd">            columns MGS count, Gene count, Microbial load, ID, and Status</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            abund(Pandas dataframe): microbe center-log ratio abundances per</span>
+<span class="sd">            species with metadata columns ID and Status</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">counts</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;MGS count&#39;</span><span class="p">,</span> <span class="s1">&#39;Gene count&#39;</span><span class="p">,</span> <span class="s1">&#39;Microbial load&#39;</span><span class="p">])</span>
+    <span class="n">counts</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;ID&#39;</span><span class="p">,</span> <span class="s1">&#39;Status&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># assert that all count columns are dtype float</span>
+    <span class="k">assert</span> <span class="n">counts</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;float64&#39;</span>
+
+    <span class="c1"># calculate geometric mean of each row</span>
+    <span class="n">counts</span><span class="p">[</span><span class="s1">&#39;gmean&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">counts</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">mstats</span><span class="o">.</span><span class="n">gmean</span><span class="p">,</span>
+                                   <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">nan_policy</span><span class="o">=</span><span class="s1">&#39;omit&#39;</span><span class="p">)</span>
+
+    <span class="c1"># center log transform, drop gmean column</span>
+    <span class="n">abund</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">counts</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="s1">&#39;gmean&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">abund</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="s1">&#39;gmean&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">abund</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">abund</span></div>
+
+
+<div class="viewcode-block" id="sparse_filt"><a class="viewcode-back" href="../../../cardio.preprocessing_scripts.html#cardio.preprocessing_scripts.trimdata.sparse_filt">[docs]</a><span class="k">def</span> <span class="nf">sparse_filt</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">remove_str</span><span class="p">,</span> <span class="n">na_lim</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Filtering out sparse and uncharacterized features in a data subset</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            df(Pandas dataframe): dataframe with feature columns and patients</span>
+<span class="sd">            as indices</span>
+<span class="sd">            remove_str(string): identifier of uncharacterized columns (e.g.</span>
+<span class="sd">            unknown metabolites or species) - either &#39;X-&#39; or &#39;unclassified&#39;</span>
+<span class="sd">            here</span>
+<span class="sd">            na_lim(int): number of acceptable nas in feature column</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            df(Pandas dataframe): trimmed dataframe</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">keep_columns</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">na_lim</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">keep_columns</span><span class="p">]</span>
+    <span class="n">keep_columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">remove_str</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">col</span><span class="p">]</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">keep_columns</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;N/A limit (max. acceptable NAs per column): &#39;</span><span class="p">,</span> <span class="n">na_lim</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Oops! You have removed all features from your </span><span class="se">\</span>
+<span class="s1">                         dataframe! This likely means all of your </span><span class="se">\</span>
+<span class="s1">                         columns surpassed the NA limit above.&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="preprocess"><a class="viewcode-back" href="../../../cardio.preprocessing_scripts.html#cardio.preprocessing_scripts.trimdata.preprocess">[docs]</a><span class="k">def</span> <span class="nf">preprocess</span><span class="p">(</span><span class="n">fill_na</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Main preprocessing function that runs all others.</span>
+
+<span class="sd">        Parameters: None</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            df_metamicro(Pandas dataframe): processed dataframe</span>
+<span class="sd">            micro_cols(list): feature columns of microbial species</span>
+<span class="sd">            metabo_cols(list): feature coumns of metabolites</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">raw_data</span><span class="p">,</span> <span class="n">metadata_cols</span><span class="p">,</span> <span class="n">microbiome_cols</span><span class="p">,</span> <span class="n">metabolome_cols</span> <span class="o">=</span> <span class="n">read_csvs</span><span class="p">()</span>
+    <span class="n">basicfilt_data</span><span class="p">,</span> <span class="n">df_meta</span><span class="p">,</span> <span class="n">df_micro</span> <span class="o">=</span> <span class="n">basic_filtering</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span>
+                                                        <span class="n">microbiome_cols</span><span class="p">,</span>
+                                                        <span class="n">metabolome_cols</span><span class="p">)</span>
+    <span class="n">abundance</span> <span class="o">=</span> <span class="n">count_to_abundance</span><span class="p">(</span><span class="n">df_micro</span><span class="p">)</span>
+
+    <span class="c1"># filtering based off of feature sparsity</span>
+    <span class="n">df_meta_filt</span> <span class="o">=</span> <span class="n">sparse_filt</span><span class="p">(</span><span class="n">df_meta</span><span class="p">,</span> <span class="n">remove_str</span><span class="o">=</span><span class="s1">&#39;X-&#39;</span><span class="p">,</span> <span class="n">na_lim</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">df_micro_filt</span> <span class="o">=</span> <span class="n">sparse_filt</span><span class="p">(</span><span class="n">abundance</span><span class="p">,</span> <span class="n">remove_str</span><span class="o">=</span><span class="s1">&#39;unclassified&#39;</span><span class="p">,</span>
+                                <span class="n">na_lim</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+
+    <span class="c1"># calculate shannon diversity from raw microbiome counts</span>
+    <span class="n">df_divers</span> <span class="o">=</span> <span class="n">calculate_shannon_diversity</span><span class="p">(</span><span class="n">df_micro</span><span class="o">.</span><span class="n">drop</span>
+                                            <span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;MGS count&#39;</span><span class="p">,</span>
+                                                      <span class="s1">&#39;Gene count&#39;</span><span class="p">,</span>
+                                                      <span class="s1">&#39;Microbial load&#39;</span><span class="p">,</span> <span class="s1">&#39;ID&#39;</span><span class="p">,</span>
+                                                      <span class="s1">&#39;Status&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+
+    <span class="c1"># merge together metadata, filtered metabolites, and filtered abundances</span>
+    <span class="n">df_basic</span> <span class="o">=</span> <span class="n">basicfilt_data</span><span class="p">[</span><span class="n">metadata_cols</span><span class="p">]</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">df_divers</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;inner&#39;</span><span class="p">,</span>
+                                                   <span class="n">right_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                                   <span class="n">left_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">df_metabs</span> <span class="o">=</span> <span class="n">df_basic</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">df_meta_filt</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;inner&#39;</span><span class="p">,</span>
+                               <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;ID&#39;</span><span class="p">,</span> <span class="s1">&#39;Status&#39;</span><span class="p">])</span>
+    <span class="n">df_metamicro</span> <span class="o">=</span> <span class="n">df_metabs</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">df_micro_filt</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;inner&#39;</span><span class="p">,</span>
+                                   <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;ID&#39;</span><span class="p">,</span> <span class="s1">&#39;Status&#39;</span><span class="p">])</span>
+
+    <span class="c1"># drop duplicate patients</span>
+    <span class="n">df_metamicro</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;ID&#39;</span><span class="p">,</span> <span class="s1">&#39;Status&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">df_metamicro</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">keep</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">df_metamicro</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># update microbiome and metabolome columns</span>
+    <span class="n">micro_cols</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df_metamicro</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">df_metamicro</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">microbiome_cols</span><span class="p">[</span><span class="mi">2</span><span class="p">:])])</span>
+    <span class="n">metabo_cols</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df_metamicro</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">df_metamicro</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">metabolome_cols</span><span class="p">[</span><span class="mi">2</span><span class="p">:])])</span>
+
+    <span class="k">if</span> <span class="n">fill_na</span><span class="p">:</span>
+        <span class="n">fill_values</span> <span class="o">=</span> <span class="n">df_metamicro</span><span class="p">[</span><span class="n">df_metamicro</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">5</span><span class="p">:]]</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">filled</span> <span class="o">=</span> <span class="n">df_metamicro</span><span class="p">[</span><span class="n">df_metamicro</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">5</span><span class="p">:]]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">fill_values</span><span class="p">,</span>
+                                                               <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">fill_values</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;cardio/model/na_fill_values.pkl&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">))</span>
+        <span class="n">df_metamicro</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">((</span><span class="n">df_metamicro</span><span class="p">[</span><span class="n">df_metamicro</span><span class="o">.</span><span class="n">columns</span><span class="p">[:</span><span class="mi">5</span><span class="p">]],</span>
+                                  <span class="n">filled</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">df_metamicro</span><span class="p">,</span> <span class="n">micro_cols</span><span class="p">,</span> <span class="n">metabo_cols</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kira Olander, Mattias Tolhurst, Paul Kim, Alyssa Easton, Maggie Cook.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

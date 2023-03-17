@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cardio.preprocessing_scripts.norm_filt &mdash; Cardio 01 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Cardio
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">cardio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases.html">Use Cases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_stories.html">User Stories</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Cardio</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">cardio.preprocessing_scripts.norm_filt</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cardio.preprocessing_scripts.norm_filt</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy.stats</span>
+<span class="kn">from</span> <span class="nn">skbio.stats.composition</span> <span class="kn">import</span> <span class="n">clr</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">abspath</span><span class="p">,</span> <span class="n">join</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This script reads csv files, calculates microbe relative abundance, and</span>
+<span class="sd">filters out rare features (present in &gt; some % samples).</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="count_to_abundance"><a class="viewcode-back" href="../../../cardio.preprocessing_scripts.html#cardio.preprocessing_scripts.norm_filt.count_to_abundance">[docs]</a><span class="k">def</span> <span class="nf">count_to_abundance</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Transform microbiome sequencing count data to relative abundance with </span>
+<span class="sd">    Center-log ratio (CLR) transformation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">counts</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;MGS count&#39;</span><span class="p">,</span> <span class="s1">&#39;Gene count&#39;</span><span class="p">,</span> <span class="s1">&#39;Microbial load&#39;</span><span class="p">])</span>
+    <span class="n">counts</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;ID&#39;</span><span class="p">,</span> <span class="s1">&#39;Status&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">counts</span> <span class="o">+=</span> <span class="mf">1.0</span>
+    <span class="n">counts</span><span class="p">[</span><span class="s1">&#39;gmean&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">counts</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">mstats</span><span class="o">.</span><span class="n">gmean</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">nan_policy</span><span class="o">=</span><span class="s1">&#39;omit&#39;</span><span class="p">)</span>
+
+    <span class="n">abund</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">counts</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="s1">&#39;gmean&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">abund</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="s1">&#39;gmean&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">abund</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">abund</span></div>
+
+
+<div class="viewcode-block" id="filter_sparse"><a class="viewcode-back" href="../../../cardio.preprocessing_scripts.html#cardio.preprocessing_scripts.norm_filt.filter_sparse">[docs]</a><span class="k">def</span> <span class="nf">filter_sparse</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">feature_cols</span><span class="p">,</span> <span class="n">percent</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    filters sparse features (microbes or metabolites) so that we only consider</span>
+<span class="sd">    those present in at least (percent) % of samples</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">sparse</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">feature_cols</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">percent</span><span class="p">)</span>
+    <span class="n">feature_cols</span> <span class="o">=</span> <span class="n">sparse</span><span class="p">[</span><span class="o">~</span><span class="n">sparse</span><span class="p">]</span><span class="o">.</span><span class="n">index</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">sparse</span><span class="p">[</span><span class="n">sparse</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="combine_metamicro"><a class="viewcode-back" href="../../../cardio.preprocessing_scripts.html#cardio.preprocessing_scripts.norm_filt.combine_metamicro">[docs]</a><span class="k">def</span> <span class="nf">combine_metamicro</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span> <span class="n">metabs</span><span class="p">,</span> <span class="n">micros</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ids</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[[</span><span class="s1">&#39;ID&#39;</span><span class="p">,</span> <span class="s1">&#39;Status&#39;</span><span class="p">,</span> <span class="s1">&#39;Age (years)&#39;</span><span class="p">,</span> <span class="s1">&#39;BMI (kg/m²)&#39;</span><span class="p">,</span> <span class="s1">&#39;Gender&#39;</span><span class="p">]]</span>
+    <span class="n">ids_metab</span> <span class="o">=</span> <span class="n">ids</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">metabs</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;inner&#39;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;ID&#39;</span><span class="p">,</span> <span class="s1">&#39;Status&#39;</span><span class="p">])</span>
+    <span class="n">ids_metab_micro</span> <span class="o">=</span> <span class="n">micros</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">ids_metab</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;inner&#39;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;ID&#39;</span><span class="p">,</span> <span class="s1">&#39;Status&#39;</span><span class="p">])</span>
+    <span class="n">ids_metab_micro</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;ID&#39;</span><span class="p">,</span> <span class="s1">&#39;Status&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">ids_metab_micro</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">keep</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">ids_metab_micro</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">ids_metab_micro</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ids_metab_micro</span></div>
+
+<span class="c1"># def run_example():</span>
+<span class="c1">#     # import csv files from current directory - we can change this</span>
+<span class="c1">#     metadata = pd.read_csv(&#39;metacard_metadata.csv&#39;)</span>
+<span class="c1">#     microbiome = pd.read_csv(&#39;metacard_microbiome.csv&#39;)</span>
+<span class="c1">#     metabolome = pd.read_csv(&#39;metacard_serum.csv&#39;)</span>
+
+<div class="viewcode-block" id="load_data"><a class="viewcode-back" href="../../../cardio.preprocessing_scripts.html#cardio.preprocessing_scripts.norm_filt.load_data">[docs]</a><span class="k">def</span> <span class="nf">load_data</span><span class="p">(</span><span class="n">sheets_url</span><span class="p">):</span>
+    <span class="n">csv_url</span> <span class="o">=</span> <span class="n">sheets_url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/edit#gid=&quot;</span><span class="p">,</span> <span class="s2">&quot;/export?format=csv&amp;gid=&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">csv_url</span><span class="p">)</span></div>
+
+<span class="n">metacard_metadata_public_gsheets_url</span> <span class="o">=</span> <span class="s2">&quot;https://docs.google.com/spreadsheets/d/1t6mfVOJsSmbwtgvYzyYqT6ofSFoJb6HZBl2ZddZis4g/edit#gid=1481496480&quot;</span>
+<span class="n">metacard_microbiome_public_gsheets_url</span> <span class="o">=</span> <span class="s2">&quot;https://docs.google.com/spreadsheets/d/13o6uYJ-vX1VIMPO1nkH4WYaNUJe3vdVrw6pv8O76S6g/edit#gid=1074439309&quot;</span>
+<span class="n">metacard_serum_public_gsheets_url</span> <span class="o">=</span> <span class="s2">&quot;https://docs.google.com/spreadsheets/d/1_Z_U_gJ0li1Iy7wwrQGWoZOcQ6fFc1As21omMuuObXc/edit#gid=1093748047&quot;</span>
+
+<span class="c1"># import csv files from current directory - we can change this</span>
+<span class="c1"># metadata = pd.read_csv(&#39;metacard_metadata.csv&#39;)</span>
+<span class="c1"># microbiome = pd.read_csv(&#39;metacard_microbiome.csv&#39;)</span>
+<span class="c1"># metabolome = pd.read_csv(&#39;metacard_serum.csv&#39;)</span>
+<span class="n">metadata</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">(</span><span class="n">metacard_metadata_public_gsheets_url</span><span class="p">)</span>
+<span class="n">microbiome</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">(</span><span class="n">metacard_microbiome_public_gsheets_url</span><span class="p">)</span>
+<span class="n">metabolome</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">(</span><span class="n">metacard_serum_public_gsheets_url</span><span class="p">)</span>
+
+<span class="c1"># transform and filter microbiome dataframe</span>
+<span class="n">abundance</span> <span class="o">=</span> <span class="n">count_to_abundance</span><span class="p">(</span><span class="n">microbiome</span><span class="p">)</span>
+
+<span class="c1"># merge into one large dataframe by patient ID, filter sparse features</span>
+<span class="n">metamicro</span> <span class="o">=</span> <span class="n">combine_metamicro</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span> <span class="n">metabolome</span><span class="p">,</span> <span class="n">abundance</span><span class="p">)</span>
+<span class="n">metamicro_filt</span> <span class="o">=</span> <span class="n">filter_sparse</span><span class="p">(</span><span class="n">metamicro</span><span class="p">,</span> <span class="n">metamicro</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">2</span><span class="p">:],</span> <span class="n">percent</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+<span class="c1"># this is where we could remove X-metabolites</span>
+
+<span class="c1"># send final df to pickle</span>
+<span class="n">current_dir</span> <span class="o">=</span> <span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+<span class="n">root_dir</span> <span class="o">=</span> <span class="n">dirname</span><span class="p">(</span><span class="n">dirname</span><span class="p">(</span><span class="n">dirname</span><span class="p">(</span><span class="n">current_dir</span><span class="p">)))</span>
+<span class="n">metamicro_filt</span><span class="o">.</span><span class="n">to_pickle</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">root_dir</span><span class="p">,</span> <span class="s1">&#39;data/metamicro_processed.pkl&#39;</span><span class="p">))</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kira Olander, Mattias Tolhurst, Paul Kim, Alyssa Easton, Maggie Cook.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>README Metabolander &mdash; Cardio 01 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Use Cases" href="use_cases.html" />
+    <link rel="prev" title="cardio.vis package" href="cardio.vis.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Cardio
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="modules.html">cardio</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">README Metabolander</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#example-event-parameter"></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#components">Components</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#preprocessing-scripts">Preprocessing Scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-visualization">Data Visualization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#modelling">Modelling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#user-input-predictions">User Input Predictions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#patient-status-abbreviations">Patient status abbreviations:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dependencies">Dependencies</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="use_cases.html">Use Cases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_stories.html">User Stories</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Cardio</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">README Metabolander</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/readme_link.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="readme-metabolander">
+<h1>README Metabolander<a class="headerlink" href="#readme-metabolander" title="Permalink to this heading"></a></h1>
+<p>Tool for Analysis of meta microbiomes and metabolomes.</p>
+</section>
+<section id="example-event-parameter">
+<h1><img alt="example event parameter" src="https://github.com/Cardio-Meta-Microme/Cardio/tree/main/.github/workflows/main.yml/badge.svg?event=push" /><a class="headerlink" href="#example-event-parameter" title="Permalink to this heading"></a></h1>
+<section id="components">
+<h2>Components<a class="headerlink" href="#components" title="Permalink to this heading"></a></h2>
+<p><img alt="cox interaction model" src="https://github.com/Cardio-Meta-Microme/Cardio/tree/main/assets/cox_interaction_model.png" /></p>
+<section id="preprocessing-scripts">
+<h3>Preprocessing Scripts<a class="headerlink" href="#preprocessing-scripts" title="Permalink to this heading"></a></h3>
+<p>Data preprocessing inputs:</p>
+<ul class="simple">
+<li><p>log-transformed metabolites</p></li>
+<li><p>microbiome read-normalized counts</p></li>
+<li><p>patient health metrics (Age, BMI, sex, ID, health status)</p></li>
+</ul>
+<p>Processing steps:</p>
+<ul class="simple">
+<li><p>read CSV files from data folder</p></li>
+<li><p>combine metadata, microbiome, and metabolome into one dataframe with patients as indices</p></li>
+<li><p>drop patients missing over 1000 features from model</p></li>
+<li><p>calculate each patient’s shannon diversity from microbe counts</p></li>
+<li><p>centered log ratio (CLR) transform counts to relative abundance:</p>
+<ul>
+<li><p>we have to do this because compositional data is constrained by total</p></li>
+<li><p>image address: Aitchison_triadlogratio.jpg</p></li>
+<li><p>formula:  $ clr(x) =  \ln\left[\frac{x_1}{g_m(x)}, \ldots, \frac{x_D}{g_m(x)}\right] $ where $ g_m(x) = (\prod\limits_{i=1}^{D} x_i)^{1/D} $ is the geometric mean of x</p></li>
+</ul>
+</li>
+<li><p>filter sparse features separately for microbiome/metabolome</p>
+<ul>
+<li><p>sparse defined as having more than a certain number of NAs</p></li>
+</ul>
+</li>
+</ul>
+<p>Before ML feature selection and training:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>impute NAs as lowest value in distribution -1
+</pre></div>
+</div>
+</section>
+<section id="data-visualization">
+<h3>Data Visualization<a class="headerlink" href="#data-visualization" title="Permalink to this heading"></a></h3>
+<p>There are a several useful visualizations in this component.</p>
+<p>Firstly we visualise the general distributions of our cohort using Altair, this includes a boxplot of the BMI, age,
+and shannon diversity of the sample.</p>
+<p>Next we plot the the relative abundance of bacterial species among all four of the cohorts. These display the bacterial species or metabolites that are significantly changed from the healthy cohort. This change is deemed significant by a <a class="reference external" href="https://link.springer.com/referenceworkentry/10.1007/978-1-4419-9863-7_1215">Benjamini-Hochberg</a> test.</p>
+<p>Finally there are two Uniform Manifold Approximation Projections (UMAPs) which reduce the dimensionality</p>
+</section>
+<section id="modelling">
+<h3>Modelling<a class="headerlink" href="#modelling" title="Permalink to this heading"></a></h3>
+</section>
+<section id="user-input-predictions">
+<h3>User Input Predictions<a class="headerlink" href="#user-input-predictions" title="Permalink to this heading"></a></h3>
+</section>
+<section id="patient-status-abbreviations">
+<h3>Patient status abbreviations:<a class="headerlink" href="#patient-status-abbreviations" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p>IHD: ischemic heart disease patients</p></li>
+<li><p>HC: healthy controls</p></li>
+<li><p>MMC: metabolically matched controls</p></li>
+<li><p>UMMC unmedicated metabolically matched controls</p></li>
+<li><p>ACS: acute coronary syndrome</p></li>
+<li><p>CIHD: chronic IHD</p></li>
+<li><p>HF: heart failure due to IHD</p></li>
+</ul>
+</section>
+<section id="dependencies">
+<h3>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p>numpy</p></li>
+<li><p>scipy</p></li>
+<li><p>pandas</p></li>
+<li><p>matplotlib</p></li>
+<li><p>openpyxl</p></li>
+</ul>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="cardio.vis.html" class="btn btn-neutral float-left" title="cardio.vis package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="use_cases.html" class="btn btn-neutral float-right" title="Use Cases" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kira Olander, Mattias Tolhurst, Paul Kim, Alyssa Easton, Maggie Cook.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

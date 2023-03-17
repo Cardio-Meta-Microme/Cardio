@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cardio.tests.test_trim_data &mdash; Cardio 01 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Cardio
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">cardio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases.html">Use Cases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_stories.html">User Stories</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Cardio</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">cardio.tests.test_trim_data</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cardio.tests.test_trim_data</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">import</span> <span class="nn">scipy.stats</span>
+<span class="kn">import</span> <span class="nn">skbio.diversity</span>
+<span class="kn">from</span> <span class="nn">cardio.preprocessing_scripts</span> <span class="kn">import</span> <span class="n">trimdata</span>
+
+<span class="n">collections</span><span class="o">.</span><span class="n">Callable</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;../..&#39;</span><span class="p">)</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">RuntimeWarning</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="TestPreprocessing"><a class="viewcode-back" href="../../../cardio.tests.html#cardio.tests.test_trim_data.TestPreprocessing">[docs]</a><span class="k">class</span> <span class="nc">TestPreprocessing</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Test functions within preprocessing script trimdata.py</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TestPreprocessing.test_readcsvs"><a class="viewcode-back" href="../../../cardio.tests.html#cardio.tests.test_trim_data.TestPreprocessing.test_readcsvs">[docs]</a>    <span class="k">def</span> <span class="nf">test_readcsvs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Test whether omics data .csv files are in the correct folder for</span>
+<span class="sd">        function read_csvs</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">trimdata</span><span class="o">.</span><span class="n">read_csvs</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;CSV path test passed&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Data files not found. Working directory must be Cardio, </span><span class="se">\</span>
+<span class="s1">                  and csv data files must be in Cardio/data. Metadata, microbiome, </span><span class="se">\</span>
+<span class="s1">                  and metabolome data must be entitled metacard_metadata.csv, </span><span class="se">\</span>
+<span class="s1">                  metacard_microbiome.csv, and metacard_serum.csv&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestPreprocessing.testbasicfilt"><a class="viewcode-back" href="../../../cardio.tests.html#cardio.tests.test_trim_data.TestPreprocessing.testbasicfilt">[docs]</a>    <span class="k">def</span> <span class="nf">testbasicfilt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Test that empty dataframe throws ValueError</span>
+<span class="sd">        in function basic_filtering</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">[],</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;ID&#39;</span><span class="p">,</span> <span class="s1">&#39;Age&#39;</span><span class="p">,</span> <span class="s1">&#39;Feature&#39;</span><span class="p">])</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">trimdata</span><span class="o">.</span><span class="n">basic_filtering</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Test of basic filtering empty dataframe passed&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestPreprocessing.test_sparsefilt"><a class="viewcode-back" href="../../../cardio.tests.html#cardio.tests.test_trim_data.TestPreprocessing.test_sparsefilt">[docs]</a>    <span class="k">def</span> <span class="nf">test_sparsefilt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Test that sparse feature removal throws error if all features</span>
+<span class="sd">        are sparse, and thus removed from df in function sparse_filt</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">[],</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">])</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">trimdata</span><span class="o">.</span><span class="n">sparse_filt</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">remove_str</span><span class="o">=</span><span class="s1">&#39;X-&#39;</span><span class="p">,</span> <span class="n">na_lim</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Test of sparse feature filtering empty dataframe passed&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestPreprocessing.test_shannon"><a class="viewcode-back" href="../../../cardio.tests.html#cardio.tests.test_trim_data.TestPreprocessing.test_shannon">[docs]</a>    <span class="k">def</span> <span class="nf">test_shannon</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Test that Shannon diversity function runs, outputting a column of</span>
+<span class="sd">        float64 and that NaNs do not throw errors</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]])</span>
+        <span class="n">shan</span> <span class="o">=</span> <span class="n">trimdata</span><span class="o">.</span><span class="n">calculate_shannon_diversity</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">shan</span><span class="o">.</span><span class="n">shannon</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;float64&#39;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Smoke test for shannon calculation worked&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestPreprocessing.test_counttoabund"><a class="viewcode-back" href="../../../cardio.tests.html#cardio.tests.test_trim_data.TestPreprocessing.test_counttoabund">[docs]</a>    <span class="k">def</span> <span class="nf">test_counttoabund</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Test that function count_to_abundance throws AssertionError if</span>
+<span class="sd">        counts are not numerical dtype</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">[[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">]],</span>
+                          <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;MGS count&#39;</span><span class="p">,</span> <span class="s1">&#39;Gene count&#39;</span><span class="p">,</span>
+                                   <span class="s1">&#39;Microbial load&#39;</span><span class="p">,</span> <span class="s1">&#39;ID&#39;</span><span class="p">,</span> <span class="s1">&#39;Status&#39;</span><span class="p">,</span>
+                                   <span class="s1">&#39;count&#39;</span><span class="p">])</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">trimdata</span><span class="o">.</span><span class="n">count_to_abundance</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Test of invalid count data type passed&#39;</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kira Olander, Mattias Tolhurst, Paul Kim, Alyssa Easton, Maggie Cook.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

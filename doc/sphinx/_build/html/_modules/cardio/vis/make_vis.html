@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cardio.vis.make_vis &mdash; Cardio 01 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Cardio
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">cardio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases.html">Use Cases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_stories.html">User Stories</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Cardio</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">cardio.vis.make_vis</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cardio.vis.make_vis</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">math</span>
+
+<span class="kn">import</span> <span class="nn">altair</span> <span class="k">as</span> <span class="nn">alt</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="kn">import</span> <span class="nn">statsmodels</span>
+<span class="kn">from</span> <span class="nn">statsmodels.stats.weightstats</span> <span class="kn">import</span> <span class="n">ztest</span>
+<span class="kn">from</span> <span class="nn">statsmodels.stats.multitest</span> <span class="kn">import</span> <span class="n">multipletests</span>
+<span class="kn">from</span> <span class="nn">umap</span> <span class="kn">import</span> <span class="n">UMAP</span>
+
+<span class="c1">#Global variable for matplotlib fonts</span>
+<span class="n">SMALL_SIZE</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">MEDIUM_SIZE</span> <span class="o">=</span> <span class="mi">16</span>
+<span class="n">BIGGER_SIZE</span> <span class="o">=</span> <span class="mi">18</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;font&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">SMALL_SIZE</span><span class="p">)</span>          <span class="c1"># controls default text sizes</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;axes&#39;</span><span class="p">,</span> <span class="n">titlesize</span><span class="o">=</span><span class="n">BIGGER_SIZE</span><span class="p">)</span>     <span class="c1"># fontsize of the axes title</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;axes&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="n">MEDIUM_SIZE</span><span class="p">)</span>    <span class="c1"># fontsize of the x and y labels</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;xtick&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="n">SMALL_SIZE</span><span class="p">)</span>    <span class="c1"># fontsize of the tick labels</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;ytick&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="n">SMALL_SIZE</span><span class="p">)</span>    <span class="c1"># fontsize of the tick labels</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;legend&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">SMALL_SIZE</span><span class="p">)</span>    <span class="c1"># legend fontsize</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;figure&#39;</span><span class="p">,</span> <span class="n">titlesize</span><span class="o">=</span><span class="n">BIGGER_SIZE</span><span class="p">)</span>  <span class="c1"># fontsize of the figure title</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;figure&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="n">BIGGER_SIZE</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;dark_background&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="process_for_visualization"><a class="viewcode-back" href="../../../cardio.vis.html#cardio.vis.make_vis.process_for_visualization">[docs]</a><span class="k">def</span> <span class="nf">process_for_visualization</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Processed data for visualization by changing chort names to more memorable</span>
+<span class="sd">        titles</span>
+<span class="sd">        Parameters:</span>
+<span class="sd">            data(pandas df): with columsn ID, Status, Age, BMI, Gender, shannon</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            general_data(pandas df): with columns mentioned above and new cols</span>
+<span class="sd">            sample_group, and sample_group_breaks</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#check that the columns we need are present</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">,</span> <span class="s1">&#39;BMI&#39;</span><span class="p">,</span> <span class="s1">&#39;Age&#39;</span><span class="p">,</span> <span class="s1">&#39;Gender&#39;</span><span class="p">,</span> <span class="s1">&#39;shannon&#39;</span><span class="p">]:</span>
+        <span class="k">assert</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span>
+
+    <span class="c1">#mapping sample names</span>
+    <span class="n">sample_name_w_breaks</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;HC275&#39;</span><span class="p">:</span> <span class="s1">&#39;Healthy</span><span class="se">\n</span><span class="s1"> n=275&#39;</span><span class="p">,</span>
+     <span class="s1">&#39;MMC269&#39;</span><span class="p">:</span> <span class="s1">&#39;Metabolically</span><span class="se">\n</span><span class="s1"> Matched</span><span class="se">\n</span><span class="s1"> n=269&#39;</span><span class="p">,</span>
+     <span class="s1">&#39;IHD372&#39;</span><span class="p">:</span> <span class="s1">&#39;Heart Disease</span><span class="se">\n</span><span class="s1"> n=372&#39;</span><span class="p">,</span>
+     <span class="s1">&#39;UMCC222&#39;</span><span class="p">:</span> <span class="s1">&#39;NoTx.</span><span class="se">\n</span><span class="s1"> Metabolically</span><span class="se">\n</span><span class="s1"> Matched</span><span class="se">\n</span><span class="s1"> n=222&#39;</span><span class="p">}</span>
+
+    <span class="n">sample_name</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;HC275&#39;</span><span class="p">:</span> <span class="s1">&#39;Healthy n=275&#39;</span><span class="p">,</span>
+     <span class="s1">&#39;MMC269&#39;</span><span class="p">:</span> <span class="s1">&#39;Metabolically Matched n=269&#39;</span><span class="p">,</span>
+     <span class="s1">&#39;IHD372&#39;</span><span class="p">:</span> <span class="s1">&#39;Heart Disease n=372&#39;</span><span class="p">,</span>
+     <span class="s1">&#39;UMCC222&#39;</span><span class="p">:</span> <span class="s1">&#39;NoTx. Metabolically Matched n=222&#39;</span><span class="p">}</span>
+
+    <span class="c1">#mapping ID to these sample names</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;sample_group_breaks&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> \
+                                                         <span class="n">sample_name_w_breaks</span><span class="p">[</span><span class="n">x</span><span class="p">])</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;sample_group&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">sample_name</span><span class="p">[</span><span class="n">x</span><span class="p">])</span>
+
+    <span class="n">general_data</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="s1">&#39;ID&#39;</span><span class="p">,</span> <span class="s1">&#39;Status&#39;</span><span class="p">,</span> <span class="s1">&#39;Age&#39;</span><span class="p">,</span> <span class="s1">&#39;BMI&#39;</span><span class="p">,</span> <span class="s1">&#39;Gender&#39;</span><span class="p">,</span><span class="s1">&#39;shannon&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;sample_group&#39;</span><span class="p">,</span> <span class="s1">&#39;sample_group_breaks&#39;</span><span class="p">]]</span>
+
+    <span class="k">return</span> <span class="n">general_data</span></div>
+
+
+<div class="viewcode-block" id="plot_general_dist_altair"><a class="viewcode-back" href="../../../cardio.vis.html#cardio.vis.make_vis.plot_general_dist_altair">[docs]</a><span class="k">def</span> <span class="nf">plot_general_dist_altair</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Make boxplots showing general characteristics of each cohort we are trying</span>
+<span class="sd">        to classify</span>
+<span class="sd">        Parameters:</span>
+<span class="sd">            df(pandas df): with cohort info with colnames sample_group,</span>
+<span class="sd">                sample_group_breaks, BMI (kg/m²),Age (years), Gender</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            fig(altair figure object): with boxplots for Age, BMI, Gender and</span>
+<span class="sd">                Shannon Index</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">frame</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span>
+
+    <span class="c1">#processing data for visualization</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">process_for_visualization</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+    <span class="c1">#check that the columns we need are present</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;sample_group&#39;</span><span class="p">,</span> <span class="s1">&#39;BMI&#39;</span><span class="p">,</span> <span class="s1">&#39;Age&#39;</span><span class="p">,</span> <span class="s1">&#39;Gender&#39;</span><span class="p">,</span> <span class="s1">&#39;shannon&#39;</span><span class="p">]:</span>
+        <span class="k">assert</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span>
+
+    <span class="c1">#creating first boxplot of bmi using altair</span>
+    <span class="n">chart1</span> <span class="o">=</span> <span class="n">alt</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="o">.</span><span class="n">mark_boxplot</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+        <span class="n">alt</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s1">&#39;sample_group&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">alt</span><span class="o">.</span><span class="n">Axis</span><span class="p">(</span><span class="n">labels</span><span class="o">=</span><span class="kc">False</span><span class="p">)),</span>
+        <span class="n">alt</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="s1">&#39;BMI&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;BMI (kg/m²)&#39;</span><span class="p">),</span>
+        <span class="n">alt</span><span class="o">.</span><span class="n">Color</span><span class="p">(</span><span class="s1">&#39;sample_group&#39;</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="n">alt</span><span class="o">.</span><span class="n">Legend</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;Patient Group&#39;</span><span class="p">))</span>
+    <span class="p">)</span>
+
+    <span class="c1">#creating second boxplot of Age using altair</span>
+    <span class="n">chart2</span> <span class="o">=</span> <span class="n">alt</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="o">.</span><span class="n">mark_boxplot</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+        <span class="n">alt</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s1">&#39;sample_group&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">alt</span><span class="o">.</span><span class="n">Axis</span><span class="p">(</span><span class="n">labels</span><span class="o">=</span><span class="kc">False</span><span class="p">)),</span>
+        <span class="n">alt</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="s1">&#39;Age&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Age (years)&#39;</span><span class="p">),</span>
+        <span class="n">alt</span><span class="o">.</span><span class="n">Color</span><span class="p">(</span><span class="s1">&#39;sample_group&#39;</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="n">alt</span><span class="o">.</span><span class="n">Legend</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;Patient Group&#39;</span><span class="p">))</span>
+    <span class="p">)</span>
+
+    <span class="n">chart4</span> <span class="o">=</span> <span class="n">alt</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="o">.</span><span class="n">mark_boxplot</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+        <span class="n">alt</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s1">&#39;sample_group&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">alt</span><span class="o">.</span><span class="n">Axis</span><span class="p">(</span><span class="n">labels</span><span class="o">=</span><span class="kc">False</span><span class="p">)),</span>
+        <span class="n">alt</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="s1">&#39;shannon&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Shannon Index&#39;</span><span class="p">),</span>
+        <span class="n">alt</span><span class="o">.</span><span class="n">Color</span><span class="p">(</span><span class="s1">&#39;sample_group&#39;</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="n">alt</span><span class="o">.</span><span class="n">Legend</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;Patient Group&#39;</span><span class="p">))</span>
+    <span class="p">)</span>
+
+    <span class="c1">#concatenating the charts using altair</span>
+    <span class="n">boxplots</span> <span class="o">=</span> <span class="n">alt</span><span class="o">.</span><span class="n">hconcat</span><span class="p">(</span><span class="n">chart1</span><span class="p">,</span> <span class="n">chart2</span><span class="p">,</span> <span class="n">chart4</span><span class="p">)</span>
+
+    <span class="c1">#creating a df that groups by disease classification and counts the number</span>
+    <span class="c1">#of Males and Females</span>
+    <span class="n">gender_df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;sample_group_breaks&#39;</span><span class="p">,</span><span class="s1">&#39;Gender&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+    <span class="n">gender_df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1">#This just makes the title wrapping for the altair bar chart easier</span>
+    <span class="n">gender_df</span><span class="p">[</span><span class="s1">&#39;sample_group_breaks&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gender_df</span><span class="o">.</span><span class="n">sample_group_breaks</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="c1">#using altair to make a bar chart by gender for each cohort</span>
+    <span class="n">gender_dis</span> <span class="o">=</span> <span class="n">alt</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">gender_df</span><span class="p">)</span><span class="o">.</span><span class="n">mark_bar</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+        <span class="n">alt</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s1">&#39;Gender:N&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">),</span>
+        <span class="n">alt</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="s1">&#39;ID:Q&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Patient Count&#39;</span><span class="p">),</span>
+        <span class="n">alt</span><span class="o">.</span><span class="n">Color</span><span class="p">(</span><span class="s1">&#39;Gender:N&#39;</span><span class="p">),</span> \
+        <span class="n">alt</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;sample_group_breaks:N&#39;</span><span class="p">,</span> \
+                    <span class="n">header</span><span class="o">=</span><span class="n">alt</span><span class="o">.</span><span class="n">Header</span><span class="p">(</span><span class="n">labelAlign</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">labelColor</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">),</span>\
+                    <span class="n">title</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">boxplots</span><span class="p">,</span> <span class="n">gender_dis</span></div>
+
+
+<div class="viewcode-block" id="ttest"><a class="viewcode-back" href="../../../cardio.vis.html#cardio.vis.make_vis.ttest">[docs]</a><span class="k">def</span> <span class="nf">ttest</span><span class="p">(</span><span class="n">hc</span><span class="p">,</span> <span class="n">subgroup</span><span class="p">,</span> <span class="n">microtype</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Evaluates a t test for each feature of the dataframe</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            hc(Pandas dataframe): subgroup of whole dataset for only the healthy</span>
+<span class="sd">                control group</span>
+<span class="sd">            subgroup(Pandas dataframe): subgroup of whole dataset for only one</span>
+<span class="sd">                disease condition</span>
+<span class="sd">            microtype(list): names of bacterial or metabolite species, matches</span>
+<span class="sd">                the column names in the df</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            pvals(list): p values of each t test</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pvals</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">species</span> <span class="ow">in</span> <span class="n">microtype</span><span class="p">:</span>
+        <span class="n">t</span><span class="p">,</span> <span class="n">pval</span> <span class="o">=</span> <span class="n">statsmodels</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">weightstats</span><span class="o">.</span><span class="n">ztest</span><span class="p">(</span><span class="n">hc</span><span class="p">[</span><span class="n">species</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">(),</span> \
+                                                      <span class="n">subgroup</span><span class="p">[</span><span class="n">species</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">())</span>
+        <span class="n">pvals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pval</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pvals</span></div>
+
+
+<div class="viewcode-block" id="multtest"><a class="viewcode-back" href="../../../cardio.vis.html#cardio.vis.make_vis.multtest">[docs]</a><span class="k">def</span> <span class="nf">multtest</span><span class="p">(</span><span class="n">hc</span><span class="p">,</span> <span class="n">subgroup</span><span class="p">,</span> <span class="n">microtype</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Evaluates a Benjamini/Hochberg test for each p value of the t test of each</span>
+<span class="sd">        feature of the dataframe</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            hc(Pandas dataframe): subgroup of whole dataset for only the healthy</span>
+<span class="sd">                control group subgroup(Pandas dataframe): subgroup of whole</span>
+<span class="sd">                dataset for only one disease condition</span>
+<span class="sd">            microtype(list): names of bacterial or metabolite species, matches</span>
+<span class="sd">                the column names in the df</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            siglist(list): boolean values for each feature if it has</span>
+<span class="sd">                significantly deviated from the healthy control group</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tlist</span> <span class="o">=</span> <span class="n">ttest</span><span class="p">(</span><span class="n">hc</span><span class="p">,</span> <span class="n">subgroup</span><span class="p">,</span> <span class="n">microtype</span><span class="p">)</span>
+    <span class="n">sigbool</span> <span class="o">=</span> <span class="n">statsmodels</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">multitest</span><span class="o">.</span><span class="n">multipletests</span><span class="p">(</span><span class="n">tlist</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;fdr_bh&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">siglist</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span> <span class="p">:</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)</span> <span class="p">,</span> <span class="n">microtype</span><span class="p">,</span> <span class="n">sigbool</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">siglist</span></div>
+
+
+<div class="viewcode-block" id="mk_dict"><a class="viewcode-back" href="../../../cardio.vis.html#cardio.vis.make_vis.mk_dict">[docs]</a><span class="k">def</span> <span class="nf">mk_dict</span><span class="p">(</span><span class="n">colnames</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Makes a dictionary of mean normalized read counts for either bacterial</span>
+<span class="sd">        species or metabolites for a dataframe</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            colnames(list): names of bacterial species, matches the column names</span>
+<span class="sd">                in the df</span>
+<span class="sd">            df(Pandas dataframe): subgroup of whole dataset for only one</span>
+<span class="sd">                disease condition</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            micro_dict(dict): mean normalized read counts (values) for bacterial</span>
+<span class="sd">                species or metabolites (key)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">micro_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">eq</span><span class="p">(</span><span class="s1">&#39;HC275&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="n">colnames</span><span class="p">]</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">micro_dict</span><span class="p">[</span><span class="n">point</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">point</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="n">colnames</span><span class="p">]</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">micro_dict</span><span class="p">[</span><span class="n">point</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">point</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()]</span>
+
+    <span class="k">return</span> <span class="n">micro_dict</span></div>
+
+
+<div class="viewcode-block" id="mk_control_df"><a class="viewcode-back" href="../../../cardio.vis.html#cardio.vis.make_vis.mk_control_df">[docs]</a><span class="k">def</span> <span class="nf">mk_control_df</span><span class="p">(</span><span class="n">micro_dict</span><span class="p">,</span> <span class="n">valtype</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Makes a sorted dataframe of mean normalized read counts for either bacterial</span>
+<span class="sd">        species or metabolites ONLY for the healthy control disease subtype</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            micro_dict(dict): mean normalized read counts (values) for bacterial</span>
+<span class="sd">                species or metabolites (key)</span>
+<span class="sd">            valtype(string): either &quot;Bacteria&quot; or &quot;Metabolites&quot;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            micro_dict(Pandas dataframe): sorted dataframe of normalized read</span>
+<span class="sd">                counts for either bacterial species or metabolites</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">micro_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">micro_dict</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="n">micro_type</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">micro_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">type_counts</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">micro_dict</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+    <span class="n">micro_dict</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">micro_dict</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+    <span class="n">micro_dict</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="n">valtype</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span> <span class="s1">&#39;Normalized Read Count&#39;</span><span class="p">},</span> \
+                      <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">micro_dict</span></div>
+
+
+<div class="viewcode-block" id="mk_df"><a class="viewcode-back" href="../../../cardio.vis.html#cardio.vis.make_vis.mk_df">[docs]</a><span class="k">def</span> <span class="nf">mk_df</span><span class="p">(</span><span class="n">micro_dict</span><span class="p">,</span> <span class="n">control_dict</span><span class="p">,</span> <span class="n">valtype</span><span class="p">,</span> <span class="n">siglist</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Makes a dataframe of mean normalized read counts for either bacterial</span>
+<span class="sd">        species or metabolites sorted based off the healthy control subtype</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            micro_dict(dict): mean normalized read counts (values) for bacterial</span>
+<span class="sd">                species or metabolites (key)</span>
+<span class="sd">            control_dict(dict): mean normalized read counts (values) for</span>
+<span class="sd">                bacterial species or metabolites (key) for healthy control</span>
+<span class="sd">                subtype</span>
+<span class="sd">            valtype(string): either &quot;Bacteria&quot; or &quot;Metabolites&quot;</span>
+<span class="sd">	    siglist(list): boolean values for each feature if significantly deviated</span>
+<span class="sd">            from healthy</span>
+<span class="sd">	Returns:</span>
+<span class="sd">            micro_df(Pandas dataframe): sorted dataframe of normalized read</span>
+<span class="sd">                counts for either bacterial species or metabolites</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">micro_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">micro_dict</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">kv</span><span class="p">:</span> <span class="n">control_dict</span><span class="p">[</span><span class="n">kv</span><span class="p">[</span><span class="mi">0</span><span class="p">]]))</span>
+    <span class="n">micro_type</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">micro_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">type_counts</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">micro_dict</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+    <span class="k">for</span> <span class="n">species</span> <span class="ow">in</span> <span class="n">micro_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">siglist</span><span class="p">[</span><span class="n">species</span><span class="p">]:</span>
+            <span class="n">micro_dict</span><span class="p">[</span><span class="n">species</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Significant Change&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">micro_dict</span><span class="p">[</span><span class="n">species</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;No Significant Change&#39;</span><span class="p">)</span>
+
+    <span class="n">micro_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">micro_dict</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+    <span class="n">micro_df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="n">valtype</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span> <span class="s1">&#39;Normalized Read Count&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> \
+                    <span class="s1">&#39;Change from Healthy Control&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">micro_df</span></div>
+
+
+<div class="viewcode-block" id="mk_chart"><a class="viewcode-back" href="../../../cardio.vis.html#cardio.vis.make_vis.mk_chart">[docs]</a><span class="k">def</span> <span class="nf">mk_chart</span><span class="p">(</span><span class="n">HCDF</span><span class="p">,</span> <span class="n">IHDDF</span><span class="p">,</span> <span class="n">MMCDF</span><span class="p">,</span> <span class="n">UMCCDF</span><span class="p">,</span> <span class="n">valtype</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Makes a chart of mean normalized read counts for either bacterial species or</span>
+<span class="sd">        metabolites sorted based off the healthy control subtype for all four</span>
+<span class="sd">        subgroups</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            HCDF(Pandas dataframe): subset of dataframe information for healthy</span>
+<span class="sd">            controls</span>
+<span class="sd">            IHDDF(Pandas dataframe): subset of dataframe information for IHD</span>
+<span class="sd">            group</span>
+<span class="sd">            MMCDF(Pandas dataframe): subset of dataframe information for MMC</span>
+<span class="sd">            group</span>
+<span class="sd">            UMCCDF(Pandas dataframe): subset of dataframe information for UMCC</span>
+<span class="sd">            valtype(string): either &quot;Bacteria&quot; or &quot;Metabolites&quot;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            chart(Altair chart): chart of mean normalized read counts for either</span>
+<span class="sd">                bacterial species or metabolites sorted based off the healthy</span>
+<span class="sd">                control subtype for all four subgroups</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">domain</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;No Significant Change&#39;</span><span class="p">,</span> <span class="s1">&#39;Significant Change&#39;</span><span class="p">]</span>
+    <span class="n">range_</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;grey&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">]</span>
+
+    <span class="n">chartHC</span> <span class="o">=</span> <span class="n">alt</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">HCDF</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Healthy Controls&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">mark_bar</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+        <span class="n">alt</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s1">&#39;Normalized Read Count&#39;</span><span class="p">),</span>
+        <span class="n">alt</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="n">valtype</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">alt</span><span class="o">.</span><span class="n">Axis</span><span class="p">(</span><span class="n">labels</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tickSize</span><span class="o">=</span><span class="mi">0</span><span class="p">)),</span>
+        <span class="n">color</span><span class="o">=</span><span class="n">alt</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="s1">&#39;grey&#39;</span><span class="p">),</span>
+        <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="n">valtype</span><span class="p">,</span> <span class="s1">&#39;Normalized Read Count&#39;</span><span class="p">]</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+        <span class="n">width</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="mi">300</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">interactive</span><span class="p">()</span>
+
+    <span class="n">chartUMCC</span> <span class="o">=</span> <span class="n">alt</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">UMCCDF</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Untreated Metabolically Matched </span><span class="se">\</span>
+<span class="s1">                          Controls&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">mark_bar</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+        <span class="n">alt</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s1">&#39;Normalized Read Count&#39;</span><span class="p">),</span>
+        <span class="n">alt</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="n">valtype</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">alt</span><span class="o">.</span><span class="n">Axis</span><span class="p">(</span><span class="n">labels</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tickSize</span><span class="o">=</span><span class="mi">0</span><span class="p">)),</span>
+        <span class="n">color</span><span class="o">=</span><span class="n">alt</span><span class="o">.</span><span class="n">Color</span><span class="p">(</span><span class="s1">&#39;Change from Healthy Control&#39;</span><span class="p">,</span> \
+                        <span class="n">scale</span><span class="o">=</span><span class="n">alt</span><span class="o">.</span><span class="n">Scale</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">range_</span><span class="p">)),</span>
+        <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="n">valtype</span><span class="p">,</span> <span class="s1">&#39;Normalized Read Count&#39;</span><span class="p">]</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+        <span class="n">width</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="mi">300</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">interactive</span><span class="p">()</span>
+
+    <span class="n">chartIHD</span> <span class="o">=</span> <span class="n">alt</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">IHDDF</span><span class="p">,</span> \
+                         <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Ischemic Heart Disease&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">mark_bar</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+        <span class="n">alt</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s1">&#39;Normalized Read Count&#39;</span><span class="p">),</span>
+        <span class="n">alt</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="n">valtype</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">alt</span><span class="o">.</span><span class="n">Axis</span><span class="p">(</span><span class="n">labels</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tickSize</span><span class="o">=</span><span class="mi">0</span><span class="p">)),</span>
+        <span class="n">color</span><span class="o">=</span><span class="n">alt</span><span class="o">.</span><span class="n">Color</span><span class="p">(</span><span class="s1">&#39;Change from Healthy Control&#39;</span><span class="p">,</span> \
+                        <span class="n">scale</span><span class="o">=</span><span class="n">alt</span><span class="o">.</span><span class="n">Scale</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">range_</span><span class="p">)),</span>
+        <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="n">valtype</span><span class="p">,</span> <span class="s1">&#39;Normalized Read Count&#39;</span><span class="p">]</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+        <span class="n">width</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="mi">300</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">interactive</span><span class="p">()</span>
+
+    <span class="n">chartMMC</span> <span class="o">=</span> <span class="n">alt</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">MMCDF</span><span class="p">,</span> \
+                <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Metabolically Matched Controls&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">mark_bar</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+        <span class="n">alt</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s1">&#39;Normalized Read Count&#39;</span><span class="p">),</span>
+        <span class="n">alt</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="n">valtype</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">alt</span><span class="o">.</span><span class="n">Axis</span><span class="p">(</span><span class="n">labels</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tickSize</span><span class="o">=</span><span class="mi">0</span><span class="p">)),</span>
+        <span class="n">color</span><span class="o">=</span><span class="n">alt</span><span class="o">.</span><span class="n">Color</span><span class="p">(</span><span class="s1">&#39;Change from Healthy Control&#39;</span><span class="p">,</span> \
+                        <span class="n">scale</span><span class="o">=</span><span class="n">alt</span><span class="o">.</span><span class="n">Scale</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">range_</span><span class="p">)),</span>
+        <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="n">valtype</span><span class="p">,</span> <span class="s1">&#39;Normalized Read Count&#39;</span><span class="p">]</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+        <span class="n">width</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="mi">300</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">interactive</span><span class="p">()</span>
+
+    <span class="n">chart</span> <span class="o">=</span> <span class="n">alt</span><span class="o">.</span><span class="n">vconcat</span><span class="p">(</span><span class="n">alt</span><span class="o">.</span><span class="n">hconcat</span><span class="p">(</span><span class="n">chartHC</span><span class="p">,</span> <span class="n">chartIHD</span><span class="p">),</span><span class="n">alt</span><span class="o">.</span><span class="n">hconcat</span><span class="p">(</span><span class="n">chartMMC</span><span class="p">,</span> \
+    <span class="n">chartUMCC</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">chart</span></div>
+
+
+<div class="viewcode-block" id="plot_micro_abundance"><a class="viewcode-back" href="../../../cardio.vis.html#cardio.vis.make_vis.plot_micro_abundance">[docs]</a><span class="k">def</span> <span class="nf">plot_micro_abundance</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">microtype</span><span class="p">,</span> <span class="n">bacteria</span><span class="p">,</span> <span class="n">metabolites</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Wrapper function to generate a chart of mean normalized read counts for</span>
+<span class="sd">        either bacterial species or metabolites sorted based off the healthy</span>
+<span class="sd">        control subtype for all four subgroups</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            df(Pandas dataframe): entire dataframe</span>
+<span class="sd">            microtype(string): either &quot;Bacteria&quot; or &quot;Metabolites&quot;</span>
+<span class="sd">	    bacteria(list): column names of all bacterial species</span>
+<span class="sd">            metabolites(list): column names of all bacterial species</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            chart(Altair chart): chart of mean normalized read counts for either</span>
+<span class="sd">            bacterial species or metabolites sorted based off the healthy</span>
+<span class="sd">            control subtype for all four subgroups.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">microtype</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;microtype should be string type, either &quot;Bacteria&quot; or </span><span class="se">\</span>
+<span class="s1">                        &quot;Metabolites&quot;&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">bacteria</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;bacteria should be list type containing all bacterial </span><span class="se">\</span>
+<span class="s1">                        species columns&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">metabolites</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;metabolites should be list type containing all </span><span class="se">\</span>
+<span class="s1">                        metabolite columns&#39;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">df</span><span class="p">[</span><span class="n">bacteria</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;bacteria columns do not exist in df&#39;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">df</span><span class="p">[</span><span class="n">metabolites</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;metabolite columns do not exist in df&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">microtype</span> <span class="o">==</span> <span class="s1">&#39;Bacteria&#39;</span><span class="p">:</span>
+        <span class="n">mtype</span> <span class="o">=</span> <span class="n">bacteria</span>
+    <span class="k">elif</span> <span class="n">microtype</span> <span class="o">==</span> <span class="s1">&#39;Metabolite&#39;</span><span class="p">:</span>
+        <span class="n">mtype</span> <span class="o">=</span> <span class="n">metabolites</span>
+
+    <span class="n">df_HC275</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;HC275&#39;</span><span class="p">]</span>
+    <span class="n">df_MMC269</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;MMC269&#39;</span><span class="p">]</span>
+    <span class="n">df_IHD372</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;IHD372&#39;</span><span class="p">]</span>
+    <span class="n">df_UMCC222</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;UMCC222&#39;</span><span class="p">]</span>
+
+    <span class="n">hcdict</span> <span class="o">=</span> <span class="n">mk_dict</span><span class="p">(</span><span class="n">mtype</span><span class="p">,</span> <span class="n">df_HC275</span><span class="p">)</span>
+    <span class="n">hcdf</span> <span class="o">=</span> <span class="n">mk_control_df</span><span class="p">(</span><span class="n">hcdict</span><span class="p">,</span> <span class="n">microtype</span><span class="p">)</span>
+
+    <span class="n">mmcsiglist</span> <span class="o">=</span> <span class="n">multtest</span><span class="p">(</span><span class="n">df_HC275</span><span class="p">,</span> <span class="n">df_MMC269</span><span class="p">,</span> <span class="n">mtype</span><span class="p">)</span>
+    <span class="n">mmcdict</span> <span class="o">=</span> <span class="n">mk_dict</span><span class="p">(</span><span class="n">mtype</span><span class="p">,</span> <span class="n">df_MMC269</span><span class="p">)</span>
+    <span class="n">mmcdf</span> <span class="o">=</span> <span class="n">mk_df</span><span class="p">(</span><span class="n">mmcdict</span><span class="p">,</span> <span class="n">hcdict</span><span class="p">,</span> <span class="n">microtype</span><span class="p">,</span> <span class="n">mmcsiglist</span><span class="p">)</span>
+
+    <span class="n">ihdsiglist</span> <span class="o">=</span> <span class="n">multtest</span><span class="p">(</span><span class="n">df_HC275</span><span class="p">,</span> <span class="n">df_IHD372</span><span class="p">,</span> <span class="n">mtype</span><span class="p">)</span>
+    <span class="n">ihddict</span> <span class="o">=</span> <span class="n">mk_dict</span><span class="p">(</span><span class="n">mtype</span><span class="p">,</span> <span class="n">df_IHD372</span><span class="p">)</span>
+    <span class="n">ihddf</span> <span class="o">=</span> <span class="n">mk_df</span><span class="p">(</span><span class="n">ihddict</span><span class="p">,</span> <span class="n">hcdict</span><span class="p">,</span> <span class="n">microtype</span><span class="p">,</span> <span class="n">ihdsiglist</span><span class="p">)</span>
+
+    <span class="n">umccsiglist</span> <span class="o">=</span> <span class="n">multtest</span><span class="p">(</span><span class="n">df_HC275</span><span class="p">,</span> <span class="n">df_UMCC222</span><span class="p">,</span> <span class="n">mtype</span><span class="p">)</span>
+    <span class="n">umccdict</span> <span class="o">=</span> <span class="n">mk_dict</span><span class="p">(</span><span class="n">mtype</span><span class="p">,</span> <span class="n">df_UMCC222</span><span class="p">)</span>
+    <span class="n">umccdf</span> <span class="o">=</span> <span class="n">mk_df</span><span class="p">(</span><span class="n">umccdict</span><span class="p">,</span> <span class="n">hcdict</span><span class="p">,</span> <span class="n">microtype</span><span class="p">,</span> <span class="n">umccsiglist</span><span class="p">)</span>
+
+    <span class="n">chart</span> <span class="o">=</span> <span class="n">mk_chart</span><span class="p">(</span><span class="n">hcdf</span><span class="p">,</span> <span class="n">ihddf</span><span class="p">,</span> <span class="n">mmcdf</span><span class="p">,</span> <span class="n">umccdf</span><span class="p">,</span> <span class="n">microtype</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">chart</span></div>
+
+
+<div class="viewcode-block" id="high_var"><a class="viewcode-back" href="../../../cardio.vis.html#cardio.vis.make_vis.high_var">[docs]</a><span class="k">def</span> <span class="nf">high_var</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns 500 most variable features in dataframe</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            df(Pandas dataframe): entire dataframe</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            hv_data(Pandas dataframe): only includes the 500 most variable \</span>
+<span class="sd">            features</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">high_var</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)[:</span><span class="mi">500</span><span class="p">]</span><span class="o">.</span><span class="n">index</span>
+    <span class="n">hv_data</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">high_var</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">hv_data</span></div>
+
+
+<div class="viewcode-block" id="plot_UMAP"><a class="viewcode-back" href="../../../cardio.vis.html#cardio.vis.make_vis.plot_UMAP">[docs]</a><span class="k">def</span> <span class="nf">plot_UMAP</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">hivar</span><span class="p">,</span> <span class="n">bacteria</span><span class="p">,</span> <span class="n">metabolites</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a UMAP</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            df(Pandas dataframe): entire dataframe</span>
+<span class="sd">            columns(str): either &quot;all&quot; or &quot;default&quot;, specifies if you want to \</span>
+<span class="sd">                include age and BMI or not</span>
+<span class="sd">            hivar(bool): True or False, specifies if you want to only include \</span>
+<span class="sd">                the high variable</span>
+<span class="sd">            bacteria(list): column names of all bacterial species</span>
+<span class="sd">            metabolites(list): column names of all bacterial species</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            chart(Altair chart): clusters patients</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;columns should be string type, either &quot;all&quot; or </span><span class="se">\</span>
+<span class="s1">            &quot;default&quot;&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">hivar</span><span class="p">)</span> <span class="o">==</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;hivar should be bool type dictating if you want to </span><span class="se">\</span>
+<span class="s1">                        include only high variable features or not&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">bacteria</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;bactera should be list type containing all bacterial </span><span class="se">\</span>
+<span class="s1">                        species columns&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">metabolites</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;metabolites should be list type containing all </span><span class="se">\</span>
+<span class="s1">                        metabolite columns&#39;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">df</span><span class="p">[</span><span class="n">bacteria</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;bacteria columns do not exist in df&#39;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">df</span><span class="p">[</span><span class="n">metabolites</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;metabolite columns do not exist in df&#39;</span><span class="p">)</span>
+
+    <span class="n">default_modeling_columns</span> <span class="o">=</span> <span class="n">bacteria</span> <span class="o">+</span> <span class="n">metabolites</span>
+    <span class="n">all_modeling_columns</span> <span class="o">=</span> <span class="n">bacteria</span> <span class="o">+</span> <span class="n">metabolites</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;Age&#39;</span><span class="p">,</span> <span class="s1">&#39;BMI&#39;</span><span class="p">]</span>
+
+    <span class="c1"># specify the dataframe at either all_modeling_columns or default_modeling_columns, depending on inclusion of age and BMI</span>
+    <span class="k">if</span> <span class="n">columns</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">all_modeling_columns</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">columns</span> <span class="o">==</span> <span class="s1">&#39;default&#39;</span><span class="p">:</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">default_modeling_columns</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">hivar</span><span class="p">:</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">high_var</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># replace NaN values with zero</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">X</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">(),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">X</span><span class="p">[</span><span class="n">col</span><span class="p">])</span>
+
+    <span class="n">reducer</span> <span class="o">=</span> <span class="n">UMAP</span><span class="p">()</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">reducer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+    <span class="n">principal_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;component_one&#39;</span><span class="p">,</span> \
+                                                <span class="s1">&#39;component_two&#39;</span><span class="p">])</span>
+    <span class="n">final_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">principal_df</span><span class="p">,</span> <span class="n">df</span><span class="p">[[</span><span class="s1">&#39;Status&#39;</span><span class="p">]]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">chart</span> <span class="o">=</span> <span class="n">alt</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">final_df</span><span class="p">)</span><span class="o">.</span><span class="n">mark_circle</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+                <span class="n">alt</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s1">&#39;component_one&#39;</span><span class="p">),</span>
+                <span class="n">alt</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="s1">&#39;component_two&#39;</span><span class="p">),</span>
+                <span class="n">color</span><span class="o">=</span><span class="s1">&#39;Status&#39;</span><span class="p">,</span>
+                <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">]</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">interactive</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">chart</span></div>
+
+
+<div class="viewcode-block" id="cluster_age_bmi"><a class="viewcode-back" href="../../../cardio.vis.html#cardio.vis.make_vis.cluster_age_bmi">[docs]</a><span class="k">def</span> <span class="nf">cluster_age_bmi</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a scatter plot of age and BMI</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            df(Pandas dataframe): entire dataframe</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            chart(Altair chart): clusters patients based off their age and BMI</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">chart</span> <span class="o">=</span> <span class="n">alt</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="o">.</span><span class="n">mark_circle</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+                <span class="n">alt</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s1">&#39;Age&#39;</span><span class="p">),</span>
+                <span class="n">alt</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="s1">&#39;BMI&#39;</span><span class="p">),</span>
+                <span class="n">color</span><span class="o">=</span><span class="s1">&#39;Status&#39;</span><span class="p">,</span>
+                <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">]</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">interactive</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">chart</span></div>
+
+
+<div class="viewcode-block" id="feature_histograms"><a class="viewcode-back" href="../../../cardio.vis.html#cardio.vis.make_vis.feature_histograms">[docs]</a><span class="k">def</span> <span class="nf">feature_histograms</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">patient_data</span><span class="p">,</span> <span class="n">features</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Takes in training data and patient data and plots patient values against</span>
+<span class="sd">        the training data with IHD for</span>
+<span class="sd">    certain list of predictive features</span>
+<span class="sd">        Parameters:</span>
+<span class="sd">            df(pandas df): training data with columns &#39;Status&#39;</span>
+<span class="sd">                patient data(pandas series): where each row is a feature to plot</span>
+<span class="sd">                against training data</span>
+<span class="sd">            features(list): list of features, should be columns in both patient</span>
+<span class="sd">                data and df</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            fig(altair plot)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="s1">&#39;Status&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span>
+
+    <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">features</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span>
+        <span class="k">assert</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">patient_data</span>
+
+    <span class="c1">#filtering data for IHD only</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;IHD372&#39;</span><span class="p">]</span>
+    <span class="c1">#subsetting to features we&#39;re interested in</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">features</span><span class="p">]</span>
+    <span class="n">patient_data</span> <span class="o">=</span> <span class="n">patient_data</span><span class="p">[</span><span class="n">features</span><span class="p">]</span>
+
+    <span class="c1">#determining how big a plotting grid to make</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">features</span><span class="p">)</span> <span class="o">%</span> <span class="mi">5</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">features</span><span class="p">)</span> <span class="o">/</span> <span class="mi">5</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">features</span><span class="p">)</span> <span class="o">/</span> <span class="mi">5</span><span class="p">)</span>
+
+    <span class="c1">#creating said grid</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">rows</span><span class="p">),</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">set_size_inches</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+
+    <span class="c1">#so only the axis with plots show</span>
+    <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axs</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">ax</span><span class="p">:</span>
+            <span class="n">col</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
+
+    <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c1">#for loop creating plot for each feature</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">feature</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">features</span><span class="p">):</span>
+        <span class="c1">#resetting counter after each row is full</span>
+        <span class="k">if</span> <span class="n">counter</span> <span class="o">%</span> <span class="mi">5</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="c1">#making kdeplot</span>
+        <span class="n">sns</span><span class="o">.</span><span class="n">kdeplot</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">feature</span><span class="p">],</span> <span class="n">legend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;lightgray&#39;</span><span class="p">,</span> \
+                    <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="o">//</span><span class="mi">5</span><span class="p">,</span><span class="n">counter</span><span class="p">])</span>
+        <span class="c1">#adding vertical line for patient data</span>
+        <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="o">//</span><span class="mi">5</span><span class="p">,</span><span class="n">counter</span><span class="p">]</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">patient_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">feature</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+        <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="o">//</span><span class="mi">5</span><span class="p">,</span><span class="n">counter</span><span class="p">]</span><span class="o">.</span><span class="n">set_axis_on</span><span class="p">()</span>
+        <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="o">//</span><span class="mi">5</span><span class="p">,</span><span class="n">counter</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s1">&#39;Predictive Features&#39;</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">supylabel</span><span class="p">(</span><span class="s1">&#39;Density&#39;</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">fig</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kira Olander, Mattias Tolhurst, Paul Kim, Alyssa Easton, Maggie Cook.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
