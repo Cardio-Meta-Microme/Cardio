@@ -4,7 +4,8 @@ channels:
   - anaconda
   - defaults
   - conda-forge
-  - "conda-forge/label/cf201901"
+  - conda-forge/label/cf201901
+  - conda-forge/label/cf202003
 dependencies:
   - abseil-cpp=20211102.0
   - altair=4.1.0
