@@ -21,11 +21,8 @@ from vis import make_vis
 
 #Reading testing data
 TEST_DATA = pd.read_csv('../../data/processed_data.csv')
-DATA_DIR = '../../data'
-MICROBIOME = pd.read_csv(DATA_DIR + '/metacard_microbiome.csv')
-MICROBIOME_COL = MICROBIOME.columns
-METABOLOME = pd.read_csv(DATA_DIR + '/metacard_serum.csv')
-METABOLOME_COL = METABOLOME.columns
+MICROBIOME_COL = ['S-1-pyrroline-5-carboxylate', 'spermidine', '1-methylnicotinamide',]
+METABOLOME_COL = ['N-methylproline', 'beta-cryptoxanthin','5alpha-androstan-3beta,17beta-diol disulfate']
 
 
 class ProcessForVisualization(unittest.TestCase):
