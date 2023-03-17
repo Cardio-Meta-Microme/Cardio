@@ -1,7 +1,7 @@
 # README Metabolander
 Tool for Analysis of meta microbiomes and metabolomes.
 
-![example event parameter](https://github.com/Cardio-Meta-Microme/Cardio/tree/main/.github/workflows/main.yml/badge.svg?event=push)
+[![Python Tests](https://github.com/Cardio-Meta-Microme/Cardio/actions/workflows/pytest_pip.yml/badge.svg)](https://github.com/Cardio-Meta-Microme/Cardio/actions/workflows/pytest_pip.yml)
 =======
 
 ## Components
