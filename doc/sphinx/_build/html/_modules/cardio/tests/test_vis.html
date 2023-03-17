@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cardio.tests.test_vis &mdash; Cardio 01 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Cardio
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">cardio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme_link.html">README Metabolander</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme_link.html#example-event-parameter"></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases.html">Use Cases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_stories.html">User Stories</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Cardio</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">cardio.tests.test_vis</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cardio.tests.test_vis</h1><div class="highlight"><pre>
+<span></span><span class="c1">#this will test visualization module</span>
+<span class="sd">&quot;&quot;&quot;importing python modules and modules from make_vis.py&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">unittest</span>
+
+<span class="kn">import</span> <span class="nn">altair</span> <span class="k">as</span> <span class="nn">alt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+
+<span class="c1">#adding the current path for imports</span>
+<span class="n">current_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+<span class="n">test_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">current_file_path</span><span class="p">)</span>
+<span class="n">cardio_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">test_dir</span><span class="p">)</span>
+<span class="n">root_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">cardio_dir</span><span class="p">)</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">root_dir</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">cardio.vis</span> <span class="kn">import</span> <span class="n">make_vis</span>
+
+<span class="c1">#Reading testing data</span>
+<span class="n">TEST_DATA</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root_dir</span><span class="p">,</span> <span class="s1">&#39;data/processed_data.csv&#39;</span><span class="p">))</span>
+<span class="n">MICROBIOME_COL</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;S-1-pyrroline-5-carboxylate&#39;</span><span class="p">,</span> <span class="s1">&#39;spermidine&#39;</span><span class="p">,</span> <span class="s1">&#39;1-methylnicotinamide&#39;</span><span class="p">,]</span>
+<span class="n">METABOLOME_COL</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;N-methylproline&#39;</span><span class="p">,</span> <span class="s1">&#39;beta-cryptoxanthin&#39;</span><span class="p">,</span><span class="s1">&#39;5alpha-androstan-3beta,17beta-diol disulfate&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="ProcessForVisualization"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.ProcessForVisualization">[docs]</a><span class="k">class</span> <span class="nc">ProcessForVisualization</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;Class for testing process_for_visualization&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ProcessForVisualization.test_col_names"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.ProcessForVisualization.test_col_names">[docs]</a>    <span class="k">def</span> <span class="nf">test_col_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test whether col names are in the test_df&quot;&quot;&quot;</span>
+        <span class="n">test_df</span> <span class="o">=</span> <span class="n">TEST_DATA</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s1">&#39;Status&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">make_vis</span><span class="o">.</span><span class="n">process_for_visualization</span><span class="p">(</span><span class="n">test_df</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ProcessForVisualization.test_study_groups"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.ProcessForVisualization.test_study_groups">[docs]</a>    <span class="k">def</span> <span class="nf">test_study_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test whether the right patient groups are there&quot;&quot;&quot;</span>
+        <span class="n">test_df</span> <span class="o">=</span> <span class="n">TEST_DATA</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">test_df</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">test_df</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;HC275&#39;</span><span class="p">,</span> <span class="s1">&#39;HC276&#39;</span><span class="p">,</span>\
+                                     <span class="n">test_df</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">])</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">make_vis</span><span class="o">.</span><span class="n">process_for_visualization</span><span class="p">(</span><span class="n">test_df</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ProcessForVisualization.test_output"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.ProcessForVisualization.test_output">[docs]</a>    <span class="k">def</span> <span class="nf">test_output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test the output has the right columns&quot;&quot;&quot;</span>
+        <span class="n">test_df</span> <span class="o">=</span> <span class="n">TEST_DATA</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">test_output</span> <span class="o">=</span> <span class="n">make_vis</span><span class="o">.</span><span class="n">process_for_visualization</span><span class="p">(</span><span class="n">test_df</span><span class="p">)</span>
+
+        <span class="n">col_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ID&#39;</span><span class="p">,</span> <span class="s1">&#39;Status&#39;</span><span class="p">,</span> <span class="s1">&#39;Age&#39;</span><span class="p">,</span> <span class="s1">&#39;BMI&#39;</span><span class="p">,</span> <span class="s1">&#39;Gender&#39;</span><span class="p">,</span> <span class="s1">&#39;shannon&#39;</span><span class="p">,</span>\
+                    <span class="s1">&#39;sample_group&#39;</span><span class="p">,</span> <span class="s1">&#39;sample_group_breaks&#39;</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">col_names</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">test_output</span><span class="o">.</span><span class="n">columns</span></div></div>
+
+
+<div class="viewcode-block" id="PlotGeneralDistAltair"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.PlotGeneralDistAltair">[docs]</a><span class="k">class</span> <span class="nc">PlotGeneralDistAltair</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;Class for testing altair plot&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PlotGeneralDistAltair.test_col_names"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.PlotGeneralDistAltair.test_col_names">[docs]</a>    <span class="k">def</span> <span class="nf">test_col_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test whether right col names are in input dataframe&quot;&quot;&quot;</span>
+        <span class="n">test_df</span> <span class="o">=</span> <span class="n">TEST_DATA</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s1">&#39;Status&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">make_vis</span><span class="o">.</span><span class="n">plot_general_dist_altair</span><span class="p">(</span><span class="n">test_df</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PlotGeneralDistAltair.test_input_type"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.PlotGeneralDistAltair.test_input_type">[docs]</a>    <span class="k">def</span> <span class="nf">test_input_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test whether the input is a pandas df&quot;&quot;&quot;</span>
+        <span class="n">test_df</span> <span class="o">=</span> <span class="n">TEST_DATA</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">test_col</span> <span class="o">=</span> <span class="n">test_df</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">make_vis</span><span class="o">.</span><span class="n">plot_general_dist_altair</span><span class="p">(</span><span class="n">test_col</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="FeatureHistograms"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.FeatureHistograms">[docs]</a><span class="k">class</span> <span class="nc">FeatureHistograms</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;Class for testing feature histograms&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="FeatureHistograms.test_status"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.FeatureHistograms.test_status">[docs]</a>    <span class="k">def</span> <span class="nf">test_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;test whether status is in columns&quot;&quot;&quot;</span>
+        <span class="n">test_df</span> <span class="o">=</span> <span class="n">TEST_DATA</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s1">&#39;Status&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">rand_features</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">test_df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">to_series</span><span class="p">()</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">make_vis</span><span class="o">.</span><span class="n">feature_histograms</span><span class="p">(</span><span class="n">test_df</span><span class="p">,</span> <span class="n">test_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rand_features</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FeatureHistograms.test_patient_features_in_test_col"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.FeatureHistograms.test_patient_features_in_test_col">[docs]</a>    <span class="k">def</span> <span class="nf">test_patient_features_in_test_col</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;test whether features are present in the training data column&quot;&quot;&quot;</span>
+        <span class="n">test_df</span> <span class="o">=</span> <span class="n">TEST_DATA</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">rand_features</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">test_df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">to_series</span><span class="p">()</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">patient</span> <span class="o">=</span> <span class="n">test_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">test_df</span> <span class="o">=</span> <span class="n">test_df</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="n">rand_features</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">make_vis</span><span class="o">.</span><span class="n">feature_histograms</span><span class="p">(</span><span class="n">test_df</span><span class="p">,</span> <span class="n">patient</span><span class="p">,</span> <span class="n">rand_features</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FeatureHistograms.test_patient_features_in_patient_col"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.FeatureHistograms.test_patient_features_in_patient_col">[docs]</a>    <span class="k">def</span> <span class="nf">test_patient_features_in_patient_col</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;test whether features are in patient col&quot;&quot;&quot;</span>
+        <span class="n">test_df</span> <span class="o">=</span> <span class="n">TEST_DATA</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">rand_features</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">test_df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">to_series</span><span class="p">()</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">patient</span> <span class="o">=</span> <span class="n">test_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">patient</span> <span class="o">=</span> <span class="n">patient</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="n">rand_features</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">make_vis</span><span class="o">.</span><span class="n">feature_histograms</span><span class="p">(</span><span class="n">test_df</span><span class="p">,</span> <span class="n">patient</span><span class="p">,</span> <span class="n">rand_features</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="TestTTest"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestTTest">[docs]</a><span class="k">class</span> <span class="nc">TestTTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;Class for testing t test function&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TestTTest.test_length_match"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestTTest.test_length_match">[docs]</a>    <span class="k">def</span> <span class="nf">test_length_match</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Tests that the list returned in t test is the same length as the</span>
+<span class="sd">        list of features in input&quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">TEST_DATA</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">df_HC275</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;HC275&#39;</span><span class="p">]</span>
+        <span class="n">df_MMC269</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;MMC269&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">MICROBIOME_COL</span><span class="p">),</span>\
+                        <span class="nb">len</span><span class="p">(</span><span class="n">make_vis</span><span class="o">.</span><span class="n">ttest</span><span class="p">(</span><span class="n">df_HC275</span><span class="p">,</span> <span class="n">df_MMC269</span><span class="p">,</span> <span class="n">MICROBIOME_COL</span><span class="p">))),</span>\
+                        <span class="s1">&#39;Length of p values does not match length of input cols&#39;</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TestMultTest"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestMultTest">[docs]</a><span class="k">class</span> <span class="nc">TestMultTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;Class for testing multtest function&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TestMultTest.test_length_match"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestMultTest.test_length_match">[docs]</a>    <span class="k">def</span> <span class="nf">test_length_match</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Tests that the list returned in multtest is the same length as the</span>
+<span class="sd">        list of features in input&quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">TEST_DATA</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">df_HC275</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;HC275&#39;</span><span class="p">]</span>
+        <span class="n">df_MMC269</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;MMC269&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">MICROBIOME_COL</span><span class="p">),</span>\
+                        <span class="nb">len</span><span class="p">(</span><span class="n">make_vis</span><span class="o">.</span><span class="n">multtest</span><span class="p">(</span><span class="n">df_HC275</span><span class="p">,</span> <span class="n">df_MMC269</span><span class="p">,</span> <span class="n">MICROBIOME_COL</span><span class="p">))),</span>\
+                        <span class="s1">&#39;Length of p values does not match length of input cols&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestMultTest.test_key_match"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestMultTest.test_key_match">[docs]</a>    <span class="k">def</span> <span class="nf">test_key_match</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Tests that multtest is using the same indices as the input list&quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">TEST_DATA</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">df_HC275</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;HC275&#39;</span><span class="p">]</span>
+        <span class="n">df_MMC269</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;MMC269&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">MICROBIOME_COL</span><span class="p">)</span> <span class="o">==</span> <span class="nb">set</span><span class="p">(</span><span class="n">make_vis</span><span class="o">.</span><span class="n">multtest</span><span class="p">(</span><span class="n">df_HC275</span><span class="p">,</span>\
+                                              <span class="n">df_MMC269</span><span class="p">,</span> <span class="n">MICROBIOME_COL</span><span class="p">)</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>\
+                                              <span class="s2">&quot;The keys of p value list from </span><span class="se">\</span>
+<span class="s2">                                              multtest don&#39;t match original keys&quot;</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TestMkDict"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestMkDict">[docs]</a><span class="k">class</span> <span class="nc">TestMkDict</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;Class for testing mk_dict function&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TestMkDict.test_length_match"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestMkDict.test_length_match">[docs]</a>    <span class="k">def</span> <span class="nf">test_length_match</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Tests that returned dictionary has same width as the length of the</span>
+<span class="sd">        columns provided&quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">TEST_DATA</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">MICROBIOME_COL</span><span class="p">),</span>\
+                        <span class="nb">len</span><span class="p">(</span><span class="n">make_vis</span><span class="o">.</span><span class="n">mk_dict</span><span class="p">(</span><span class="n">MICROBIOME_COL</span><span class="p">,</span> <span class="n">df</span><span class="p">))),</span> <span class="s1">&#39;Length of </span><span class="se">\</span>
+<span class="s1">                        dictionary does not match length of input columns&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestMkDict.test_key_match"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestMkDict.test_key_match">[docs]</a>    <span class="k">def</span> <span class="nf">test_key_match</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Tests that the input columns match the dictionary made my mk_dict&quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">TEST_DATA</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">MICROBIOME_COL</span><span class="p">)</span> <span class="o">==</span> <span class="nb">set</span><span class="p">(</span><span class="n">make_vis</span><span class="o">.</span><span class="n">mk_dict</span><span class="p">(</span><span class="n">MICROBIOME_COL</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>\
+                        <span class="s2">&quot;The features provided do not match the dictionary keys&quot;</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TestMkControlDf"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestMkControlDf">[docs]</a><span class="k">class</span> <span class="nc">TestMkControlDf</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;Class for testing mk_control_df function&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TestMkControlDf.test_sorted"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestMkControlDf.test_sorted">[docs]</a>    <span class="k">def</span> <span class="nf">test_sorted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Tests that the mk_control_df correctly sorts the dictionary by the</span>
+<span class="sd">        values&quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">TEST_DATA</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">df_HC275</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;HC275&#39;</span><span class="p">]</span>
+        <span class="n">cdf</span> <span class="o">=</span> <span class="n">make_vis</span><span class="o">.</span><span class="n">mk_control_df</span><span class="p">(</span><span class="n">make_vis</span><span class="o">.</span><span class="n">mk_dict</span><span class="p">(</span><span class="n">MICROBIOME_COL</span><span class="p">,</span> <span class="n">df_HC275</span><span class="p">),</span>\
+                                     <span class="s1">&#39;Bacteria&#39;</span><span class="p">)</span>
+        <span class="n">cdfs</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">cdf</span><span class="p">[</span><span class="s1">&#39;Normalized Read Count&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">((</span><span class="n">cdf</span><span class="p">[</span><span class="s1">&#39;Normalized Read Count&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">cdfs</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(),</span>\
+                         <span class="s1">&#39;Values are not sorted correctly&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestMkControlDf.test_key_match"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestMkControlDf.test_key_match">[docs]</a>    <span class="k">def</span> <span class="nf">test_key_match</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Tests that mk_control_df uses same indices as the list provided&quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">TEST_DATA</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">df_HC275</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;HC275&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">MICROBIOME_COL</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">make_vis</span><span class="o">.</span><span class="n">mk_control_df</span>\
+                                    <span class="p">(</span><span class="n">make_vis</span><span class="o">.</span><span class="n">mk_dict</span><span class="p">(</span><span class="n">MICROBIOME_COL</span><span class="p">,</span> <span class="n">df_HC275</span><span class="p">),</span> \
+                                    <span class="s1">&#39;Bacteria&#39;</span><span class="p">))),</span> <span class="s1">&#39;Length of sorted df does </span><span class="se">\</span>
+<span class="s1">                                    not match length of input columns&#39;</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TestMkDf"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestMkDf">[docs]</a><span class="k">class</span> <span class="nc">TestMkDf</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;Class for testing mk_df function&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TestMkDf.test_sorted"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestMkDf.test_sorted">[docs]</a>    <span class="k">def</span> <span class="nf">test_sorted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Tests that mk_df is ordering the clinical subgroup by the \</span>
+<span class="sd">           same order used in the healthy control group&quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">TEST_DATA</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">df_HC275</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;HC275&#39;</span><span class="p">]</span>
+        <span class="n">df_MMC269</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;MMC269&#39;</span><span class="p">]</span>
+
+        <span class="n">hcdict</span> <span class="o">=</span> <span class="n">make_vis</span><span class="o">.</span><span class="n">mk_dict</span><span class="p">(</span><span class="n">MICROBIOME_COL</span><span class="p">,</span> <span class="n">df_HC275</span><span class="p">)</span>
+
+        <span class="n">mmcsiglist</span> <span class="o">=</span> <span class="n">make_vis</span><span class="o">.</span><span class="n">multtest</span><span class="p">(</span><span class="n">df_HC275</span><span class="p">,</span> <span class="n">df_MMC269</span><span class="p">,</span> <span class="n">MICROBIOME_COL</span><span class="p">)</span>
+        <span class="n">mmcdict</span> <span class="o">=</span> <span class="n">make_vis</span><span class="o">.</span><span class="n">mk_dict</span><span class="p">(</span><span class="n">MICROBIOME_COL</span><span class="p">,</span> <span class="n">df_MMC269</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">((</span><span class="n">mmcdict</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">==</span> <span class="n">hcdict</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="s1">&#39;Subgroup is not </span><span class="se">\</span>
+<span class="s1">                        sorted according to healthy group&#39;</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="TestMkDf.test_key_match"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestMkDf.test_key_match">[docs]</a>    <span class="k">def</span> <span class="nf">test_key_match</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Tests that mk_df is assigning significance based on p-values \</span>
+<span class="sd">           computed earlier&quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">TEST_DATA</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">df_HC275</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;HC275&#39;</span><span class="p">]</span>
+        <span class="n">df_MMC269</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;MMC269&#39;</span><span class="p">]</span>
+
+        <span class="n">hcdict</span> <span class="o">=</span> <span class="n">make_vis</span><span class="o">.</span><span class="n">mk_dict</span><span class="p">(</span><span class="n">MICROBIOME_COL</span><span class="p">,</span> <span class="n">df_HC275</span><span class="p">)</span>
+
+        <span class="n">mmcsiglist</span> <span class="o">=</span> <span class="n">make_vis</span><span class="o">.</span><span class="n">multtest</span><span class="p">(</span><span class="n">df_HC275</span><span class="p">,</span> <span class="n">df_MMC269</span><span class="p">,</span> <span class="n">MICROBIOME_COL</span><span class="p">)</span>
+        <span class="n">mmcdict</span> <span class="o">=</span> <span class="n">make_vis</span><span class="o">.</span><span class="n">mk_dict</span><span class="p">(</span><span class="n">MICROBIOME_COL</span><span class="p">,</span> <span class="n">df_MMC269</span><span class="p">)</span>
+        <span class="n">mmcdf</span> <span class="o">=</span> <span class="n">make_vis</span><span class="o">.</span><span class="n">mk_df</span><span class="p">(</span><span class="n">mmcdict</span><span class="p">,</span> <span class="n">hcdict</span><span class="p">,</span> <span class="s1">&#39;Bacteria&#39;</span><span class="p">,</span> <span class="n">mmcsiglist</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">((</span><span class="n">mmcdf</span><span class="o">.</span><span class="n">columns</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;Bacteria&#39;</span><span class="p">,</span> <span class="s1">&#39;Normalized Read Count&#39;</span><span class="p">,</span>\
+                         <span class="s1">&#39;Change from Healthy Control&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">all</span><span class="p">(),</span> <span class="s1">&#39;Columns of df </span><span class="se">\</span>
+<span class="s1">                         incorrect&#39;</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TestMkChart"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestMkChart">[docs]</a><span class="k">class</span> <span class="nc">TestMkChart</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;Class for testing mk_chart&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TestMkChart.test_sorted"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestMkChart.test_sorted">[docs]</a>    <span class="k">def</span> <span class="nf">test_sorted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Tests that mk_chart is creating an altair stacked chart&quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">TEST_DATA</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">df_HC275</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;HC275&#39;</span><span class="p">]</span>
+        <span class="n">df_MMC269</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;MMC269&#39;</span><span class="p">]</span>
+        <span class="n">df_IHD372</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;IHD372&#39;</span><span class="p">]</span>
+        <span class="n">df_UMCC222</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;UMCC222&#39;</span><span class="p">]</span>
+
+        <span class="n">hcdict</span> <span class="o">=</span> <span class="n">make_vis</span><span class="o">.</span><span class="n">mk_dict</span><span class="p">(</span><span class="n">MICROBIOME_COL</span><span class="p">,</span> <span class="n">df_HC275</span><span class="p">)</span>
+        <span class="n">hcdf</span> <span class="o">=</span> <span class="n">make_vis</span><span class="o">.</span><span class="n">mk_control_df</span><span class="p">(</span><span class="n">hcdict</span><span class="p">,</span> <span class="s1">&#39;Bacteria&#39;</span><span class="p">)</span>
+
+        <span class="n">mmcsiglist</span> <span class="o">=</span> <span class="n">make_vis</span><span class="o">.</span><span class="n">multtest</span><span class="p">(</span><span class="n">df_HC275</span><span class="p">,</span> <span class="n">df_MMC269</span><span class="p">,</span> <span class="n">MICROBIOME_COL</span><span class="p">)</span>
+        <span class="n">mmcdict</span> <span class="o">=</span> <span class="n">make_vis</span><span class="o">.</span><span class="n">mk_dict</span><span class="p">(</span><span class="n">MICROBIOME_COL</span><span class="p">,</span> <span class="n">df_MMC269</span><span class="p">)</span>
+        <span class="n">mmcdf</span> <span class="o">=</span> <span class="n">make_vis</span><span class="o">.</span><span class="n">mk_df</span><span class="p">(</span><span class="n">mmcdict</span><span class="p">,</span> <span class="n">hcdict</span><span class="p">,</span> <span class="s1">&#39;Bacteria&#39;</span><span class="p">,</span> <span class="n">mmcsiglist</span><span class="p">)</span>
+
+        <span class="n">ihdsiglist</span> <span class="o">=</span> <span class="n">make_vis</span><span class="o">.</span><span class="n">multtest</span><span class="p">(</span><span class="n">df_HC275</span><span class="p">,</span> <span class="n">df_IHD372</span><span class="p">,</span> <span class="n">MICROBIOME_COL</span><span class="p">)</span>
+        <span class="n">ihddict</span> <span class="o">=</span> <span class="n">make_vis</span><span class="o">.</span><span class="n">mk_dict</span><span class="p">(</span><span class="n">MICROBIOME_COL</span><span class="p">,</span> <span class="n">df_IHD372</span><span class="p">)</span>
+        <span class="n">ihddf</span> <span class="o">=</span> <span class="n">make_vis</span><span class="o">.</span><span class="n">mk_df</span><span class="p">(</span><span class="n">ihddict</span><span class="p">,</span> <span class="n">hcdict</span><span class="p">,</span> <span class="s1">&#39;Bacteria&#39;</span><span class="p">,</span> <span class="n">ihdsiglist</span><span class="p">)</span>
+
+        <span class="n">umccsiglist</span> <span class="o">=</span> <span class="n">make_vis</span><span class="o">.</span><span class="n">multtest</span><span class="p">(</span><span class="n">df_HC275</span><span class="p">,</span> <span class="n">df_UMCC222</span><span class="p">,</span> <span class="n">MICROBIOME_COL</span><span class="p">)</span>
+        <span class="n">umccdict</span> <span class="o">=</span> <span class="n">make_vis</span><span class="o">.</span><span class="n">mk_dict</span><span class="p">(</span><span class="n">MICROBIOME_COL</span><span class="p">,</span> <span class="n">df_UMCC222</span><span class="p">)</span>
+        <span class="n">umccdf</span> <span class="o">=</span> <span class="n">make_vis</span><span class="o">.</span><span class="n">mk_df</span><span class="p">(</span><span class="n">umccdict</span><span class="p">,</span> <span class="n">hcdict</span><span class="p">,</span> <span class="s1">&#39;Bacteria&#39;</span><span class="p">,</span> <span class="n">umccsiglist</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">make_vis</span><span class="o">.</span><span class="n">mk_chart</span><span class="p">(</span><span class="n">hcdf</span><span class="p">,</span> <span class="n">ihddf</span><span class="p">,</span> <span class="n">mmcdf</span><span class="p">,</span> \
+                        <span class="n">umccdf</span><span class="p">,</span> <span class="s1">&#39;Bacteria&#39;</span><span class="p">),</span> <span class="n">alt</span><span class="o">.</span><span class="n">vegalite</span><span class="o">.</span><span class="n">v4</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">VConcatChart</span><span class="p">)</span>\
+                        <span class="p">,</span> <span class="s1">&#39;Chart type is incorrect&#39;</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TestPlotMicroAbundance"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestPlotMicroAbundance">[docs]</a><span class="k">class</span> <span class="nc">TestPlotMicroAbundance</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;Class for testing plot_micro_abundance&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TestPlotMicroAbundance.test_microtype_input"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestPlotMicroAbundance.test_microtype_input">[docs]</a>    <span class="k">def</span> <span class="nf">test_microtype_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Tests that user is entering microtype specification as a string&quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">TEST_DATA</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">make_vis</span><span class="o">.</span><span class="n">plot_micro_abundance</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">MICROBIOME_COL</span><span class="p">,</span> <span class="n">METABOLOME_COL</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;Allowing non-string microtypes&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestPlotMicroAbundance.test_bacteria_type_input"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestPlotMicroAbundance.test_bacteria_type_input">[docs]</a>    <span class="k">def</span> <span class="nf">test_bacteria_type_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Tests that user is entering MICROBIOME_COL specification as a list&quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">TEST_DATA</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">make_vis</span><span class="o">.</span><span class="n">plot_micro_abundance</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;Bacteria&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">METABOLOME_COL</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;Allowing non-list bacteria columns&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestPlotMicroAbundance.test_metabolite_type_input"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestPlotMicroAbundance.test_metabolite_type_input">[docs]</a>    <span class="k">def</span> <span class="nf">test_metabolite_type_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Tests that user is entering METABOLOME_COL specification as a list&quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">TEST_DATA</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">make_vis</span><span class="o">.</span><span class="n">plot_micro_abundance</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;Bacteria&#39;</span><span class="p">,</span> <span class="n">MICROBIOME_COL</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;Allowing non-list metabolites columns&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestPlotMicroAbundance.test_bacteria_input"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestPlotMicroAbundance.test_bacteria_input">[docs]</a>    <span class="k">def</span> <span class="nf">test_bacteria_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Tests that user is specifying micrcols which exist in the entered \</span>
+<span class="sd">           dataframe&quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">TEST_DATA</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">make_vis</span><span class="o">.</span><span class="n">plot_micro_abundance</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;Bacteria&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;thing1&#39;</span><span class="p">,</span> <span class="s1">&#39;thing2&#39;</span><span class="p">],</span> \
+                                          <span class="n">METABOLOME_COL</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;Allowing bacteria columns which do not </span><span class="se">\</span>
+<span class="s1">                            exist in the df&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">)</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestPlotMicroAbundance.test_metabolite_input"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestPlotMicroAbundance.test_metabolite_input">[docs]</a>    <span class="k">def</span> <span class="nf">test_metabolite_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Tests that user is specifying METABOLOME_COL which exist in the entered \</span>
+<span class="sd">           dataframe&quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">TEST_DATA</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">make_vis</span><span class="o">.</span><span class="n">plot_micro_abundance</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;Metabolite&#39;</span><span class="p">,</span> <span class="n">MICROBIOME_COL</span><span class="p">,</span> \
+                                          <span class="p">[</span><span class="s1">&#39;thing1&#39;</span><span class="p">,</span> <span class="s1">&#39;thing2&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;Allowing metabolite columns which do </span><span class="se">\</span>
+<span class="s1">                            not exist in the df&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">)</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="TestHighVar"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestHighVar">[docs]</a><span class="k">class</span> <span class="nc">TestHighVar</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;Class for testing high_var&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TestHighVar.test_shape"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestHighVar.test_shape">[docs]</a>    <span class="k">def</span> <span class="nf">test_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Tests that high_var is returning 500 most variable features&quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">TEST_DATA</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">make_vis</span><span class="o">.</span><span class="n">high_var</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="mi">500</span><span class="p">),</span>\
+                        <span class="s1">&#39;Not returning 500 features&#39;</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="TestPlotUMAP"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestPlotUMAP">[docs]</a><span class="k">class</span> <span class="nc">TestPlotUMAP</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;Class for testing plot_UMAP&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TestPlotUMAP.test_column_input"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestPlotUMAP.test_column_input">[docs]</a>    <span class="k">def</span> <span class="nf">test_column_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Tests that user is entering columns specification as a string&quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">TEST_DATA</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">make_vis</span><span class="o">.</span><span class="n">plot_UMAP</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">MICROBIOME_COL</span><span class="p">,</span> <span class="n">METABOLOME_COL</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;Allowing non-string columns&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestPlotUMAP.test_hivar_input"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestPlotUMAP.test_hivar_input">[docs]</a>    <span class="k">def</span> <span class="nf">test_hivar_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Tests that user is entering hivar specification as a boolean&quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">TEST_DATA</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">make_vis</span><span class="o">.</span><span class="n">plot_UMAP</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">MICROBIOME_COL</span><span class="p">,</span> <span class="n">METABOLOME_COL</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;Allowing non-bool hivar&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestPlotUMAP.test_bacteria_type_input"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestPlotUMAP.test_bacteria_type_input">[docs]</a>    <span class="k">def</span> <span class="nf">test_bacteria_type_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Tests that user is entering micrcols specification as a list&quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">TEST_DATA</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">make_vis</span><span class="o">.</span><span class="n">plot_UMAP</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">METABOLOME_COL</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;Allowing non-list bacteria columns&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestPlotUMAP.test_metabolite_type_input"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestPlotUMAP.test_metabolite_type_input">[docs]</a>    <span class="k">def</span> <span class="nf">test_metabolite_type_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Tests that user is entering METABOLOME_COL specification as a list&quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">TEST_DATA</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">make_vis</span><span class="o">.</span><span class="n">plot_UMAP</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">MICROBIOME_COL</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;Allowing non-list metabolites columns&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestPlotUMAP.test_bacteria_input"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestPlotUMAP.test_bacteria_input">[docs]</a>    <span class="k">def</span> <span class="nf">test_bacteria_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Tests that user is specifying MICROBIOME_COL which exist in the entered \</span>
+<span class="sd">        dataframe&quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">TEST_DATA</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">make_vis</span><span class="o">.</span><span class="n">plot_UMAP</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span>  <span class="p">[</span><span class="s1">&#39;thing1&#39;</span><span class="p">,</span> <span class="s1">&#39;thing2&#39;</span><span class="p">],</span> <span class="n">METABOLOME_COL</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;Allowing bacteria columns which do not </span><span class="se">\</span>
+<span class="s1">                            exist in the df&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">)</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestPlotUMAP.test_metabolite_input"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestPlotUMAP.test_metabolite_input">[docs]</a>    <span class="k">def</span> <span class="nf">test_metabolite_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Tests that user is specifying METABOLOME_COL which exist in the \</span>
+<span class="sd">        entered dataframe&quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">TEST_DATA</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">make_vis</span><span class="o">.</span><span class="n">plot_UMAP</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">MICROBIOME_COL</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;thing1&#39;</span><span class="p">,</span> <span class="s1">&#39;thing2&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;Allowing metabolite columns which do not </span><span class="se">\</span>
+<span class="s1">                            exist in the df&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">)</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TestClusterAgeBMI"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestClusterAgeBMI">[docs]</a><span class="k">class</span> <span class="nc">TestClusterAgeBMI</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;Class for testing cluster_age_bmi&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TestClusterAgeBMI.test_output_type"><a class="viewcode-back" href="../../../doc/cardio.tests.html#cardio.tests.test_vis.TestClusterAgeBMI.test_output_type">[docs]</a>    <span class="k">def</span> <span class="nf">test_output_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Tests that cluster_age_bmi is returning an altair plot&quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">TEST_DATA</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">make_vis</span><span class="o">.</span><span class="n">cluster_age_bmi</span><span class="p">(</span><span class="n">df</span><span class="p">))</span> <span class="o">==</span> \
+                        <span class="n">alt</span><span class="o">.</span><span class="n">vegalite</span><span class="o">.</span><span class="n">v4</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">Chart</span><span class="p">,</span> <span class="s1">&#39;Returned type is </span><span class="se">\</span>
+<span class="s1">                        not an altair plot&#39;</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kira Olander, Mattias Tolhurst, Paul Kim, Alyssa Easton, Maggie Cook.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

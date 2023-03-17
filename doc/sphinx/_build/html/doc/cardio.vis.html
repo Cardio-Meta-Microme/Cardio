@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cardio.vis package &mdash; Cardio 01 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Cardio
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">cardio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme_link.html">README Metabolander</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../readme_link.html#example-event-parameter"></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use_cases.html">Use Cases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_stories.html">User Stories</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Cardio</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">cardio.vis package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/doc/cardio.vis.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="cardio-vis-package">
+<h1>cardio.vis package<a class="headerlink" href="#cardio-vis-package" title="Permalink to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-cardio.vis.make_vis">
+<span id="cardio-vis-make-vis-module"></span><h2>cardio.vis.make_vis module<a class="headerlink" href="#module-cardio.vis.make_vis" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="cardio.vis.make_vis.cluster_age_bmi">
+<span class="sig-prename descclassname"><span class="pre">cardio.vis.make_vis.</span></span><span class="sig-name descname"><span class="pre">cluster_age_bmi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cardio/vis/make_vis.html#cluster_age_bmi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cardio.vis.make_vis.cluster_age_bmi" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a scatter plot of age and BMI</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Parameters:</dt><dd><p>df(Pandas dataframe): entire dataframe</p>
+</dd>
+<dt>Returns:</dt><dd><p>chart(Altair chart): clusters patients based off their age and BMI</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cardio.vis.make_vis.feature_histograms">
+<span class="sig-prename descclassname"><span class="pre">cardio.vis.make_vis.</span></span><span class="sig-name descname"><span class="pre">feature_histograms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patient_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cardio/vis/make_vis.html#feature_histograms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cardio.vis.make_vis.feature_histograms" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Takes in training data and patient data and plots patient values against</dt><dd><p>the training data with IHD for</p>
+</dd>
+<dt>certain list of predictive features</dt><dd><dl class="simple">
+<dt>Parameters:</dt><dd><dl class="simple">
+<dt>df(pandas df): training data with columns ‘Status’</dt><dd><p>patient data(pandas series): where each row is a feature to plot
+against training data</p>
+</dd>
+<dt>features(list): list of features, should be columns in both patient</dt><dd><p>data and df</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><p>fig(altair plot)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cardio.vis.make_vis.high_var">
+<span class="sig-prename descclassname"><span class="pre">cardio.vis.make_vis.</span></span><span class="sig-name descname"><span class="pre">high_var</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cardio/vis/make_vis.html#high_var"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cardio.vis.make_vis.high_var" title="Permalink to this definition"></a></dt>
+<dd><p>Returns 500 most variable features in dataframe</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Parameters:</dt><dd><p>df(Pandas dataframe): entire dataframe</p>
+</dd>
+<dt>Returns:</dt><dd><p>hv_data(Pandas dataframe): only includes the 500 most variable             features</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cardio.vis.make_vis.mk_chart">
+<span class="sig-prename descclassname"><span class="pre">cardio.vis.make_vis.</span></span><span class="sig-name descname"><span class="pre">mk_chart</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">HCDF</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">IHDDF</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MMCDF</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">UMCCDF</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">valtype</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cardio/vis/make_vis.html#mk_chart"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cardio.vis.make_vis.mk_chart" title="Permalink to this definition"></a></dt>
+<dd><dl>
+<dt>Makes a chart of mean normalized read counts for either bacterial species or</dt><dd><p>metabolites sorted based off the healthy control subtype for all four
+subgroups</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><p>HCDF(Pandas dataframe): subset of dataframe information for healthy
+controls
+IHDDF(Pandas dataframe): subset of dataframe information for IHD
+group
+MMCDF(Pandas dataframe): subset of dataframe information for MMC
+group
+UMCCDF(Pandas dataframe): subset of dataframe information for UMCC
+valtype(string): either “Bacteria” or “Metabolites”</p>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>chart(Altair chart): chart of mean normalized read counts for either</dt><dd><p>bacterial species or metabolites sorted based off the healthy
+control subtype for all four subgroups</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cardio.vis.make_vis.mk_control_df">
+<span class="sig-prename descclassname"><span class="pre">cardio.vis.make_vis.</span></span><span class="sig-name descname"><span class="pre">mk_control_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">micro_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">valtype</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cardio/vis/make_vis.html#mk_control_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cardio.vis.make_vis.mk_control_df" title="Permalink to this definition"></a></dt>
+<dd><dl>
+<dt>Makes a sorted dataframe of mean normalized read counts for either bacterial</dt><dd><p>species or metabolites ONLY for the healthy control disease subtype</p>
+<dl>
+<dt>Parameters:</dt><dd><dl class="simple">
+<dt>micro_dict(dict): mean normalized read counts (values) for bacterial</dt><dd><p>species or metabolites (key)</p>
+</dd>
+</dl>
+<p>valtype(string): either “Bacteria” or “Metabolites”</p>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>micro_dict(Pandas dataframe): sorted dataframe of normalized read</dt><dd><p>counts for either bacterial species or metabolites</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cardio.vis.make_vis.mk_df">
+<span class="sig-prename descclassname"><span class="pre">cardio.vis.make_vis.</span></span><span class="sig-name descname"><span class="pre">mk_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">micro_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">valtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">siglist</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cardio/vis/make_vis.html#mk_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cardio.vis.make_vis.mk_df" title="Permalink to this definition"></a></dt>
+<dd><dl>
+<dt>Makes a dataframe of mean normalized read counts for either bacterial</dt><dd><p>species or metabolites sorted based off the healthy control subtype</p>
+<dl>
+<dt>Parameters:</dt><dd><dl class="simple">
+<dt>micro_dict(dict): mean normalized read counts (values) for bacterial</dt><dd><p>species or metabolites (key)</p>
+</dd>
+<dt>control_dict(dict): mean normalized read counts (values) for</dt><dd><p>bacterial species or metabolites (key) for healthy control
+subtype</p>
+</dd>
+</dl>
+<p>valtype(string): either “Bacteria” or “Metabolites”
+siglist(list): boolean values for each feature if significantly deviated
+from healthy</p>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>micro_df(Pandas dataframe): sorted dataframe of normalized read</dt><dd><p>counts for either bacterial species or metabolites</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cardio.vis.make_vis.mk_dict">
+<span class="sig-prename descclassname"><span class="pre">cardio.vis.make_vis.</span></span><span class="sig-name descname"><span class="pre">mk_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">colnames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cardio/vis/make_vis.html#mk_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cardio.vis.make_vis.mk_dict" title="Permalink to this definition"></a></dt>
+<dd><dl>
+<dt>Makes a dictionary of mean normalized read counts for either bacterial</dt><dd><p>species or metabolites for a dataframe</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><dl class="simple">
+<dt>colnames(list): names of bacterial species, matches the column names</dt><dd><p>in the df</p>
+</dd>
+<dt>df(Pandas dataframe): subgroup of whole dataset for only one</dt><dd><p>disease condition</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>micro_dict(dict): mean normalized read counts (values) for bacterial</dt><dd><p>species or metabolites (key)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cardio.vis.make_vis.multtest">
+<span class="sig-prename descclassname"><span class="pre">cardio.vis.make_vis.</span></span><span class="sig-name descname"><span class="pre">multtest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subgroup</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">microtype</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cardio/vis/make_vis.html#multtest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cardio.vis.make_vis.multtest" title="Permalink to this definition"></a></dt>
+<dd><dl>
+<dt>Evaluates a Benjamini/Hochberg test for each p value of the t test of each</dt><dd><p>feature of the dataframe</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><dl class="simple">
+<dt>hc(Pandas dataframe): subgroup of whole dataset for only the healthy</dt><dd><p>control group subgroup(Pandas dataframe): subgroup of whole
+dataset for only one disease condition</p>
+</dd>
+<dt>microtype(list): names of bacterial or metabolite species, matches</dt><dd><p>the column names in the df</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>siglist(list): boolean values for each feature if it has</dt><dd><p>significantly deviated from the healthy control group</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cardio.vis.make_vis.plot_UMAP">
+<span class="sig-prename descclassname"><span class="pre">cardio.vis.make_vis.</span></span><span class="sig-name descname"><span class="pre">plot_UMAP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columns</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hivar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bacteria</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metabolites</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cardio/vis/make_vis.html#plot_UMAP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cardio.vis.make_vis.plot_UMAP" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a UMAP</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Parameters:</dt><dd><p>df(Pandas dataframe): entire dataframe
+columns(str): either “all” or “default”, specifies if you want to                 include age and BMI or not
+hivar(bool): True or False, specifies if you want to only include                 the high variable
+bacteria(list): column names of all bacterial species
+metabolites(list): column names of all bacterial species</p>
+</dd>
+<dt>Returns:</dt><dd><p>chart(Altair chart): clusters patients</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cardio.vis.make_vis.plot_general_dist_altair">
+<span class="sig-prename descclassname"><span class="pre">cardio.vis.make_vis.</span></span><span class="sig-name descname"><span class="pre">plot_general_dist_altair</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cardio/vis/make_vis.html#plot_general_dist_altair"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cardio.vis.make_vis.plot_general_dist_altair" title="Permalink to this definition"></a></dt>
+<dd><dl>
+<dt>Make boxplots showing general characteristics of each cohort we are trying</dt><dd><p>to classify
+Parameters:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>df(pandas df): with cohort info with colnames sample_group,</dt><dd><p>sample_group_breaks, BMI (kg/m²),Age (years), Gender</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="simple">
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>fig(altair figure object): with boxplots for Age, BMI, Gender and</dt><dd><p>Shannon Index</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cardio.vis.make_vis.plot_micro_abundance">
+<span class="sig-prename descclassname"><span class="pre">cardio.vis.make_vis.</span></span><span class="sig-name descname"><span class="pre">plot_micro_abundance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">microtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bacteria</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metabolites</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cardio/vis/make_vis.html#plot_micro_abundance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cardio.vis.make_vis.plot_micro_abundance" title="Permalink to this definition"></a></dt>
+<dd><dl>
+<dt>Wrapper function to generate a chart of mean normalized read counts for</dt><dd><p>either bacterial species or metabolites sorted based off the healthy
+control subtype for all four subgroups</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><p>df(Pandas dataframe): entire dataframe
+microtype(string): either “Bacteria” or “Metabolites”
+bacteria(list): column names of all bacterial species
+metabolites(list): column names of all bacterial species</p>
+</dd>
+<dt>Returns:</dt><dd><p>chart(Altair chart): chart of mean normalized read counts for either
+bacterial species or metabolites sorted based off the healthy
+control subtype for all four subgroups.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cardio.vis.make_vis.process_for_visualization">
+<span class="sig-prename descclassname"><span class="pre">cardio.vis.make_vis.</span></span><span class="sig-name descname"><span class="pre">process_for_visualization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cardio/vis/make_vis.html#process_for_visualization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cardio.vis.make_vis.process_for_visualization" title="Permalink to this definition"></a></dt>
+<dd><dl>
+<dt>Processed data for visualization by changing chort names to more memorable</dt><dd><p>titles
+Parameters:</p>
+<blockquote>
+<div><p>data(pandas df): with columsn ID, Status, Age, BMI, Gender, shannon</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>general_data(pandas df): with columns mentioned above and new cols
+sample_group, and sample_group_breaks</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cardio.vis.make_vis.ttest">
+<span class="sig-prename descclassname"><span class="pre">cardio.vis.make_vis.</span></span><span class="sig-name descname"><span class="pre">ttest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subgroup</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">microtype</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cardio/vis/make_vis.html#ttest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cardio.vis.make_vis.ttest" title="Permalink to this definition"></a></dt>
+<dd><p>Evaluates a t test for each feature of the dataframe</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Parameters:</dt><dd><dl class="simple">
+<dt>hc(Pandas dataframe): subgroup of whole dataset for only the healthy</dt><dd><p>control group</p>
+</dd>
+<dt>subgroup(Pandas dataframe): subgroup of whole dataset for only one</dt><dd><p>disease condition</p>
+</dd>
+<dt>microtype(list): names of bacterial or metabolite species, matches</dt><dd><p>the column names in the df</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><p>pvals(list): p values of each t test</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+</section>
+<section id="module-cardio.vis">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-cardio.vis" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kira Olander, Mattias Tolhurst, Paul Kim, Alyssa Easton, Maggie Cook.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cardio.model.making_model &mdash; Cardio 01 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Cardio
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">cardio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme_link.html">README Metabolander</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme_link.html#example-event-parameter"></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases.html">Use Cases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_stories.html">User Stories</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Cardio</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">cardio.model.making_model</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cardio.model.making_model</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pickle</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">linear_model</span><span class="p">,</span> <span class="n">tree</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.feature_selection</span> <span class="kn">import</span> <span class="n">GenericUnivariateSelect</span><span class="p">,</span> <span class="n">RFECV</span><span class="p">,</span> <span class="n">f_classif</span>
+<span class="kn">from</span> <span class="nn">sklearn.inspection</span> <span class="kn">import</span> <span class="n">permutation_importance</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">accuracy_score</span><span class="p">,</span> <span class="n">confusion_matrix</span><span class="p">,</span> <span class="n">precision_recall_curve</span><span class="p">,</span> <span class="n">precision_score</span><span class="p">,</span> <span class="n">recall_score</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">StratifiedKFold</span><span class="p">,</span> <span class="n">train_test_split</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
+
+
+<div class="viewcode-block" id="load_data"><a class="viewcode-back" href="../../../doc/cardio.model.html#cardio.model.making_model.load_data">[docs]</a><span class="k">def</span> <span class="nf">load_data</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load data from a pickle file and clean it by dropping any patient</span>
+<span class="sd">    with NaN values and the Gender column.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">            path : str</span>
+<span class="sd">                Path to the pickle file containing the data.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">            data_frame : pandas.DataFrame</span>
+<span class="sd">                Cleaned DataFrame of the data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">data_frame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_pickle</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">data_frame</span> <span class="o">=</span> <span class="n">data_frame</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">del</span> <span class="n">data_frame</span><span class="p">[</span><span class="s1">&#39;Gender&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">data_frame</span></div>
+
+<div class="viewcode-block" id="make_x_y"><a class="viewcode-back" href="../../../doc/cardio.model.html#cardio.model.making_model.make_x_y">[docs]</a><span class="k">def</span> <span class="nf">make_x_y</span><span class="p">(</span><span class="n">data_frame</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create numpy arrays X and Y from a pandas DataFrame.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">            data_frame : pandas.DataFrame</span>
+<span class="sd">                The input DataFrame.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">            X : numpy.ndarray</span>
+<span class="sd">                The input DataFrame&#39;s columns from 2 (inclusive)</span>
+<span class="sd">                to second-to-last (exclusive).</span>
+<span class="sd">            Y : numpy.ndarray</span>
+<span class="sd">                A binary array with 1 if the patient&#39;s Status is</span>
+<span class="sd">                IHD372 or CIHD158, 0 otherwise.</span>
+<span class="sd">            x_cols : numpy.ndarray</span>
+<span class="sd">                The column labels of X.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">data_frame</span><span class="p">[</span><span class="s1">&#39;IHD&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">data_frame</span><span class="o">.</span><span class="n">Status</span> <span class="o">==</span> <span class="s1">&#39;IHD372&#39;</span><span class="p">)</span> <span class="o">^</span> <span class="p">(</span><span class="n">data_frame</span><span class="o">.</span><span class="n">Status</span> <span class="o">==</span> <span class="s1">&#39;CIHD158&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">x_cols</span> <span class="o">=</span> <span class="n">data_frame</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">y_cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;IHD&#39;</span><span class="p">]</span>
+
+    <span class="n">X</span> <span class="o">=</span> <span class="n">data_frame</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">x_cols</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="n">data_frame</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">y_cols</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">x_cols</span></div>
+
+<div class="viewcode-block" id="compute_metrics"><a class="viewcode-back" href="../../../doc/cardio.model.html#cardio.model.making_model.compute_metrics">[docs]</a><span class="k">def</span> <span class="nf">compute_metrics</span><span class="p">(</span><span class="n">true</span><span class="p">,</span> <span class="n">pred</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute accuracy, precision and recall scores from true and</span>
+<span class="sd">    predicted labels.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">            true : numpy.ndarray</span>
+<span class="sd">                The true labels.</span>
+<span class="sd">            pred : numpy.ndarray</span>
+<span class="sd">                The predicted labels.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">            accuracy : float</span>
+<span class="sd">                The accuracy score.</span>
+<span class="sd">            precision : float</span>
+<span class="sd">                The precision score.</span>
+<span class="sd">            recall : float</span>
+<span class="sd">                The recall score.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">accuracy</span><span class="p">,</span> <span class="n">precision</span><span class="p">,</span> <span class="n">recall</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">true</span><span class="p">,</span> <span class="n">pred</span><span class="p">),</span> <span class="mi">2</span><span class="p">),</span>\
+                                  <span class="nb">round</span><span class="p">(</span><span class="n">precision_score</span><span class="p">(</span><span class="n">true</span><span class="p">,</span> <span class="n">pred</span><span class="p">),</span> <span class="mi">2</span><span class="p">),</span>\
+                                  <span class="nb">round</span><span class="p">(</span><span class="n">recall_score</span><span class="p">(</span><span class="n">true</span><span class="p">,</span> <span class="n">pred</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;accuracy: </span><span class="si">{}</span><span class="s1">, precision: </span><span class="si">{}</span><span class="s1">, recall: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">accuracy</span><span class="p">,</span> <span class="n">precision</span><span class="p">,</span> <span class="n">recall</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">accuracy</span><span class="p">,</span> <span class="n">precision</span><span class="p">,</span> <span class="n">recall</span></div>
+
+<div class="viewcode-block" id="univariate_ftest_feature_subset"><a class="viewcode-back" href="../../../doc/cardio.model.html#cardio.model.making_model.univariate_ftest_feature_subset">[docs]</a><span class="k">def</span> <span class="nf">univariate_ftest_feature_subset</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Select a subset of features using a univariate F-test.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">            X : numpy.ndarray</span>
+<span class="sd">                The feature matrix.</span>
+<span class="sd">            Y : numpy.ndarray</span>
+<span class="sd">                The target vector.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">            keep_columns : numpy.ndarray</span>
+<span class="sd">                A boolean array with True values for columns with</span>
+<span class="sd">                F-test p-values less than 0.025.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;selecting subset of features using univariate f-test&#39;</span><span class="p">)</span>
+    <span class="n">selection</span> <span class="o">=</span> <span class="n">GenericUnivariateSelect</span><span class="p">(</span><span class="n">f_classif</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+    <span class="n">keep_columns</span> <span class="o">=</span> <span class="n">selection</span><span class="o">.</span><span class="n">pvalues_</span> <span class="o">&lt;</span> <span class="mf">0.025</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;keeping </span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1"> features with f-statistic p-values &lt; 0.025&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="nb">sum</span><span class="p">(</span><span class="n">keep_columns</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">keep_columns</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">keep_columns</span></div>
+    <span class="c1"># X = X[:, keep_columns]</span>
+    <span class="c1"># x_columns = np.array(x_cols)[keep_columns]</span>
+
+<div class="viewcode-block" id="split_data"><a class="viewcode-back" href="../../../doc/cardio.model.html#cardio.model.making_model.split_data">[docs]</a><span class="k">def</span> <span class="nf">split_data</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Split the data into training, validation and testing sets.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">            X : numpy.ndarray</span>
+<span class="sd">                The feature matrix.</span>
+<span class="sd">            Y : numpy.ndarray</span>
+<span class="sd">                The target vector.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">            x_train : numpy.ndarray</span>
+<span class="sd">                The training set features.</span>
+<span class="sd">            y_train : numpy.ndarray</span>
+<span class="sd">                The training set targets.</span>
+<span class="sd">            x_valid : numpy.ndarray</span>
+<span class="sd">                The validation set features.</span>
+<span class="sd">            y_valid : numpy.ndarray</span>
+<span class="sd">                The validation set targets.</span>
+<span class="sd">            x_train_valid : numpy.ndarray</span>
+<span class="sd">                The combined training and validation set features.</span>
+<span class="sd">            y_train_valid : numpy.ndarray</span>
+<span class="sd">                The combined training and validation set targets.</span>
+<span class="sd">            x_test : numpy.ndarray</span>
+<span class="sd">                The test set features.</span>
+<span class="sd">            y_test : numpy.ndarray</span>
+<span class="sd">                The test set targets.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;splitting data into train, valid and test&#39;</span><span class="p">)</span>
+    <span class="n">x_train_valid</span><span class="p">,</span> <span class="n">x_test</span><span class="p">,</span> <span class="n">y_train_valid</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+    <span class="n">x_train</span><span class="p">,</span> <span class="n">x_valid</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_valid</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">x_train_valid</span><span class="p">,</span> <span class="n">y_train_valid</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;train size: </span><span class="si">{}</span><span class="s1">, valid size: </span><span class="si">{}</span><span class="s1">, test size: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="nb">len</span><span class="p">(</span><span class="n">x_train</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_valid</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_test</span><span class="p">)))</span>
+
+    <span class="k">return</span> <span class="n">x_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">x_valid</span><span class="p">,</span> <span class="n">y_valid</span><span class="p">,</span> <span class="n">x_train_valid</span><span class="p">,</span> <span class="n">y_train_valid</span><span class="p">,</span> <span class="n">x_test</span><span class="p">,</span> <span class="n">y_test</span></div>
+
+<div class="viewcode-block" id="evaluate_model"><a class="viewcode-back" href="../../../doc/cardio.model.html#cardio.model.making_model.evaluate_model">[docs]</a><span class="k">def</span> <span class="nf">evaluate_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x_eval</span><span class="p">,</span> <span class="n">y_eval</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Evaluates the performance of a given model on a given evaluation set and</span>
+<span class="sd">       prints the accuracy, precision and recall scores.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">            model : sklearn estimator</span>
+<span class="sd">                A trained estimator that will be used to make predictions on the evaluation set.</span>
+<span class="sd">            x_eval : numpy array</span>
+<span class="sd">                The feature matrix of the evaluation set.</span>
+<span class="sd">            y_eval : numpy array</span>
+<span class="sd">                The target labels of the evaluation set.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">            accuracy : float</span>
+<span class="sd">                The accuracy score.</span>
+<span class="sd">            precision : float</span>
+<span class="sd">                The precision score.</span>
+<span class="sd">            recall : float</span>
+<span class="sd">                The recall score.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">Yhat_eval</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x_eval</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">compute_metrics</span><span class="p">(</span><span class="n">y_eval</span><span class="p">,</span> <span class="n">Yhat_eval</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="reverse_selection_feature_subset"><a class="viewcode-back" href="../../../doc/cardio.model.html#cardio.model.making_model.reverse_selection_feature_subset">[docs]</a><span class="k">def</span> <span class="nf">reverse_selection_feature_subset</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Selects a subset of features by recursively removing features</span>
+<span class="sd">       using the RFECV scikitlearn class. </span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">            X : numpy array</span>
+<span class="sd">                A matrix of shape (n_samples, n_features) containing the input data.</span>
+<span class="sd">            Y : numpy array</span>
+<span class="sd">                A vector of shape (n_samples,) containing the target labels.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">            keep_columns : numpy array</span>
+<span class="sd">                A boolean mask that indicates which columns of X were selected to be kept.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">scaler</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span>
+    <span class="n">X_scaled</span> <span class="o">=</span> <span class="n">scaler</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="n">clf</span> <span class="o">=</span> <span class="n">linear_model</span><span class="o">.</span><span class="n">LogisticRegression</span><span class="p">(</span><span class="n">max_iter</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="s1">&#39;liblinear&#39;</span><span class="p">)</span>
+    <span class="n">cv</span> <span class="o">=</span> <span class="n">StratifiedKFold</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">rfecv</span> <span class="o">=</span> <span class="n">RFECV</span><span class="p">(</span><span class="n">estimator</span><span class="o">=</span><span class="n">clf</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="s2">&quot;accuracy&quot;</span><span class="p">,</span> <span class="n">min_features_to_select</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">rfecv</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_scaled</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">rfecv</span><span class="o">.</span><span class="n">support_</span></div>
+
+<div class="viewcode-block" id="hyperparam_optimize_n_trees"><a class="viewcode-back" href="../../../doc/cardio.model.html#cardio.model.making_model.hyperparam_optimize_n_trees">[docs]</a><span class="k">def</span> <span class="nf">hyperparam_optimize_n_trees</span><span class="p">(</span><span class="n">x_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">x_valid</span><span class="p">,</span> <span class="n">y_valid</span><span class="p">,</span> <span class="n">n_trees</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Optimizes the number of trees in a random forest classifier using the validation set. </span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">            x_train : numpy array</span>
+<span class="sd">                The feature matrix of the training set.</span>
+<span class="sd">            y_train : numpy array</span>
+<span class="sd">                The target labels of the training set.</span>
+<span class="sd">            x_valid : numpy array</span>
+<span class="sd">                The feature matrix of the validation set.</span>
+<span class="sd">            y_valid : numpy array</span>
+<span class="sd">                The target labels of the validation set.</span>
+<span class="sd">            n_trees : list</span>
+<span class="sd">                A list of integers representing the number of trees to try.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">            best_n_trees : int</span>
+<span class="sd">                The number of trees that resulted in the highest accuracy on the validation set.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">result_estimator</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">n_estimator</span> <span class="ow">in</span> <span class="n">n_trees</span><span class="p">:</span>
+        <span class="n">clf</span> <span class="o">=</span> <span class="n">RandomForestClassifier</span><span class="p">(</span><span class="n">n_estimator</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+        <span class="n">Yhat_valid</span> <span class="o">=</span> <span class="n">clf</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x_valid</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Performance on validation set of Random Forest with </span><span class="si">{}</span><span class="s1"> trees&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n_estimator</span><span class="p">))</span>
+        <span class="n">accuracy</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">compute_metrics</span><span class="p">(</span><span class="n">y_valid</span><span class="p">,</span> <span class="n">Yhat_valid</span><span class="p">)</span>
+        <span class="n">result_estimator</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">accuracy</span><span class="p">,</span> <span class="n">n_estimator</span><span class="p">))</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;N_Trees - Accuracy&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">result</span><span class="p">,</span> <span class="n">estimator</span> <span class="ow">in</span> <span class="n">result_estimator</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+
+    <span class="n">best</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">result_estimator</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Best n_trees: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">best</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="n">best</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="plot_precision_recall_curve"><a class="viewcode-back" href="../../../doc/cardio.model.html#cardio.model.making_model.plot_precision_recall_curve">[docs]</a><span class="k">def</span> <span class="nf">plot_precision_recall_curve</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_proba</span><span class="p">,</span> <span class="n">filepath</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plots and saves to file a precision-recall curve.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            y_true (array-like): True binary labels.</span>
+<span class="sd">            y_proba (array-like): Predicted probabilities.</span>
+<span class="sd">            filepath (str): File path to save the plot.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">precision</span><span class="p">,</span> <span class="n">recall</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">precision_recall_curve</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_proba</span><span class="p">)</span>
+
+    <span class="n">sns</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s2">&quot;darkgrid&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">&quot;dark_background&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">recall</span><span class="p">,</span> <span class="n">precision</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Precision-Recall Curve&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Recall&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Precision&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.05</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Precision-Recall Curve&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;lower left&quot;</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="plot_confusion_matrix"><a class="viewcode-back" href="../../../doc/cardio.model.html#cardio.model.making_model.plot_confusion_matrix">[docs]</a><span class="k">def</span> <span class="nf">plot_confusion_matrix</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">filepath</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plots and saves to file a confusion matrix.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            y_true (array-like): True binary labels.</span>
+<span class="sd">            y_pred (array-like): Predicted binary labels.</span>
+<span class="sd">            filepath (str): File path to save the plot.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y_true</span><span class="p">)</span>
+    <span class="n">cm</span> <span class="o">=</span> <span class="n">confusion_matrix</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
+
+    <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s2">&quot;darkgrid&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">&quot;dark_background&quot;</span><span class="p">)</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">cm</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;Blues&#39;</span><span class="p">,</span> <span class="n">cbar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Predicted labels&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;True labels&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Confusion Matrix&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_ticklabels</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_ticklabels</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="RF_Classifier"><a class="viewcode-back" href="../../../doc/cardio.model.html#cardio.model.making_model.RF_Classifier">[docs]</a><span class="k">class</span> <span class="nc">RF_Classifier</span><span class="p">():</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_path</span><span class="p">,</span> <span class="n">columns_path</span><span class="p">,</span> <span class="n">fill_nas_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initializes a RF_Classifier object.</span>
+
+<span class="sd">            Parameters:</span>
+<span class="sd">                model_path : str</span>
+<span class="sd">                    The path to the saved model.</span>
+<span class="sd">                columns_path : str</span>
+<span class="sd">                    The path to the saved list of column names.</span>
+
+<span class="sd">            Returns:</span>
+<span class="sd">                None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">model_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">columns_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">na_fill</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">fill_nas_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
+
+<div class="viewcode-block" id="RF_Classifier.classify"><a class="viewcode-back" href="../../../doc/cardio.model.html#cardio.model.making_model.RF_Classifier.classify">[docs]</a>    <span class="k">def</span> <span class="nf">classify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_frame</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Makes predictions on a given dataframe using the trained random forest model.</span>
+
+<span class="sd">            Parameters:</span>
+<span class="sd">                data_frame : pandas dataframe</span>
+<span class="sd">                    The dataframe to make predictions on.</span>
+
+<span class="sd">            Returns:</span>
+<span class="sd">                predictions : numpy array</span>
+<span class="sd">                    The predicted target labels for the input dataframe.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">data_frame</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">na_fill</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">predictions</span></div></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;../../data/cleaned_data.pkl&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;loading data&#39;</span><span class="p">)</span>
+    <span class="n">data_frame</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">x_columns</span> <span class="o">=</span> <span class="n">make_x_y</span><span class="p">(</span><span class="n">data_frame</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;target is presence of IHD, codes IHD372 and CIHD158&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;dataset contains </span><span class="si">{}</span><span class="s1"> patients with IHD, </span><span class="si">{}</span><span class="s1"> patients without, </span><span class="si">{}</span><span class="s1"> patients total&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">Y</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="nb">len</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span> <span class="o">-</span> <span class="n">Y</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="nb">len</span><span class="p">(</span><span class="n">Y</span><span class="p">)))</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;training data initially contains </span><span class="si">{}</span><span class="s1"> patients and </span><span class="si">{}</span><span class="s1"> features&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+    <span class="n">keep_columns</span> <span class="o">=</span> <span class="n">univariate_ftest_feature_subset</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+
+    <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="n">keep_columns</span><span class="p">]</span>
+    <span class="n">x_columns</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x_columns</span><span class="p">)[</span><span class="n">keep_columns</span><span class="p">]</span>
+
+    <span class="n">x_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">x_valid</span><span class="p">,</span> <span class="n">y_valid</span><span class="p">,</span> <span class="n">x_train_valid</span><span class="p">,</span> <span class="n">y_train_valid</span><span class="p">,</span> <span class="n">x_test</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">split_data</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+
+    <span class="n">basic</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">DecisionTreeClassifier</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Performance on training set of basic decision tree classifier&#39;</span><span class="p">)</span>
+    <span class="n">evaluate_model</span><span class="p">(</span><span class="n">basic</span><span class="p">,</span> <span class="n">x_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Performance on validation set of basic decision tree classifier&#39;</span><span class="p">)</span>
+    <span class="n">evaluate_model</span><span class="p">(</span><span class="n">basic</span><span class="p">,</span> <span class="n">x_valid</span><span class="p">,</span> <span class="n">y_valid</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;running RFECV with 5-fold CV, step size of 25, using a logistic regression model as base&#39;</span><span class="p">)</span>
+    <span class="n">support</span> <span class="o">=</span> <span class="n">reverse_selection_feature_subset</span><span class="p">(</span><span class="n">x_train_valid</span><span class="p">,</span> <span class="n">y_train_valid</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;RFECV terminated finding </span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1"> features useful&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">support</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">support</span><span class="p">)))</span>
+
+    <span class="n">x_train_subset</span> <span class="o">=</span> <span class="n">x_train</span><span class="p">[:,</span> <span class="n">support</span><span class="p">]</span>
+    <span class="n">x_valid_subset</span> <span class="o">=</span> <span class="n">x_valid</span><span class="p">[:,</span> <span class="n">support</span><span class="p">]</span>
+    <span class="n">x_train_valid_subset</span> <span class="o">=</span> <span class="n">x_train_valid</span><span class="p">[:,</span> <span class="n">support</span><span class="p">]</span>
+    <span class="n">x_test_subset</span> <span class="o">=</span> <span class="n">x_test</span><span class="p">[:,</span> <span class="n">support</span><span class="p">]</span>
+    <span class="n">X_subset</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="n">support</span><span class="p">]</span>
+    <span class="n">x_columns</span> <span class="o">=</span> <span class="n">x_columns</span><span class="p">[</span><span class="n">support</span><span class="p">]</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Now using random forest with a few numbers of estimators and using the features found by the RFECV&#39;</span><span class="p">)</span>
+    <span class="n">trees</span> <span class="o">=</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">250</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">5000</span><span class="p">,</span> <span class="mi">10000</span><span class="p">]</span>
+
+    <span class="n">best_n_trees</span> <span class="o">=</span> <span class="n">hyperparam_optimize_n_trees</span><span class="p">(</span><span class="n">x_train_subset</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">x_valid_subset</span><span class="p">,</span> <span class="n">y_valid</span><span class="p">,</span> <span class="n">trees</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Retraining random forest on entire train-valid set and testing on test set&#39;</span><span class="p">)</span>
+
+    <span class="n">clf</span> <span class="o">=</span> <span class="n">RandomForestClassifier</span><span class="p">(</span><span class="n">best_n_trees</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x_train_valid_subset</span><span class="p">,</span> <span class="n">y_train_valid</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Performance on test set:&#39;</span><span class="p">)</span>
+    <span class="n">evaluate_model</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">x_test_subset</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;plotting test set performance&#39;</span><span class="p">)</span>
+    <span class="n">probabilities</span> <span class="o">=</span> <span class="n">clf</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">x_test_subset</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">predictions</span> <span class="o">=</span> <span class="n">clf</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x_test_subset</span><span class="p">)</span>
+    <span class="n">plot_precision_recall_curve</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">probabilities</span><span class="p">,</span> <span class="s1">&#39;precision_recall_curve.png&#39;</span><span class="p">)</span>
+    <span class="n">plot_confusion_matrix</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">predictions</span><span class="p">,</span> <span class="s1">&#39;confusion_matrix.png&#39;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;computing feature importance on the test set&#39;</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">permutation_importance</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">x_test_subset</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span> <span class="n">n_repeats</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+    <span class="n">importances</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">importances_mean</span>
+    <span class="n">features_sorted</span> <span class="o">=</span> <span class="n">x_columns</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">importances</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+    <span class="n">importances_sorted</span> <span class="o">=</span> <span class="n">importances</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">importances</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+    <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">([</span><span class="n">features_sorted</span><span class="p">,</span> <span class="n">importances_sorted</span><span class="p">],</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;features_importances_sorted.pkl&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;top 10 most important features:&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;feature - importance&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">feature</span><span class="p">,</span> <span class="n">importance</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">features_sorted</span><span class="p">[:</span><span class="mi">10</span><span class="p">],</span> <span class="n">importances_sorted</span><span class="p">[:</span><span class="mi">10</span><span class="p">]):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">importance</span><span class="p">)</span>
+
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Retraining classifier on entire dataset and saving to pickle&#39;</span><span class="p">)</span>
+    <span class="n">clf</span> <span class="o">=</span> <span class="n">RandomForestClassifier</span><span class="p">(</span><span class="n">best_n_trees</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_subset</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+    <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;Trained_Production_RF_Classifier_230314.pkl&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">))</span>
+    <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">x_columns</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;Trained_Production_RF_Classifier_features_230314.pkl&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">))</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Kira Olander, Mattias Tolhurst, Paul Kim, Alyssa Easton, Maggie Cook.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

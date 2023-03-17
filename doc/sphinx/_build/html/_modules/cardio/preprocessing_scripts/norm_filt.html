@@ -40,6 +40,8 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules.html">cardio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme_link.html">README Metabolander</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme_link.html#example-event-parameter"></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../use_cases.html">Use Cases</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../user_stories.html">User Stories</a></li>
 </ul>
@@ -81,7 +83,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 
-<div class="viewcode-block" id="count_to_abundance"><a class="viewcode-back" href="../../../cardio.preprocessing_scripts.html#cardio.preprocessing_scripts.norm_filt.count_to_abundance">[docs]</a><span class="k">def</span> <span class="nf">count_to_abundance</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+<div class="viewcode-block" id="count_to_abundance"><a class="viewcode-back" href="../../../doc/cardio.preprocessing_scripts.html#cardio.preprocessing_scripts.norm_filt.count_to_abundance">[docs]</a><span class="k">def</span> <span class="nf">count_to_abundance</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transform microbiome sequencing count data to relative abundance with </span>
 <span class="sd">    Center-log ratio (CLR) transformation.</span>
@@ -99,7 +101,7 @@
     <span class="k">return</span> <span class="n">abund</span></div>
 
 
-<div class="viewcode-block" id="filter_sparse"><a class="viewcode-back" href="../../../cardio.preprocessing_scripts.html#cardio.preprocessing_scripts.norm_filt.filter_sparse">[docs]</a><span class="k">def</span> <span class="nf">filter_sparse</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">feature_cols</span><span class="p">,</span> <span class="n">percent</span><span class="p">):</span>
+<div class="viewcode-block" id="filter_sparse"><a class="viewcode-back" href="../../../doc/cardio.preprocessing_scripts.html#cardio.preprocessing_scripts.norm_filt.filter_sparse">[docs]</a><span class="k">def</span> <span class="nf">filter_sparse</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">feature_cols</span><span class="p">,</span> <span class="n">percent</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    filters sparse features (microbes or metabolites) so that we only consider</span>
 <span class="sd">    those present in at least (percent) % of samples</span>
@@ -110,7 +112,7 @@
     <span class="k">return</span> <span class="n">df</span></div>
 
 
-<div class="viewcode-block" id="combine_metamicro"><a class="viewcode-back" href="../../../cardio.preprocessing_scripts.html#cardio.preprocessing_scripts.norm_filt.combine_metamicro">[docs]</a><span class="k">def</span> <span class="nf">combine_metamicro</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span> <span class="n">metabs</span><span class="p">,</span> <span class="n">micros</span><span class="p">):</span>
+<div class="viewcode-block" id="combine_metamicro"><a class="viewcode-back" href="../../../doc/cardio.preprocessing_scripts.html#cardio.preprocessing_scripts.norm_filt.combine_metamicro">[docs]</a><span class="k">def</span> <span class="nf">combine_metamicro</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span> <span class="n">metabs</span><span class="p">,</span> <span class="n">micros</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -129,7 +131,7 @@
 <span class="c1">#     microbiome = pd.read_csv(&#39;metacard_microbiome.csv&#39;)</span>
 <span class="c1">#     metabolome = pd.read_csv(&#39;metacard_serum.csv&#39;)</span>
 
-<div class="viewcode-block" id="load_data"><a class="viewcode-back" href="../../../cardio.preprocessing_scripts.html#cardio.preprocessing_scripts.norm_filt.load_data">[docs]</a><span class="k">def</span> <span class="nf">load_data</span><span class="p">(</span><span class="n">sheets_url</span><span class="p">):</span>
+<div class="viewcode-block" id="load_data"><a class="viewcode-back" href="../../../doc/cardio.preprocessing_scripts.html#cardio.preprocessing_scripts.norm_filt.load_data">[docs]</a><span class="k">def</span> <span class="nf">load_data</span><span class="p">(</span><span class="n">sheets_url</span><span class="p">):</span>
     <span class="n">csv_url</span> <span class="o">=</span> <span class="n">sheets_url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/edit#gid=&quot;</span><span class="p">,</span> <span class="s2">&quot;/export?format=csv&amp;gid=&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">csv_url</span><span class="p">)</span></div>
 

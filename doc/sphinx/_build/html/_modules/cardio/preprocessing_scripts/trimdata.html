@@ -40,6 +40,8 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules.html">cardio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme_link.html">README Metabolander</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme_link.html#example-event-parameter"></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../use_cases.html">Use Cases</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../user_stories.html">User Stories</a></li>
 </ul>
@@ -86,7 +88,7 @@
 <span class="kn">import</span> <span class="nn">skbio.diversity</span>
 
 
-<div class="viewcode-block" id="read_csvs"><a class="viewcode-back" href="../../../cardio.preprocessing_scripts.html#cardio.preprocessing_scripts.trimdata.read_csvs">[docs]</a><span class="k">def</span> <span class="nf">read_csvs</span><span class="p">():</span>
+<div class="viewcode-block" id="read_csvs"><a class="viewcode-back" href="../../../doc/cardio.preprocessing_scripts.html#cardio.preprocessing_scripts.trimdata.read_csvs">[docs]</a><span class="k">def</span> <span class="nf">read_csvs</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read raw data csv files from Cardio/data and merge into one large dataframe</span>
 
@@ -126,7 +128,7 @@
     <span class="k">return</span> <span class="n">all_joined</span><span class="p">,</span> <span class="n">metadata_columns</span><span class="p">,</span> <span class="n">microbiome_columns</span><span class="p">,</span> <span class="n">metabolome_columns</span></div>
 
 
-<div class="viewcode-block" id="basic_filtering"><a class="viewcode-back" href="../../../cardio.preprocessing_scripts.html#cardio.preprocessing_scripts.trimdata.basic_filtering">[docs]</a><span class="k">def</span> <span class="nf">basic_filtering</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">microbiome_columns</span><span class="p">,</span> <span class="n">metabolome_columns</span><span class="p">):</span>
+<div class="viewcode-block" id="basic_filtering"><a class="viewcode-back" href="../../../doc/cardio.preprocessing_scripts.html#cardio.preprocessing_scripts.trimdata.basic_filtering">[docs]</a><span class="k">def</span> <span class="nf">basic_filtering</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">microbiome_columns</span><span class="p">,</span> <span class="n">metabolome_columns</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Drop patients missing most measurements, replace zeros with NaN, get</span>
 <span class="sd">    separate dfs for microbiome/metabolome</span>
@@ -161,7 +163,7 @@
     <span class="k">return</span> <span class="n">df</span><span class="p">,</span> <span class="n">df_meta</span><span class="p">,</span> <span class="n">df_micro</span></div>
 
 
-<div class="viewcode-block" id="calculate_shannon_diversity"><a class="viewcode-back" href="../../../cardio.preprocessing_scripts.html#cardio.preprocessing_scripts.trimdata.calculate_shannon_diversity">[docs]</a><span class="k">def</span> <span class="nf">calculate_shannon_diversity</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="calculate_shannon_diversity"><a class="viewcode-back" href="../../../doc/cardio.preprocessing_scripts.html#cardio.preprocessing_scripts.trimdata.calculate_shannon_diversity">[docs]</a><span class="k">def</span> <span class="nf">calculate_shannon_diversity</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates shannon (alpha) diversity index for each patient</span>
 
@@ -191,7 +193,7 @@
     <span class="k">return</span> <span class="n">shannon_diversity</span></div>
 
 
-<div class="viewcode-block" id="count_to_abundance"><a class="viewcode-back" href="../../../cardio.preprocessing_scripts.html#cardio.preprocessing_scripts.trimdata.count_to_abundance">[docs]</a><span class="k">def</span> <span class="nf">count_to_abundance</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+<div class="viewcode-block" id="count_to_abundance"><a class="viewcode-back" href="../../../doc/cardio.preprocessing_scripts.html#cardio.preprocessing_scripts.trimdata.count_to_abundance">[docs]</a><span class="k">def</span> <span class="nf">count_to_abundance</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transform microbiome sequencing count data to relative abundance with</span>
 <span class="sd">    Center-log ratio (CLR) transformation.</span>
@@ -220,7 +222,7 @@
     <span class="k">return</span> <span class="n">abund</span></div>
 
 
-<div class="viewcode-block" id="sparse_filt"><a class="viewcode-back" href="../../../cardio.preprocessing_scripts.html#cardio.preprocessing_scripts.trimdata.sparse_filt">[docs]</a><span class="k">def</span> <span class="nf">sparse_filt</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">remove_str</span><span class="p">,</span> <span class="n">na_lim</span><span class="p">):</span>
+<div class="viewcode-block" id="sparse_filt"><a class="viewcode-back" href="../../../doc/cardio.preprocessing_scripts.html#cardio.preprocessing_scripts.trimdata.sparse_filt">[docs]</a><span class="k">def</span> <span class="nf">sparse_filt</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">remove_str</span><span class="p">,</span> <span class="n">na_lim</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Filtering out sparse and uncharacterized features in a data subset</span>
 
@@ -250,7 +252,7 @@
     <span class="k">return</span> <span class="n">df</span></div>
 
 
-<div class="viewcode-block" id="preprocess"><a class="viewcode-back" href="../../../cardio.preprocessing_scripts.html#cardio.preprocessing_scripts.trimdata.preprocess">[docs]</a><span class="k">def</span> <span class="nf">preprocess</span><span class="p">(</span><span class="n">fill_na</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="preprocess"><a class="viewcode-back" href="../../../doc/cardio.preprocessing_scripts.html#cardio.preprocessing_scripts.trimdata.preprocess">[docs]</a><span class="k">def</span> <span class="nf">preprocess</span><span class="p">(</span><span class="n">fill_na</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Main preprocessing function that runs all others.</span>
 
