@@ -55,6 +55,10 @@ st.markdown("## Patient Input")
 
 uploaded_file = st.file_uploader(label="Upload a Single Row to Predict", type="csv", accept_multiple_files=False)
 
+if st.button(label="Download a Single Patient as a CSV"):
+    st.session_state['metamicro_filt'][0].sample(1).iloc[0].to_csv("random_patient.csv")
+
+
 if uploaded_file is not None:
     user_data = pd.read_csv(uploaded_file, index_col=0)
     
