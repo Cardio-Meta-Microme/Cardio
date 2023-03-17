@@ -5,7 +5,7 @@ pandas
 scikit-learn
 altair
 statsmodels
-umap
+umap-learn
 scikit-bio
 scipy
 streamlit

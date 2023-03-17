@@ -13,14 +13,16 @@ import pandas as pd
 import seaborn as sns
 
 #adding the current path for imports
-sys.path.append('../../cardio')
+current_file_path = os.path.abspath(__file__)
+test_dir = os.path.dirname(current_file_path)
+cardio_dir = os.path.dirname(test_dir)
+root_dir = os.path.dirname(cardio_dir)
+sys.path.insert(0, root_dir)
 
-from preprocessing_scripts import trimdata
-from vis import make_vis
-
+from cardio.vis import make_vis
 
 #Reading testing data
-TEST_DATA = pd.read_csv('../../data/processed_data.csv')
+TEST_DATA = pd.read_csv(os.path.join(root_dir, 'data/processed_data.csv'))
 MICROBIOME_COL = ['S-1-pyrroline-5-carboxylate', 'spermidine', '1-methylnicotinamide',]
 METABOLOME_COL = ['N-methylproline', 'beta-cryptoxanthin','5alpha-androstan-3beta,17beta-diol disulfate']
 
