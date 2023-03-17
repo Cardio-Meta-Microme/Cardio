@@ -57,12 +57,23 @@ uploaded_file = st.file_uploader(label="Upload a Single Row to Predict", type="c
 
 if uploaded_file is not None:
     user_data = pd.read_csv(uploaded_file, index_col=0)
+    
+    """#### Data Input"""
+    
     st.write(user_data)
+
+    st.markdown("""#### Prediction
+    """)
 
     prediction_model = model.classify(user_data)
 
-    st.write(prediction_model)
+    #st.write(prediction_model[0])
     
+    if prediction_model[0] == 0:
+        st.markdown("The Patient is predicted to be **:blue[Healthy]**")
+    if prediction_model[0] == 1:
+        st.markdown("The Patient is predicted to have **:red[Ischemic Heart Disease]**")
+
     st.markdown("""
     ### Patient Data in Sample Distribution
 
