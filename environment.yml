@@ -4,11 +4,13 @@ channels:
   - anaconda
   - defaults
   - conda-forge
+  - "conda-forge/label/cf201901"
 dependencies:
   - abseil-cpp=20211102.0
   - altair=4.1.0
   - anyio=3.5.0
   - appdirs=1.4.4
+  - appnope=0.1.2
   - argon2-cffi=21.3.0
   - argon2-cffi-bindings=21.2.0
   - arrow-cpp=8.0.0
@@ -90,6 +92,7 @@ dependencies:
   - libev=4.33
   - libevent=2.1.12
   - libffi=3.4.2
+  - libgfortran=5.0.0
   - libgfortran5=11.3.0
   - libiconv=1.16
   - libnghttp2=1.46.0
@@ -211,5 +214,3 @@ dependencies:
       - msgpack==1.0.5
       - natsort==8.3.1
       - scikit-bio==0.5.8
-      - libgfortran=5.0.0
-      - appnope=0.1.2
