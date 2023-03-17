@@ -1,9 +1,14 @@
 import sys
 import os
-import unittest
-sys.path.append('../..')
-os.chdir('../..')
 
+current_file_path = os.path.abspath(__file__)
+test_dir = os.path.dirname(current_file_path)
+cardio_dir = os.path.dirname(test_dir)
+root_dir = os.path.dirname(cardio_dir)
+
+sys.path.insert(0, root_dir)
+
+import unittest
 import numpy as np
 
 from cardio.model.making_model import load_data, make_x_y, compute_metrics, univariate_ftest_feature_subset
@@ -11,13 +16,12 @@ from cardio.model.making_model import split_data, evaluate_model, reverse_select
 from cardio.model.making_model import hyperparam_optimize_n_trees, RF_Classifier
 from sklearn.ensemble import RandomForestClassifier
 
-DATAPATH = 'data/cleaned_data.pkl'
-MODELPATH = 'cardio/model/Trained_Production_RF_Classifier_230314.pkl'
-COLUMNPATH = 'cardio/model/Trained_Production_RF_Classifier_features_230314.pkl'
-NAPATH = 'cardio/model/na_fill_values.pkl'
+DATAPATH = os.path.join(root_dir, 'data/cleaned_data.pkl')
+MODELPATH = os.path.join(cardio_dir, 'model/Trained_Production_RF_Classifier_230314.pkl')
+COLUMNPATH =  os.path.join(cardio_dir, 'model/Trained_Production_RF_Classifier_features_230314.pkl')
+NAPATH = os.path.join(cardio_dir, 'model/na_fill_values.pkl')
 
 DF = load_data(DATAPATH)
-
 
 class TestModelingFunctions(unittest.TestCase):
     """
